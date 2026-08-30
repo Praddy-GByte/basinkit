@@ -6,7 +6,7 @@
 </picture>
 
 [![PyPI](https://img.shields.io/pypi/v/basinkit)](https://pypi.org/project/basinkit/)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![DOI](https://zenodo.org/badge/1351760570.svg)](https://doi.org/10.5281/zenodo.22181933)
 [![Tests](https://github.com/Praddy-GByte/basinkit/actions/workflows/ci.yml/badge.svg)](https://github.com/Praddy-GByte/basinkit/actions)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
