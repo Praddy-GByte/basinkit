@@ -34,9 +34,10 @@ licence that applied.
 **QGIS.** A Processing provider ships in `qgis_plugin/`: delineate from a canvas
 click, fetch layers clipped to the basin, basin statistics.
 
-**Testing.** 72 offline and 16 live tests. Ten defects were found during
-verification and are all listed openly — eight of them produced answers that
-looked entirely reasonable, which is the argument for checking against published
-values rather than snapshots.
+**Testing.** 73 offline and 17 live tests, across three operating systems and
+Python 3.10 to 3.13. Eleven defects were found during verification and are all
+listed openly — nine of them produced answers that looked entirely reasonable,
+which is the argument for checking against published values rather than
+snapshots. The last one was the README's own example, caught on release day.
 
 Full validation write-up: `docs/verification.md`.
