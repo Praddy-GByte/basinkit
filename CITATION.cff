@@ -1,0 +1,34 @@
+# Citation metadata. GitHub renders this as a "Cite this repository" button on
+# the repo page, and Zenodo reads it when minting the DOI.
+#
+# Two fields are placeholders until the first release exists:
+#   doi           — filled in after Zenodo mints it (see PUBLISHING.md step 6)
+#   date-released — the date you actually cut v0.1.0
+cff-version: 1.2.0
+message: "If you use basinkit in published work, please cite it as below, and cite the underlying datasets — Basin.license_report() prints those."
+title: "basinkit: basin-scale acquisition of open Earth observation data"
+abstract: >-
+  A Python package that delineates the upstream river basin of any coordinate
+  on Earth and returns open Earth observation layers clipped and masked to that
+  polygon rather than to its bounding box. Nineteen datasets are reachable
+  without an account. Delineation is validated against published gauge areas on
+  six continents.
+type: software
+authors:
+  - given-names: Pradeepika
+    family-names: Kaushik
+    # orcid: "https://orcid.org/0000-0000-0000-0000"   # add yours
+version: 0.1.0
+date-released: 2026-08-30
+license: MIT
+repository-code: "https://github.com/Praddy-GByte/basinkit"
+url: "https://github.com/Praddy-GByte/basinkit"
+keywords:
+  - hydrology
+  - watershed delineation
+  - river basin
+  - remote sensing
+  - earth observation
+  - open data
+  - gis
+  - qgis

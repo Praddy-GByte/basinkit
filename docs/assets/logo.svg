@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200"
+     role="img" aria-labelledby="m-title m-desc">
+<title id="m-title">basinkit</title>
+<desc id="m-desc">The letter b drawn as a river basin: the stem is the trunk river, the bowl is the divide, and four coloured tributaries feed it from inside.</desc>
+<style>
+  :root {
+    --divide: #B79A6B; --trib-1: #159C7A; --trib-2: #2A78D6;
+    --trib-3: #6B3FA0; --trib-4: #E4611F; --stem: #0B6FA4;
+    --ground: #FFFFFF; --tint: #0B6FA4; --word: #12191C;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --divide: #CFB27F; --trib-1: #2ECC9A; --trib-2: #5FA3EE;
+      --trib-3: #A98BE8; --trib-4: #F4834B; --stem: #58AEDC;
+      --ground: #10171A; --tint: #58AEDC; --word: #E8EEEC;
+    }
+  }
+  .ink { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  #stem { stroke: var(--stem); stroke-width: 27; }
+  #bowl { stroke: var(--divide); stroke-width: 18; }
+  #t2 { stroke: var(--trib-2); stroke-width: 9; }
+  #t3 { stroke: var(--trib-3); stroke-width: 9; }
+  #t4 { stroke: var(--trib-4); stroke-width: 6.5; }
+  #t1 { stroke: var(--trib-1); stroke-width: 9; }
+  #counter { fill: var(--tint); opacity: .10; }
+  #outlet { fill: var(--stem); stroke: var(--ground); stroke-width: 5; }
+</style>
+<path id="counter" d="M62.0 66.0 C116 42,170.0 70,170.0 120 C170.0 166,120 172.0,62.0 172.0 Z"/>
+<path id="stem" class="ink" pathLength="100" d="M62.0 34.0 C64 78,60 126,62.0 172.0"/>
+<path id="bowl" class="ink" pathLength="100" d="M62.0 66.0 C116 42,170.0 70,170.0 120 C170.0 166,120 172.0,62.0 172.0"/>
+<path id="t2" class="ink" pathLength="100" d="M144 88 C122 95,94 100,78 104"/>
+<path id="t3" class="ink" pathLength="100" d="M156 124 C130 128,98 130,78 130"/>
+<path id="t4" class="ink" pathLength="100" d="M130 68 C124 78,116 86,110 96"/>
+<path id="t1" class="ink" pathLength="100" d="M138 154 C114 157,92 158,78 156"/>
+<circle id="outlet" cx="62.0" cy="172.0" r="15"/>
+</svg>

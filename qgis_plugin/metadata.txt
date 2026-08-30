@@ -1,0 +1,31 @@
+[general]
+name=basinkit
+qgisMinimumVersion=3.28
+qgisMaximumVersion=4.99
+description=Delineate a river basin from a point anywhere on Earth and load every open Earth observation layer, clipped to it.
+version=0.1.0
+author=Pradeepika Kaushik
+email=pradeepikakaushik4@gmail.com
+
+about=Click a point on any river in the world and get the basin draining into it, then pull DEM, land cover, soil, rainfall, surface water, rivers and lakes for that basin -- clipped and masked to the polygon, not to its bounding box. No account is needed for any of it. Delineation is validated against published gauge areas on six continents.
+    EXTERNAL DEPENDENCY: this plugin requires the Python package "basinkit", which QGIS does not ship. If it is missing the plugin will tell you the exact pip command for your QGIS Python installation. See the plugin homepage for details.
+
+tracker=https://github.com/Praddy-GByte/basinkit/issues
+repository=https://github.com/Praddy-GByte/basinkit
+homepage=https://praddy-gbyte.github.io/basinkit/
+
+category=Vector
+icon=icon.png
+experimental=False
+deprecated=False
+hasProcessingProvider=yes
+server=False
+
+tags=hydrology,watershed,catchment,basin,delineation,dem,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
+
+changelog=0.1.0
+    First release.
+    - Delineate a basin from a canvas click, globally, via HydroBASINS graph traversal or DEM flow routing
+    - Fetch DEM, land cover, soil, surface water, rivers and lakes clipped to the basin
+    - Basin statistics: area, relief, mean slope, land cover fractions, bounding-box efficiency
+    - Every algorithm runs in the Processing framework, so batch mode and the Model Builder work
