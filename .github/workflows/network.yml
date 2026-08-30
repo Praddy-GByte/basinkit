@@ -1,0 +1,30 @@
+name: Data sources
+
+# Remote endpoints move without warning -- CDSE deprecated a STAC endpoint,
+# LP DAAC retired its Data Pool, sentinelsat's backend closed entirely. This is
+# the early-warning system for that, and it is deliberately NOT on every push:
+#
+#   * it is slow (roughly seven minutes of real downloads), and
+#   * some sources refuse GitHub's datacenter addresses outright. HydroSHEDS
+#     answers 403 to Actions runners while serving the identical request to a
+#     laptop, so gating every push on it would paint the badge red for a reason
+#     that has nothing to do with this repository.
+#
+# tests/conftest.py reports an upstream refusal as a skip and a wrong number as
+# a failure, so red here means basinkit is returning something incorrect.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"      # Mondays, 06:00 UTC
+  workflow_dispatch:          # and whenever you want to ask
+
+jobs:
+  network:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.12" }
+      - run: pip install -e ".[all,dev]"
+      - name: Live source tests
+        run: pytest -q -m network -rs
