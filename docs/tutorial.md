@@ -305,6 +305,7 @@ redistribution are blocked at the API rather than described in a footnote —
 | Raster looks like a grey rectangle in QGIS | Older export without declared nodata | Re-export with current version |
 | Very slow on a continental basin | Pixel budget is coarsening a huge mosaic | Expected; check `basinkit_coarsen_factor` |
 | Plugin says `basinkit` is not installed | QGIS uses its own Python | Run the pip command the plugin prints, then restart QGIS |
+| `Access denied (403)` from `data.hydrosheds.org` | Some hosts refuse datacenter addresses — cloud VMs, CI runners, some campus proxies | Run it from a normal network, or download the file once elsewhere and drop it in the cache directory (`BASINKIT_CACHE` sets where that is) |
 
 ---
 

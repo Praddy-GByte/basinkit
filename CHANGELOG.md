@@ -23,6 +23,18 @@ First release.
   which the network suite checks against the published 54,100 km2, and an
   offline test pins the documented coordinate to that one.
 
+### Testing and CI
+- The live-source suite moved out of `CI` into its own weekly `Data sources`
+  workflow. Some hosts refuse GitHub's datacenter addresses -- HydroSHEDS
+  answers 403 to Actions runners while serving the identical request to a
+  laptop -- so gating every push on it painted the badge red for a reason that
+  had nothing to do with this repository. `CI` is now purely offline across
+  three operating systems and Python 3.10 to 3.13, and red there always means a
+  defect here.
+- `tests/conftest.py` reports an upstream refusal (403, 404, 429, 5xx, timeout)
+  as a *skip* with the reason attached, and leaves a wrong number a failure. A
+  monitor you stop reading is not a monitor.
+
 ### Data
 - Anonymous access to 20 datasets: Copernicus DEM GLO-30/90, NASADEM, SRTM,
   HydroBASINS/RIVERS/LAKES/ATLAS, ESA WorldCover, ESRI annual LULC, SoilGrids,

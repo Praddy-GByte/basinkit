@@ -3,12 +3,11 @@ name: CI
 on:
   push: { branches: [main] }
   pull_request: { branches: [main] }
-  schedule:
-    # Weekly. Remote endpoints move without warning -- CDSE deprecated a STAC
-    # endpoint, LP DAAC retired its Data Pool, sentinelsat's backend closed
-    # entirely. A scheduled network run is how you find out before your users do.
-    - cron: "0 6 * * 1"
 
+# What this workflow answers: does basinkit's own code work, on every platform
+# and Python we claim to support? Nothing here touches the network, so a red
+# badge always means a defect in this repository and never that a data server
+# was having a bad afternoon. The live-source checks live in network.yml.
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -16,25 +15,13 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python: ["3.10", "3.11", "3.12"]
+        python: ["3.10", "3.11", "3.12", "3.13"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
       - run: pip install -e ".[all,dev]"
       - run: ruff check basinkit tests
       - name: Offline tests
         run: pytest -q -m "not network" --cov=basinkit --cov-report=term-missing
-
-  network:
-    # Only on schedule and main: these hit real endpoints and are the early
-    # warning system for upstream breakage.
-    if: github.event_name == 'schedule' || github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
-      - run: pip install -e ".[all,dev]"
-      - run: pytest -q -m network
