@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200"
+     role="img" aria-labelledby="m-title m-desc">
+<title id="m-title">basinkit</title>
+<desc id="m-desc">The letter b drawn as a river basin: the stem is the trunk river, the bowl is the divide, and four coloured tributaries feed it from inside.</desc>
+<style>
+  :root {
+    --divide: #B79A6B; --trib-1: #159C7A; --trib-2: #2A78D6;
+    --trib-3: #6B3FA0; --trib-4: #E4611F; --stem: #0B6FA4;
+    --ground: #FFFFFF; --tint: #0B6FA4; --word: #12191C;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --divide: #CFB27F; --trib-1: #2ECC9A; --trib-2: #5FA3EE;
+      --trib-3: #A98BE8; --trib-4: #F4834B; --stem: #58AEDC;
+      --ground: #10171A; --tint: #58AEDC; --word: #E8EEEC;
+    }
+  }
+  .ink { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .draw { stroke-dasharray: 100; stroke-dashoffset: 100; }
+  #stem { stroke: var(--stem); stroke-width: 27; animation: draw 1.1s ease-out 0.0s forwards; }
+  #bowl { stroke: var(--divide); stroke-width: 18; animation: draw 1.3s ease-out 0.55s forwards; }
+  #t2 { stroke: var(--trib-2); stroke-width: 9; animation: draw 0.9s ease-out 1.45s forwards; }
+  #t3 { stroke: var(--trib-3); stroke-width: 9; animation: draw 0.9s ease-out 1.6s forwards; }
+  #t4 { stroke: var(--trib-4); stroke-width: 6.5; animation: draw 0.7s ease-out 1.7s forwards; }
+  #t1 { stroke: var(--trib-1); stroke-width: 9; animation: draw 0.9s ease-out 1.75s forwards; }
+  #counter { fill: var(--tint); opacity: 0;
+             animation: soak 1.2s ease-out 1.6s forwards; }
+  #outlet { fill: var(--stem); stroke: var(--ground); stroke-width: 5;
+            transform-origin: 62px 172px; opacity: 0;
+            animation: pop .5s cubic-bezier(.34,1.56,.64,1) 2.45s forwards,
+                       beat 6s ease-in-out 2.95s infinite; }
+  @keyframes draw   { to { stroke-dashoffset: 0; } }
+  @keyframes soak   { to { opacity: .10; } }
+  @keyframes pop    { from { opacity: 0; transform: scale(.2); }
+                      to   { opacity: 1; transform: scale(1); } }
+  @keyframes beat   { 0%, 88%, 100% { transform: scale(1); }
+                      94%           { transform: scale(1.18); } }
+  @keyframes ripple { 0% { opacity: .45; transform: scale(.5); }
+                      100% { opacity: 0; transform: scale(2.4); } }
+  .ripple { fill: none; stroke: var(--stem); stroke-width: 4; opacity: 0;
+            transform-origin: 62px 172px; }
+  #r1 { animation: ripple 2.8s ease-out 2.85s infinite; }
+  #r2 { animation: ripple 2.8s ease-out 3.85s infinite; }
+
+  /* Anyone who asked for less motion gets the finished letter immediately. */
+  @media (prefers-reduced-motion: reduce) {
+    .draw { stroke-dashoffset: 0; }
+    #counter { opacity: .10; }
+    #outlet { opacity: 1; }
+    .ripple { display: none; }
+    #stem, #bowl, #t1, #t2, #t3, #t4, #counter, #outlet { animation: none; }
+  }
+</style>
+<path id="counter" d="M62.0 66.0 C116 42,170.0 70,170.0 120 C170.0 166,120 172.0,62.0 172.0 Z"/>
+<path id="stem" class="ink draw" pathLength="100" d="M62.0 34.0 C64 78,60 126,62.0 172.0"/>
+<path id="bowl" class="ink draw" pathLength="100" d="M62.0 66.0 C116 42,170.0 70,170.0 120 C170.0 166,120 172.0,62.0 172.0"/>
+<path id="t2" class="ink draw" pathLength="100" d="M144 88 C122 95,94 100,78 104"/>
+<path id="t3" class="ink draw" pathLength="100" d="M156 124 C130 128,98 130,78 130"/>
+<path id="t4" class="ink draw" pathLength="100" d="M130 68 C124 78,116 86,110 96"/>
+<path id="t1" class="ink draw" pathLength="100" d="M138 154 C114 157,92 158,78 156"/>
+<circle id="r1" class="ripple" cx="62.0" cy="172.0" r="15"/>
+<circle id="r2" class="ripple" cx="62.0" cy="172.0" r="15"/>
+<circle id="outlet" cx="62.0" cy="172.0" r="15"/>
+</svg>

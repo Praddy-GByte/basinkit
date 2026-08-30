@@ -1,0 +1,55 @@
+site_name: basinkit
+site_description: Point to river basin to every open Earth observation layer
+site_url: https://praddy-gbyte.github.io/basinkit/
+repo_url: https://github.com/Praddy-GByte/basinkit
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  logo: assets/logo.svg
+  favicon: assets/logo-32.png
+  features:
+    - navigation.instant
+    - navigation.sections
+    - content.code.copy
+    - search.suggest
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      toggle: { icon: material/weather-night, name: Dark mode }
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      toggle: { icon: material/weather-sunny, name: Light mode }
+
+plugins:
+  - search
+  - mkdocs-jupyter:
+      include_source: true
+      execute: false
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            docstring_style: numpy
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - tables
+  - toc: { permalink: true }
+
+nav:
+  - Home: index.md
+  - Why basinkit: why.md
+  - Tutorial: tutorial.md
+  - Delineation: delineation.md
+  - Related work: related-work.md
+  - Data catalogue: catalogue.md
+  - Verification: verification.md
+  - Notebooks:
+      - Quickstart: notebooks/01_quickstart.ipynb
+  - API reference: api.md

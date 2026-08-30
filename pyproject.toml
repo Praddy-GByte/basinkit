@@ -1,0 +1,70 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "basinkit"
+version = "0.1.0"
+description = "Point to river basin to every open Earth observation layer, clipped and ready. Global, no account required."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Pradeepika Kaushik" }]
+keywords = [
+  "hydrology", "watershed", "catchment", "basin", "delineation",
+  "remote-sensing", "satellite", "dem", "gis", "stac", "earth-observation",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: GIS",
+]
+dependencies = [
+  "numpy>=1.24",
+  "requests>=2.28",
+  "shapely>=2.0",
+  "geopandas>=0.14",
+  "rasterio>=1.3",
+  "rioxarray>=0.15",
+  "xarray>=2023.1",
+  "pyproj>=3.5",
+  "platformdirs>=3.0",
+  "tqdm>=4.65",
+  "click>=8.1",
+]
+
+[project.optional-dependencies]
+stac = ["pystac-client>=0.7", "odc-stac>=0.3", "planetary-computer>=1.0"]
+delineate = ["pyflwdir>=0.5.7", "numba>=0.57"]
+climate = ["netCDF4>=1.6", "cftime>=1.6"]
+viz = ["leafmap>=0.30", "folium>=0.14", "matplotlib>=3.7"]
+all = ["basinkit[stac,delineate,climate,viz]"]
+dev = ["pytest>=7", "pytest-cov", "ruff", "mypy", "mkdocs-material", "mkdocs-jupyter", "mkdocstrings[python]"]
+
+[project.urls]
+Homepage = "https://praddy-gbyte.github.io/basinkit"
+Documentation = "https://praddy-gbyte.github.io/basinkit"
+Repository = "https://github.com/Praddy-GByte/basinkit"
+Issues = "https://github.com/Praddy-GByte/basinkit/issues"
+
+[project.scripts]
+basinkit = "basinkit.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["basinkit"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["network: test requires internet access"]
