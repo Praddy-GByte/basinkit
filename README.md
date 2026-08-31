@@ -37,6 +37,7 @@ water = basin.surface_water()                # 37 years of Landsat, pre-reduced
 
 basin.download_all("koshi/")                 # the whole stack, one call
 basin.export_3d("koshi.html")                # an interactive 3D page
+morph = basin.morphometry()                  # Horton-Strahler-Schumm, in full
 ```
 
 **New here?** The [tutorial](docs/tutorial.md) walks through the whole thing —

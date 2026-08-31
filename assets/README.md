@@ -1,8 +1,12 @@
 # Logo
 
 **The mark is the letter.** The `b` of basinkit is drawn as a river basin: its
-stem is the trunk river running down to an outlet, its bowl is the catchment
-divide, and four coloured tributaries feed it from inside the counter. The two
+bowl is the catchment divide, and inside the counter a dendritic stream network
+runs down to a single outlet at the foot of the stem. The network is generated,
+not drawn by hand — every junction opens downstream at an acute angle, each
+tributary is aimed at the open catchment in front of it, and the strokes taper
+from trunk to headwater, which is what makes it read as drainage rather than as
+decoration. The four hues mark the four tributary systems. The two
 `i` tittles become gauge points — the same object as the outlet at the foot of
 the `b`. They are deliberately unequal: a small one on the first `i` and a large
 one on the second, standing on a common baseline, so the pair reads left to
@@ -12,22 +16,27 @@ gauge downstream.
 So the logo is made *of* the name rather than sitting beside it, and the icon
 and the first letter of the wordmark are the same drawing.
 
-The colour carries the idea rather than decorating it: four tributaries, four
-hues, one river. Many open data sources, one basin.
+The colour carries the idea rather than decorating it: four tributary systems,
+four hues, one network, one outlet. Many open data sources, one basin.
 
 | file | use |
 |---|---|
 | `logo-animated.svg` | the `b`, animated. Docs, site, anywhere it has room |
 | `logo.svg` | the same letter, finished, no animation |
+| `logo-small.svg` | reduced network, for 64 px and below |
 | `logo-wordmark.svg` | the full name, follows the viewer's colour scheme |
 | `logo-wordmark-light.svg` / `-dark.svg` | pinned, for GitHub's `<picture>` |
 | `logo-512/256/128/64/32.png` | raster, transparent background |
 | `icon.png` | 64 px, the QGIS plugin icon |
 
+`logo-512/256/128.png` come from `logo.svg`; `logo-64/32.png` and `icon.png`
+come from `logo-small.svg`, because the full network has more detail than
+64 px can hold.
+
 ## Notes
 
-**The animation draws the letter in order** — stem, bowl, tributaries, then the
-outlet pops and ripples. Every stroke carries `pathLength="100"`, so one set of
+**The animation draws the letter in order** — stem, bowl, then the network from
+the trunk outward to the headwaters, then the outlet pops and ripples. Every stroke carries `pathLength="100"`, so one set of
 keyframes draws paths of very different real lengths at the same apparent
 speed.
 

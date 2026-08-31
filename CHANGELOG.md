@@ -1,6 +1,57 @@
 # Changelog
 
-## 0.2.0 (unreleased)
+## 0.3.0 — 2026-08-31
+
+### Morphometry
+- `Basin.morphometry()` computes the classical Horton-Strahler-Schumm
+  parameters -- linear, areal and relief -- from the basin polygon, the river
+  network and the DEM, with a per-order table of streams, lengths and
+  bifurcation ratios.
+- Streams are counted as Strahler **streams**, not as the reaches a river
+  dataset splits them into. Counting reaches on the Koshi gives bifurcation
+  ratios of 2.3, 1.8, 2.0, 1.1, 1.9 and 17.1 -- a ratio of 1.09 is not
+  physically possible -- against 4.7, 4.6, 4.3, 5.3, 3.0, 2.0, mean 3.98, which
+  is inside Strahler's usual 3-5. This is the difference between a publishable
+  table and a wrong one, and it is the reason this is a function rather than a
+  worked example.
+- Area, perimeter, basin length and every stream length are measured in one
+  local equal-area projection. Mixing a perimeter from one projection with a
+  dataset's own stored lengths corrupts every ratio built from them, and the
+  circularity ratio is especially unforgiving.
+- The hypsometric integral is computed from the curve and reported beside the
+  elevation-relief ratio, which is derived differently; on the Koshi they agree
+  to four decimal places.
+- The output carries its own caveats: drainage density, stream frequency and
+  bifurcation ratio describe the network measured, not the basin, and are not
+  comparable across networks.
+
+### Visualisation
+- Two defects found by exporting real basins rather than test ones:
+  `texture=None` opened on the satellite material with no texture to draw, so
+  the page rendered a black mesh and read as broken; and the depth fog used
+  fixed distances, which looked right on a 70 km catchment and swallowed a
+  350 km one entirely. Fog now scales with the basin, and a page exported
+  without imagery opens in the elevation view with the satellite button
+  disabled. On a mountain basin a linear ramp collapses to one flat tone, because
+  most of the terrain sits in the upper part of its own range.
+
+### Logo
+- The drainage inside the bowl of the `b` was four near-horizontal strokes
+  meeting the stem at right angles, which read as a comb, or as an `E`, rather
+  than as a river network. It is now a generated dendritic network: one trunk
+  descending to a single outlet, junctions that open downstream at acute angles,
+  tributaries aimed at whichever bank has open catchment in front of it, and
+  stroke widths that taper from trunk to headwater.
+- `logo-small.svg` is a reduced version of the same network, used for the 64 px
+  and 32 px rasters and the QGIS plugin icon; the full mark carries more detail
+  than those sizes can hold.
+- The generator lives in `assets/build/build_network.py`, so the mark is
+  reproducible rather than hand-drawn.
+- Fixed: the wordmark's `prefers-reduced-motion` rule was overridden by the
+  general `.tittle` rule that follows it, so both `i` dots stayed invisible for
+  anyone who had asked for less motion.
+
+## 0.2.0 — 2026-08-31
 
 ### Fixed
 Four defects in the ESRI annual land-cover path, found by trying to build a
