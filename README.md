@@ -36,6 +36,7 @@ rain  = basin.precipitation(2000, 2024)      # basin-mean monthly series
 water = basin.surface_water()                # 37 years of Landsat, pre-reduced
 
 basin.download_all("koshi/")                 # the whole stack, one call
+basin.export_3d("koshi.html")                # an interactive 3D page
 ```
 
 **New here?** The [tutorial](docs/tutorial.md) walks through the whole thing —

@@ -21,6 +21,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Scientific/Engineering :: GIS",
 ]
 dependencies = [
@@ -41,7 +42,7 @@ dependencies = [
 stac = ["pystac-client>=0.7", "odc-stac>=0.3", "planetary-computer>=1.0"]
 delineate = ["pyflwdir>=0.5.7", "numba>=0.57"]
 climate = ["netCDF4>=1.6", "cftime>=1.6"]
-viz = ["leafmap>=0.30", "folium>=0.14", "matplotlib>=3.7"]
+viz = ["leafmap>=0.30", "folium>=0.14", "matplotlib>=3.7", "pillow>=9.0"]
 all = ["basinkit[stac,delineate,climate,viz]"]
 dev = ["pytest>=7", "pytest-cov", "ruff", "mypy", "mkdocs-material", "mkdocs-jupyter", "mkdocstrings[python]"]
 

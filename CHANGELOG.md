@@ -1,8 +1,46 @@
 # Changelog
 
-## 0.1.0 (unreleased)
+## 0.2.0 (unreleased)
 
-First release.
+### Fixed
+Four defects in the ESRI annual land-cover path, found by trying to build a
+year-by-year change animation. All four are now regression tests.
+
+- **The wrong year, silently.** Every annual item ends at 00:00 on 1 January,
+  so a naive year window matches the *previous* year's map at the boundary
+  instant. `landcover(source="esri", year=2024)` returned the 2023 map, and the
+  array looked entirely correct. 2024 was also the package default. A year with
+  no data now raises and lists the years that exist; `year=None` takes the
+  latest published for that location, rather than a constant that rots.
+- **The wrong legend.** `class_fractions()` always used the WorldCover class
+  numbers. ESRI numbers its classes differently, and code 10 is tree cover in
+  one scheme and cloud in the other -- so ESRI cloud was reported as forest.
+  The legend now travels with the array in `.attrs` and is read from there.
+- **The wrong type.** `esri_lulc()` returned a Dataset while `worldcover()`
+  returned a DataArray, and a Dataset has no `.values` array -- reaching for one
+  picks up the method. This is the same defect that once broke clipping on every
+  multi-band STAC result; it was fixed there and left standing here. Both
+  sources now return a 2-D `uint8` DataArray.
+- **The wrong mosaic.** A basin spanning two ESRI tiles got them stacked along a
+  time axis rather than mosaicked. They are complementary in space, not repeat
+  looks, so they are now combined first-valid: averaging class codes would
+  invent classes that do not exist.
+
+### Visualisation
+- `Basin.export_3d()` writes the basin as one self-contained interactive page:
+  a terrain mesh from the DEM, a Sentinel-2 median composite draped over it,
+  and the river network animated downhill. Imagery, geometry and the renderer
+  are all embedded, so the file opens on a laptop with no network -- which is
+  the situation many of the people this package is for actually work in.
+  `texture=None` skips the imagery for a much smaller, DEM-only page.
+- The elevation tint maps colour to the *rank* of an elevation rather than its
+  value. On a mountain basin a linear ramp collapses to one flat tone, because
+  most of the terrain sits in the upper part of its own range.
+
+## 0.1.0 — 2026-08-30
+
+First release. On PyPI as `basinkit`; archived at
+[10.5281/zenodo.22181934](https://doi.org/10.5281/zenodo.22181934).
 
 ### Delineation
 - Three global backends: HydroBASINS graph traversal (default), D8 routing over

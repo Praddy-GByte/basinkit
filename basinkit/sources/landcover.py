@@ -71,22 +71,88 @@ def worldcover(geometry, year: int = 2021, *, clip: bool = True,
     )
 
 
-def esri_lulc(geometry, year: int = 2024, *, clip: bool = True):
-    """ESRI / Impact Observatory 10 m annual land cover (2017-2024) via STAC."""
+def _item_year(item) -> int | None:
+    """The year an ESRI annual item actually describes."""
+    start = (item.properties or {}).get("start_datetime")
+    if isinstance(start, str) and len(start) >= 4 and start[:4].isdigit():
+        return int(start[:4])
+    tail = str(item.id).rsplit("-", 1)[-1]
+    return int(tail) if tail.isdigit() and len(tail) == 4 else None
+
+
+def esri_years(geometry) -> list[int]:
+    """Years of ESRI annual land cover actually available over ``geometry``."""
+    from .stac import stac_search
+
+    items = stac_search("esri_lulc", geometry=geometry,
+                        start="2017-01-01", end="2100-01-01")
+    return sorted({y for y in (_item_year(i) for i in items) if y})
+
+
+def esri_lulc(geometry, year: int | None = None, *, clip: bool = True, **kwargs):
+    """ESRI / Impact Observatory 10 m annual land cover, via STAC.
+
+    ``year=None`` takes the most recent year published for this location.
+    That is deliberately not a hard-coded number: coverage ends in different
+    years in different places, and a constant would quietly rot.
+
+    Extra keywords (``resolution``, ``max_pixels``, ...) pass through to the
+    STAC reader, so this takes the same tuning knobs as ``worldcover()``.
+    """
+
     from .stac import stac_search, stac_stack
 
-    items = stac_search(
-        "esri_lulc", geometry=geometry,
-        start=f"{year}-01-01", end=f"{year}-12-31",
-    )
-    if not items:
+    available = esri_years(geometry)
+    if not available:
         raise DataSourceError(
-            f"No ESRI LULC items for {year}. The series covers 2017-2024."
+            "No ESRI annual land cover covers this basin. ESA WorldCover is "
+            "global: use landcover(source='worldcover')."
         )
+    if year is None:
+        year = available[-1]
+
+    items = [i for i in stac_search("esri_lulc", geometry=geometry,
+                                    start=f"{year}-01-01", end=f"{year}-12-31")
+             if _item_year(i) == year]
+    if not items:
+        # The previous year's item ends at 00:00 on 1 January, so a naive
+        # window for a year with no data matches it and returns the year
+        # before -- silently, with an array that looks entirely correct.
+        raise DataSourceError(
+            f"ESRI annual land cover has no {year} map for this basin. "
+            f"Available here: {', '.join(map(str, available))}."
+        )
+
     ds = stac_stack(items, geometry, bands=["data"], clip=clip,
-                    collection="esri_lulc")
-    ds.attrs.update({"classes": str(ESRI_CLASSES), "license": "CC BY 4.0"})
-    return ds
+                    collection="esri_lulc", **kwargs)
+
+    names = list(ds.data_vars)
+    da = ds[names[0]] if len(names) == 1 else ds["data"]
+
+    if "time" in da.dims and da.sizes["time"] > 1:
+        # Adjacent ESRI tiles arrive as separate items and odc-stac stacks them
+        # along time. They are spatially complementary, not repeat looks at the
+        # same ground, so they are combined first-valid. Averaging class codes
+        # would invent classes that do not exist -- the mean of water (1) and
+        # trees (2) is not a land cover.
+        valid = da.where(da > 0)
+        merged = valid.isel(time=0)
+        for t in range(1, da.sizes["time"]):
+            merged = merged.fillna(valid.isel(time=t))
+        da = merged.fillna(0)
+    da = da.squeeze(drop=True)
+
+    if da.dtype.kind == "f":
+        da = da.astype("uint8")
+    da.name = "landcover"
+    da.attrs.update({
+        **ds.attrs,
+        "classes": str(ESRI_CLASSES),
+        "basinkit_product": f"ESRI Land Cover {year}",
+        "basinkit_year": year,
+        "license": "CC BY 4.0",
+    })
+    return da
 
 
 def _mosaic_and_clip(paths, geometry, clip, *, name, attrs, categorical=True,
@@ -109,13 +175,56 @@ def _mosaic_and_clip(paths, geometry, clip, *, name, attrs, categorical=True,
     return da.squeeze()
 
 
+def _declared_classes(obj) -> dict[int, str] | None:
+    """The legend the array is carrying, if it brought one."""
+    import ast
+
+    raw = getattr(obj, "attrs", {}).get("classes")
+    if not raw:
+        return None
+    try:
+        parsed = ast.literal_eval(raw) if isinstance(raw, str) else raw
+    except (ValueError, SyntaxError):
+        return None
+    if isinstance(parsed, dict) and parsed:
+        return {int(k): str(v) for k, v in parsed.items()}
+    return None
+
+
 def class_fractions(da, classes: dict[int, str] | None = None) -> dict[str, float]:
-    """Fraction of basin area in each land-cover class."""
+    """Fraction of basin area in each land-cover class.
+
+    The legend is read from the array unless you pass one. That matters more
+    than it looks: WorldCover and ESRI number their classes differently, and
+    code 10 means "tree cover" in one and "clouds" in the other. Defaulting to
+    WorldCover for everything reported ESRI cloud as forest, in a dictionary
+    that looked perfectly reasonable.
+    """
     import numpy as np
 
-    classes = classes or WORLDCOVER_CLASSES
+    # A Dataset has no ``.values`` array -- reaching for one picks up the
+    # method and every downstream numpy call fails or, worse, does not.
+    if hasattr(da, "data_vars"):
+        names = list(da.data_vars)
+        if len(names) != 1:
+            raise ValueError(
+                "class_fractions needs one land-cover band; this Dataset has "
+                f"{len(names)}: {names}. Select one first."
+            )
+        da = da[names[0]]
+    if hasattr(da, "squeeze"):
+        da = da.squeeze(drop=True)
+
+    if classes is None:
+        classes = _declared_classes(da) or WORLDCOVER_CLASSES
+
     vals = np.asarray(da.values).ravel()
-    vals = vals[np.isfinite(vals)]
+    if vals.dtype.kind == "f":                 # isfinite is float-only
+        vals = vals[np.isfinite(vals)]
+    elif vals.dtype.kind not in "iub":
+        raise TypeError(
+            f"expected a numeric land-cover raster, got dtype {vals.dtype}"
+        )
     vals = vals[vals > 0]
     if vals.size == 0:
         return {}
