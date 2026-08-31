@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "basinkit"
-version = "0.2.0"
+version = "0.3.0"
 description = "Point to river basin to every open Earth observation layer, clipped and ready. Global, no account required."
 readme = "README.md"
 requires-python = ">=3.10"

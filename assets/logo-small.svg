@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200"
+     role="img" aria-labelledby="m-title m-desc">
+<title id="m-title">basinkit</title>
+<desc id="m-desc">The letter b drawn as a river basin: the bowl is the drainage divide, a simplified stream network fills it, and every branch drains to the single outlet where the stem ends.</desc>
+<style>
+  :root {
+    --divide: #B79A6B; --trib-1: #159C7A; --trib-2: #2A78D6;
+    --trib-3: #6B3FA0; --trib-4: #E4611F; --stem: #0B6FA4;
+    --ground: #FFFFFF; --tint: #0B6FA4; --word: #12191C;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --divide: #CFB27F; --trib-1: #2ECC9A; --trib-2: #5FA3EE;
+      --trib-3: #A98BE8; --trib-4: #F4834B; --stem: #58AEDC;
+      --ground: #10171A; --tint: #58AEDC; --word: #E8EEEC;
+    }
+  }
+  .ink { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  #stem { stroke: var(--stem); stroke-width: 27; }
+  #bowl { stroke: var(--divide); stroke-width: 18; }
+  .rd0 { stroke: var(--trib-4); stroke-width: 2.6; }
+  .ra1 { stroke: var(--trib-1); stroke-width: 2.8; }
+  .rd2 { stroke: var(--trib-4); stroke-width: 2.9; }
+  .rc3 { stroke: var(--trib-3); stroke-width: 3.2; }
+  .rb4 { stroke: var(--trib-2); stroke-width: 3.2; }
+  .rc5 { stroke: var(--trib-3); stroke-width: 3.6; }
+  .ra6 { stroke: var(--trib-1); stroke-width: 3.8; }
+  .rb7 { stroke: var(--trib-2); stroke-width: 4.0; }
+  .rd8 { stroke: var(--trib-4); stroke-width: 4.5; }
+  .ra9 { stroke: var(--trib-1); stroke-width: 4.8; }
+  .rd10 { stroke: var(--trib-4); stroke-width: 5.0; }
+  .rc11 { stroke: var(--trib-3); stroke-width: 5.5; }
+  .rb12 { stroke: var(--trib-2); stroke-width: 5.5; }
+  .rc13 { stroke: var(--trib-3); stroke-width: 6.2; }
+  .ra14 { stroke: var(--trib-1); stroke-width: 6.5; }
+  .rb15 { stroke: var(--trib-2); stroke-width: 7.0; }
+  .rs16 { stroke: var(--stem); stroke-width: 5.5; }
+  .rs17 { stroke: var(--stem); stroke-width: 8.0; }
+  .rs18 { stroke: var(--stem); stroke-width: 10.0; }
+  #counter { fill: var(--tint); opacity: .10; }
+  #outlet { fill: var(--stem); stroke: var(--ground); stroke-width: 5; }
+</style>
+<path id="counter" d="M62.0 66.0 C116 42,170.0 70,170.0 120 C170.0 166,120 172.0,62.0 172.0 Z"/>
+<path id="stem" class="ink" pathLength="100" d="M62.0 34.0 C64 78,60 126,62.0 172.0"/>
+<path id="bowl" class="ink" pathLength="100" d="M62.0 66.0 C116 42,170.0 70,170.0 120 C170.0 166,120 172.0,62.0 172.0"/>
+<g class="ink rd0"><path d="M117.4 92.3 C111.2 96.4,105.2 101.1,102.9 107.0"/><path d="M106.1 95.8 C98.2 93.6,89.9 91.9,83.3 94.1"/><path d="M94.8 99.3 C88.3 104.2,81.9 109.9,79.8 116.5"/><path d="M81.6 103.3 C79.3 103.1,76.9 103.0,75.2 104.0"/><path d="M128.7 88.8 C128.4 84.4,127.8 79.8,125.4 76.9"/></g>
+<g class="ink ra1"><path d="M107.4 147.0 C109.8 139.4,111.8 131.2,109.7 124.6"/><path d="M116.4 137.0 C125.5 136.1,135.0 134.5,140.9 129.4"/><path d="M125.3 127.0 C128.4 119.4,130.9 111.2,129.4 104.4"/><path d="M135.8 115.3 C142.5 112.8,149.2 109.6,152.7 104.5"/></g>
+<g class="ink rd2"><path d="M106.5 81.9 C102.9 86.7,99.6 92.0,99.5 97.1"/><path d="M98.1 87.6 C91.0 86.4,83.4 85.6,77.7 88.2"/><path d="M89.8 93.4 C85.4 98.4,81.3 103.9,80.6 109.5"/><path d="M80.1 100.1 C77.9 100.8,75.7 101.7,74.6 103.2"/></g>
+<g class="ink rc3"><path d="M130.1 111.2 C123.5 108.1,116.4 105.4,110.3 106.5"/><path d="M121.1 101.3 C119.4 91.8,116.9 82.0,111.1 76.2"/><path d="M112.1 91.3 C104.2 86.3,95.6 81.6,87.7 82.0"/><path d="M101.5 79.7 C100.2 76.3,98.6 72.9,96.0 71.2"/><path d="M139.2 121.2 C144.0 115.0,148.7 108.2,149.1 101.6"/></g>
+<g class="ink rb4"><path d="M125.4 133.2 C123.0 126.3,120.0 119.4,115.0 115.7"/><path d="M125.8 119.7 C131.1 112.8,136.0 105.2,136.3 97.8"/><path d="M126.2 106.3 C124.9 98.0,122.9 89.5,117.9 84.4"/><path d="M126.6 90.6 C128.8 86.4,130.7 81.9,130.1 77.9"/><path d="M125.1 146.6 C131.3 147.1,137.9 147.1,142.5 144.3"/></g>
+<g class="ink rc5"><path d="M125.1 98.5 C116.7 96.2,107.7 94.5,100.7 97.0"/><path d="M113.1 92.5 C109.8 84.6,105.8 76.6,99.7 72.7"/><path d="M101.1 86.4 C93.6 85.4,85.8 85.0,80.1 87.9"/><path d="M87.1 79.4 C84.6 76.7,81.8 74.1,78.8 73.4"/><path d="M137.1 104.5 C139.0 98.5,140.5 92.1,138.9 87.0"/></g>
+<g class="ink ra6"><path d="M118.5 140.0 C120.1 131.7,121.2 122.9,118.2 116.2"/><path d="M123.7 127.7 C131.1 122.4,138.4 116.4,141.0 109.2"/><path d="M129.0 115.3 C131.1 107.1,132.7 98.3,130.2 91.5"/><path d="M135.1 100.9 C139.4 97.3,143.6 93.3,144.9 88.8"/></g>
+<g class="ink rb7"><path d="M130.1 125.1 C124.8 118.9,118.8 112.9,112.1 111.2"/><path d="M125.0 112.7 C127.5 103.8,129.5 94.4,126.9 87.0"/><path d="M119.9 100.2 C115.2 91.8,109.6 83.4,102.1 79.8"/><path d="M114.0 85.7 C114.3 80.6,114.2 75.3,112.0 71.6"/><path d="M135.1 137.6 C141.8 133.5,148.5 128.7,151.2 122.5"/></g>
+<g class="ink rd8"><path d="M128.7 88.8 C113.2 97.3,96.5 104.9,81.6 103.3"/></g>
+<g class="ink ra9"><path d="M98.4 157.1 C108.5 139.8,120.3 122.5,135.8 115.3"/></g>
+<g class="ink rd10"><path d="M114.8 76.1 C104.4 87.0,92.7 97.6,80.1 100.1"/></g>
+<g class="ink rc11"><path d="M139.2 121.2 C123.0 109.4,107.1 95.8,101.5 79.7"/></g>
+<g class="ink rb12"><path d="M125.1 146.6 C121.6 126.9,119.5 106.1,126.6 90.6"/></g>
+<g class="ink rc13"><path d="M137.1 104.5 C117.8 99.3,98.1 92.4,87.1 79.4"/></g>
+<g class="ink ra14"><path d="M113.2 152.4 C117.2 132.8,122.8 112.7,135.1 100.9"/></g>
+<g class="ink rb15"><path d="M135.1 137.6 C124.0 120.9,113.7 102.8,114.0 85.7"/></g>
+<g class="ink rs16"><path d="M104.0 70.0 L105.7 70.8 L114.8 76.1 L122.5 82.2 L128.7 88.8 L133.4 95.8"/></g>
+<g class="ink rs17"><path d="M136.2 102.0 L136.7 103.3 L138.6 110.9 L139.2 118.6 L138.5 126.3 L136.6 133.9"/></g>
+<g class="ink rs18"><path d="M134.0 140.0 L133.3 140.6 L129.1 144.0 L124.2 147.1 L118.9 149.9 L113.2 152.4 L107.1 154.6 L100.7 156.5 L94.0 158.1 L87.0 159.4 L80.0 160.4"/></g>
+<circle id="outlet" cx="62.0" cy="172.0" r="15"/>
+</svg>

@@ -149,7 +149,10 @@ __FACTS__
 
   var scene = new THREE.Scene();
   scene.background = new THREE.Color(0x080C0F);
-  scene.fog = new THREE.Fog(0x080C0F, 170, 460);
+  // Fog has to scale with the basin. Fixed distances looked right on a 70 km
+  // catchment and swallowed a 500 km one whole, leaving a black screen.
+  var SPAN = Math.max(spanX, spanZ);
+  scene.fog = new THREE.Fog(0x080C0F, SPAN * 1.0, SPAN * 2.8);
 
   var camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, 0.5, 900);
   var renderer = new THREE.WebGLRenderer({antialias:true});
@@ -198,6 +201,7 @@ __FACTS__
   tex.colorSpace = THREE.sRGBEncoding;
   tex.encoding = THREE.sRGBEncoding;
 
+  var HAS_TEXTURE = __HASTEX__;
   var matSat = new THREE.MeshLambertMaterial({map: tex, side: THREE.DoubleSide});
 
   // Elevation view. Most of this basin sits in the upper part of its own range,
@@ -337,8 +341,17 @@ __FACTS__
     bSat.setAttribute("aria-pressed", sat);
     bElev.setAttribute("aria-pressed", !sat);
   }
-  bSat.onclick = function(){ surface(true); };
+  bSat.onclick = function(){ if (HAS_TEXTURE) surface(true); };
   bElev.onclick = function(){ surface(false); };
+  // With no imagery there is nothing for the satellite material to draw, and
+  // a page that opens on a black mesh reads as broken rather than as empty.
+  if (!HAS_TEXTURE){
+    surface(false);
+    bSat.disabled = true;
+    bSat.style.opacity = 0.35;
+    bSat.style.cursor = "not-allowed";
+    bSat.title = "This page was exported without imagery (texture=None).";
+  }
   bRiv.onclick = function(){
     var on = bRiv.getAttribute("aria-pressed") !== "true";
     riverGroup.visible = on; bRiv.setAttribute("aria-pressed", on);
@@ -551,6 +564,7 @@ def export_3d(
             .replace("__FACTS__", _facts_html(facts if facts is not None else default_facts))
             .replace("__CREDIT__", credit)
             .replace("__EX__", f"{float(exaggeration):g}")
+            .replace("__HASTEX__", "true" if tex else "false")
             .replace("__PAYLOAD__", json.dumps(payload).replace("</", "<\\/"))
             # Last, because three.js contains "__THREE__" in its own devtools
             # hook -- and a later release could contain one of our other tokens.

@@ -172,6 +172,39 @@ def test_koshi_area_matches_hydrobasins_own_figure():
 
 
 @pytest.mark.network
+def test_morphometry_lands_in_the_ranges_the_literature_reports():
+    """Sanity bounds, not snapshots: these are what natural basins do.
+
+    Strahler put the mean bifurcation ratio of natural basins at 3 to 5. The
+    hypsometric integral is a fraction. The independently computed integral and
+    the elevation-relief ratio should agree closely -- they did not have to.
+    """
+    b = bk.Basin.from_point(26.87, 87.15, backend="hydrobasins", progress=False)
+    m = b.morphometry()
+
+    lin, ar, rel = m["linear"], m["areal"], m["relief"]
+    assert 3.0 <= lin["mean_bifurcation_ratio"] <= 5.0
+    assert lin["highest_order"] >= 5
+    assert 0 < ar["circularity_ratio"] < 1
+    assert 0 < ar["elongation_ratio"] < 1.2
+    assert 0 < rel["hypsometric_integral"] < 1
+    assert rel["hypsometric_integral"] == pytest.approx(
+        rel["elevation_relief_ratio"], abs=0.02)
+
+    # One projection for everything: area and perimeter must be consistent
+    # enough that the circularity ratio cannot exceed its geometric maximum.
+    assert ar["circularity_ratio"] <= 1.0
+    # And the trunk cannot be longer than every stream in the basin.
+    assert lin["main_channel_length_km"] < lin["total_stream_length_km"]
+
+    orders = [r["order"] for r in m["network"]]
+    assert orders == sorted(orders)
+    for row in m["network"]:
+        assert row["streams"] <= row["reaches"], (
+            "a stream is made of one or more reaches, never fewer")
+
+
+@pytest.mark.network
 def test_esri_year_is_never_quietly_substituted():
     """Asking for a year with no data must fail, not hand back its neighbour.
 
@@ -214,9 +247,14 @@ def test_export_3d_writes_a_page_that_stands_alone(tmp_path):
     assert "cdnjs.cloudflare.com" not in html, "the renderer must be embedded"
     assert "THREE.WebGLRenderer" in html
     assert '<script id="payload"' in html
-    for slot in ("__TITLE__", "__SUBTITLE__", "__CREDIT__", "__PAYLOAD__", "__EX__"):
+    for slot in ("__TITLE__", "__SUBTITLE__", "__CREDIT__", "__PAYLOAD__",
+                 "__EX__", "__HASTEX__"):
         assert slot not in html, f"{slot} was never filled in"
     assert "Copernicus DEM" in html
+    # Exported without imagery, the page must not open on the satellite
+    # material: there is no texture, so it would render a black mesh and read
+    # as broken rather than as deliberately plain.
+    assert "var HAS_TEXTURE = false;" in html
 
 
 @pytest.mark.network
@@ -774,6 +812,58 @@ def test_internal_and_external_checks_are_not_confused_in_the_docs():
     assert "54,100" in doc, "the published reference must appear beside the internal one"
 
 
+# ------------------------------------------------------------ morphometry
+
+
+def test_strahler_streams_are_not_dataset_reaches():
+    """A stream of order u runs until another order-u stream destroys it.
+
+    River datasets store one stream as several reaches, so counting rows per
+    order inflates every order above the first. On the Koshi that turns the
+    bifurcation ratios into 2.3, 1.8, 2.0, 1.1, 1.9, 17.1 -- a ratio of 1.09
+    is not physically possible -- against 4.7, 4.6, 4.3, 5.3, 3.0, 2.0 when
+    streams are counted properly.
+
+    Network below: 1 and 2 are headwaters joining at 3, which is order 2 and
+    continues through 4 and 6. 5 is a headwater joining the trunk at 6.
+    Three order-1 streams; ONE order-2 stream carried by three reaches.
+    """
+    from basinkit.morphometry import _streams_per_order
+
+    ids       = [1, 2, 3, 4, 5, 6]
+    next_down = [3, 3, 4, 6, 6, 0]
+    orders    = [1, 1, 2, 2, 1, 2]
+
+    assert _streams_per_order(ids, next_down, orders) == {1: 3, 2: 1}
+
+    naive = {u: orders.count(u) for u in set(orders)}
+    assert naive == {1: 3, 2: 3}, "the naive count is what this must not do"
+
+
+def test_a_stream_with_no_continuation_counts_once():
+    from basinkit.morphometry import _streams_per_order
+
+    assert _streams_per_order([1, 2, 3], [3, 3, 0], [1, 1, 2]) == {1: 2, 2: 1}
+
+
+def test_morphometry_needs_strahler_orders():
+    """Without orders none of the linear parameters mean anything."""
+    from basinkit.morphometry import morphometry
+
+    class _NoOrders:
+        centroid = (27.0, 85.0)
+        geometry = box(85.0, 27.0, 85.1, 27.1)
+
+        def rivers(self, **kw):
+            return gpd.GeoDataFrame(
+                {"HYRIV_ID": [1]},
+                geometry=[LineString([(85.0, 27.0), (85.1, 27.1)])],
+                crs="EPSG:4326")
+
+    with pytest.raises(ValueError, match="ORD_STRA"):
+        morphometry(_NoOrders())
+
+
 # ------------------------------------------------------------- land cover
 
 
@@ -914,8 +1004,8 @@ def test_the_3d_template_has_no_unfilled_slots():
     from basinkit import viz3d
 
     slots = set(re.findall(r"__[A-Z_]+__", viz3d._TEMPLATE))
-    assert slots == {"__THREE__", "__TITLE__", "__SUBTITLE__",
-                     "__FACTS__", "__CREDIT__", "__EX__", "__PAYLOAD__"}
+    assert slots == {"__THREE__", "__TITLE__", "__SUBTITLE__", "__FACTS__",
+                     "__CREDIT__", "__EX__", "__PAYLOAD__", "__HASTEX__"}
 
 
 def test_facts_table_renders_pairs():

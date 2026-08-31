@@ -290,6 +290,25 @@ class Basin:
             "bbox_efficiency": round(self.bbox_efficiency, 3),
         }
 
+    def morphometry(self, **kwargs) -> dict:
+        """The classical Horton-Strahler-Schumm morphometric parameters.
+
+            m = basin.morphometry()
+            m["areal"]["drainage_density_km_per_km2"]
+            m["network"]        # one row per Strahler order
+
+        Counts Strahler *streams*, not the reaches a river dataset splits them
+        into, and measures area, perimeter and every length in one equal-area
+        projection. Both matter: on the Koshi, counting reaches turns the
+        bifurcation ratios into values that are not physically possible.
+
+        See :mod:`basinkit.morphometry` for what each parameter is and for what
+        the numbers can and cannot be compared against.
+        """
+        from .morphometry import morphometry
+
+        return morphometry(self, **kwargs)
+
     def summary(self, *, terrain: bool = True, landcover: bool = True) -> dict:
         """A one-call characterisation of the basin."""
         out: dict[str, Any] = {
