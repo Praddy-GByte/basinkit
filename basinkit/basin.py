@@ -127,12 +127,22 @@ class Basin:
 
         return dem(self.geometry, product=product, **kwargs)
 
-    def landcover(self, year: int = 2021, source: str = "worldcover", **kwargs):
-        """Land cover. ``worldcover`` (10 m, 2020/2021) or ``esri`` (annual 2017-2024)."""
+    def landcover(self, year: int | None = None, source: str = "worldcover",
+                  **kwargs):
+        """Land cover, as a 2-D array with its class legend in ``.attrs``.
+
+        ``worldcover`` is ESA WorldCover at 10 m (2020 or 2021); ``esri`` is the
+        ESRI / Impact Observatory annual series. Both return the same shape of
+        object, and each carries its own legend -- the two number their classes
+        differently, and code 10 is tree cover in one and cloud in the other.
+
+        ``year=None`` means 2021 for WorldCover and the latest year published
+        for this location for ESRI.
+        """
         from .sources.landcover import esri_lulc, worldcover
 
         if source == "worldcover":
-            return worldcover(self.geometry, year=year, **kwargs)
+            return worldcover(self.geometry, year=year or 2021, **kwargs)
         if source == "esri":
             return esri_lulc(self.geometry, year=year, **kwargs)
         raise ValueError(f"Unknown land cover source {source!r}: use 'worldcover' or 'esri'.")
@@ -461,6 +471,22 @@ class Basin:
         return fp.name
 
     # -- viz ---------------------------------------------------------------
+    def export_3d(self, path: str | Path, **kwargs):
+        """Write an interactive 3D page for this basin: terrain, imagery, rivers.
+
+        One self-contained HTML file with everything embedded, so it opens with
+        no network. See :func:`basinkit.viz3d.export_3d` for the options.
+
+            basin.export_3d("koshi.html")
+            basin.export_3d("koshi.html", texture=None)   # elevation only, small
+
+        This is a way of looking at the layers this package fetches. It makes no
+        claim the other methods do not already make.
+        """
+        from .viz3d import export_3d
+
+        return export_3d(self, path, **kwargs)
+
     def explore(self, **kwargs):
         """Interactive map of the basin. Needs ``pip install 'basinkit[viz]'``."""
         from .viz import explore

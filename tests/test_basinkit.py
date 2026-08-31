@@ -8,15 +8,20 @@ evidence rather than a snapshot of whatever the code happened to produce.
 
 from __future__ import annotations
 
+import base64
 import math
+import re
 
+import geopandas as gpd
+import numpy as np
 import pytest
-from shapely.geometry import Polygon, box
+from shapely.geometry import LineString, Polygon, box
 
 import basinkit as bk
 from basinkit import catalog
 from basinkit.clip import basin_area_km2
 from basinkit.delineate.hydrobasins import REGIONS, candidate_regions
+from basinkit.exceptions import DataSourceError
 from basinkit.mosaic import estimate_pixels
 from basinkit.sources.dem import tile_url
 
@@ -164,6 +169,54 @@ def test_koshi_area_matches_hydrobasins_own_figure():
     reported = b.provenance["reported_up_area_km2"]
     assert b.area_km2 == pytest.approx(reported, rel=0.01)
     assert 50_000 < b.area_km2 < 58_000     # published: ~54,100 km2 at Chatara
+
+
+@pytest.mark.network
+def test_esri_year_is_never_quietly_substituted():
+    """Asking for a year with no data must fail, not hand back its neighbour.
+
+    Every ESRI annual item ends at 00:00 on 1 January, so a naive year window
+    matches the *previous* year's map at the boundary instant. Asking for 2024
+    returned the 2023 map, with an array that looked entirely correct -- the
+    kind of error that shifts a whole change analysis by one year.
+    """
+    import basinkit.sources.landcover as lc_mod
+    from basinkit.sources.landcover import esri_years
+
+    geom = bk.Basin.from_point(27.962, 85.184, backend="hydrobasins",
+                               progress=False).geometry
+    years = esri_years(geom)
+    assert years and all(2016 < y < 2100 for y in years)
+
+    missing = max(years) + 1
+    with pytest.raises(DataSourceError, match=str(missing)):
+        lc_mod.esri_lulc(geom, year=missing)
+
+    da = lc_mod.esri_lulc(geom, year=max(years))
+    assert da.ndim == 2, f"land cover must come back 2-D, got {da.dims}"
+    assert da.attrs["basinkit_year"] == max(years)
+
+
+@pytest.mark.network
+def test_export_3d_writes_a_page_that_stands_alone(tmp_path):
+    """The exported file must carry everything it needs, including the renderer.
+
+    The whole point is a file that opens on a laptop with no network. If the
+    renderer were left as a CDN link, the page would be blank exactly where it
+    is needed most.
+    """
+    b = bk.Basin.from_point(26.87, 87.15, backend="hydrobasins", progress=False)
+    out = b.export_3d(tmp_path / "koshi.html", texture=None, mesh_width=128,
+                      min_order=6)
+
+    html = out.read_text(encoding="utf-8")
+    assert out.stat().st_size > 200_000
+    assert "cdnjs.cloudflare.com" not in html, "the renderer must be embedded"
+    assert "THREE.WebGLRenderer" in html
+    assert '<script id="payload"' in html
+    for slot in ("__TITLE__", "__SUBTITLE__", "__CREDIT__", "__PAYLOAD__", "__EX__"):
+        assert slot not in html, f"{slot} was never filled in"
+    assert "Copernicus DEM" in html
 
 
 @pytest.mark.network
@@ -719,6 +772,158 @@ def test_internal_and_external_checks_are_not_confused_in_the_docs():
            / "docs" / "delineation.md").read_text()
     assert "not an accuracy figure" in doc
     assert "54,100" in doc, "the published reference must appear beside the internal one"
+
+
+# ------------------------------------------------------------- land cover
+
+
+class _Item:
+    def __init__(self, ident, start=None):
+        self.id = ident
+        self.properties = {"start_datetime": start} if start else {}
+
+
+def test_item_year_prefers_the_declared_coverage_window():
+    from basinkit.sources.landcover import _item_year
+
+    assert _item_year(_Item("45R-2023", "2023-01-01T00:00:00Z")) == 2023
+    assert _item_year(_Item("45R-2019")) == 2019        # falls back to the id
+    assert _item_year(_Item("weird")) is None
+
+
+def test_class_fractions_reads_the_legend_off_the_array():
+    """WorldCover and ESRI number their classes differently.
+
+    Code 10 is tree cover in one scheme and cloud in the other. Defaulting to
+    WorldCover for every raster reported ESRI cloud as forest, in a dictionary
+    that looked entirely reasonable. The legend now travels with the data.
+    """
+    import xarray as xr
+
+    from basinkit.sources.landcover import (
+        ESRI_CLASSES,
+        WORLDCOVER_CLASSES,
+        class_fractions,
+    )
+
+    grid = np.full((4, 4), 10, dtype="uint8")
+
+    esri = xr.DataArray(grid, dims=("y", "x"),
+                        attrs={"classes": str(ESRI_CLASSES)})
+    assert class_fractions(esri) == {"Clouds": 1.0}
+
+    wc = xr.DataArray(grid, dims=("y", "x"),
+                      attrs={"classes": str(WORLDCOVER_CLASSES)})
+    assert class_fractions(wc) == {"Tree cover": 1.0}
+
+    assert class_fractions(xr.DataArray(grid, dims=("y", "x"))) == {"Tree cover": 1.0}
+
+
+def test_class_fractions_survives_a_dataset():
+    """A Dataset has no ``.values`` array -- it has a ``.values`` method.
+
+    This is the same defect that once broke clipping on every multi-band STAC
+    result. It was fixed there and left standing here, which is why the ESRI
+    land-cover path raised on a TypeError from deep inside numpy.
+    """
+    import xarray as xr
+
+    from basinkit.sources.landcover import class_fractions
+
+    da = xr.DataArray(np.full((3, 3), 20, dtype="uint8"), dims=("y", "x"))
+    assert class_fractions(da.to_dataset(name="data")) == {"Shrubland": 1.0}
+
+    two = xr.Dataset({"a": da, "b": da})
+    with pytest.raises(ValueError, match="one land-cover band"):
+        class_fractions(two)
+
+
+def test_class_fractions_handles_integer_rasters():
+    """Land cover is categorical integers; np.isfinite is float-only."""
+    import xarray as xr
+
+    from basinkit.sources.landcover import class_fractions
+
+    grid = np.array([[10, 10, 20], [0, 20, 20]], dtype="uint8")   # 0 = nodata
+    out = class_fractions(xr.DataArray(grid, dims=("y", "x")))
+    assert out == {"Shrubland": 0.6, "Tree cover": 0.4}
+
+
+# ---------------------------------------------------------------- 3D export
+
+
+def _fake_dem(values):
+    """A minimal stand-in for what Basin.dem() returns."""
+    import xarray as xr
+
+    arr = np.asarray(values, dtype="float32")
+    return xr.DataArray(
+        arr, dims=("y", "x"),
+        coords={"y": np.linspace(1, 0, arr.shape[0]),
+                "x": np.linspace(0, 1, arr.shape[1])})
+
+
+def test_heights_reserve_zero_for_outside_the_basin():
+    """The mesh needs to know where the basin is not, or it fills its own holes.
+
+    0 is the sentinel; every real elevation packs into 1..65535. Getting this
+    wrong makes the lowest point in the basin indistinguishable from the void
+    around it, and the terrain grows a skirt.
+    """
+    from basinkit.viz3d import _heights
+
+    grid = np.array([[100.0, 200.0, np.nan],
+                     [150.0, 250.0, 300.0]], dtype="float32")
+    b64, meta = _heights(_fake_dem(grid), mesh_width=8)
+
+    packed = np.frombuffer(base64.b64decode(b64), dtype="<u2")
+    assert meta["zmin"] == 100.0 and meta["zmax"] == 300.0
+    assert meta["h"] == 2 and meta["w"] == 3
+    assert packed[2] == 0, "the NaN cell must pack to the outside-basin sentinel"
+    assert packed[0] == 1, "the minimum elevation must be 1, not 0"
+    assert packed.max() == 65535
+
+
+def test_heights_refuse_an_empty_basin():
+    from basinkit.viz3d import _heights
+
+    with pytest.raises(ValueError, match="empty"):
+        _heights(_fake_dem(np.full((3, 3), np.nan)), mesh_width=8)
+
+
+def test_rivers_are_normalised_into_basin_coordinates():
+    from basinkit.viz3d import _rivers
+
+    gdf = gpd.GeoDataFrame(
+        {"UPLAND_SKM": [12.0]},
+        geometry=[LineString([(10.0, 20.0), (11.0, 21.0)])], crs="EPSG:4326")
+    lines = _rivers(gdf, (10.0, 20.0, 11.0, 21.0))
+
+    assert len(lines) == 1
+    assert lines[0]["p"] == [[0.0, 0.0], [1.0, 1.0]]
+    assert lines[0]["u"] == 12.0
+
+
+def test_the_3d_template_has_no_unfilled_slots():
+    """Every placeholder must be one the exporter actually fills.
+
+    The template is a 13 KB blob of HTML, CSS and JavaScript. A renamed token
+    would leave a literal ``__TITLE__`` on a published page, and no other test
+    would notice.
+    """
+    from basinkit import viz3d
+
+    slots = set(re.findall(r"__[A-Z_]+__", viz3d._TEMPLATE))
+    assert slots == {"__THREE__", "__TITLE__", "__SUBTITLE__",
+                     "__FACTS__", "__CREDIT__", "__EX__", "__PAYLOAD__"}
+
+
+def test_facts_table_renders_pairs():
+    from basinkit.viz3d import _facts_html
+
+    assert _facts_html(None) == ""
+    html = _facts_html({"Basin area": "3,198 km²"})
+    assert "<dt>Basin area</dt><dd>3,198 km²</dd>" in html
 
 
 def test_documented_example_uses_one_verified_coordinate():

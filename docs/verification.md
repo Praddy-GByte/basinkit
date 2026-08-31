@@ -177,7 +177,7 @@ gridded data.
 
 ## Defects this found
 
-Verification is only worth doing if it changes the code. It changed eleven
+Verification is only worth doing if it changes the code. It changed twelve
 things, and every one is now a regression test.
 
 | what | how it showed up |
@@ -193,9 +193,10 @@ things, and every one is now a regression test.
 | **BasinATLAS extent code misread** | Extent is the first letter of a column's *third* token (`pre_mm_uyr` upstream, `run_mm_syr` sub-catchment), not a trailing suffix. Read as a suffix it matched nothing and `attributes()` returned an empty dict. |
 | **BasinATLAS scaled integers** | Stored as integers to keep the tables compact. Read raw, the Koshi averages 50 °C and a 204° slope. |
 | **The README's own example was wrong** | Found on release day by running it. `from_point(26.5, 85.2)`, advertised as "14,384 km²", sits 16 km off the Bagmati channel and returns 434 km². The delineation was correct and HydroBASINS' `UP_AREA` agreed with it to 0.2%; the *coordinate* was wrong and the printed figure had gone stale. The first code block a new user ran disagreed with its own output by a factor of thirty. Fixed by moving every documented example to the Chatara outlet the network suite verifies, adding an off-channel advisory warning, and pinning the documented coordinate to the tested one. |
+| **ESRI land cover returned the wrong year** | Found while trying to build a year-by-year change animation. Every annual item ends at 00:00 on 1 January, so a naive year window matches the previous year's map at the boundary instant: asking for 2024 — the package default — returned the 2023 map. Nothing raised, and the array was entirely valid. Three more defects sat in the same code path: the WorldCover legend applied to ESRI codes (reporting cloud as forest), a Dataset returned where a DataArray was expected, and two tiles stacked on a time axis instead of mosaicked. |
 
-Nine of the eleven produce answers that look entirely plausible — an empty
-dict, a negative reflectance, a 271 km² Rhine. **Only two of the eleven raised an
+Ten of the twelve produce answers that look entirely plausible — an empty
+dict, a negative reflectance, a 271 km² Rhine. **Only two of the twelve raised an
 exception**, and both were found by auditing which methods no test had ever
 called, not by the suite. That is the argument for checking against published
 values rather than snapshots: a snapshot test would have locked the other eight

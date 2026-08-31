@@ -250,6 +250,35 @@ Every GeoTIFF is written with its **nodata value declared in the header**. This
 sounds like a detail; it is the difference between your clip appearing correctly
 in QGIS and appearing as a grey rectangle.
 
+### See it in three dimensions
+
+```python
+basin.export_3d("koshi.html")                 # terrain + Sentinel-2 + rivers
+basin.export_3d("koshi.html", texture=None)   # terrain only, much smaller
+```
+
+Writes one self-contained HTML file — imagery, elevation, river geometry and
+the renderer are all embedded — so it opens from a memory stick on a laptop
+with no network. Drag to orbit, scroll to zoom, toggle between the satellite
+composite and an elevation tint, and stretch the vertical exaggeration.
+
+The imagery window matters. The default is post-monsoon, which is usually the
+cleanest; give it a dry-season window for your own region:
+
+```python
+basin.export_3d("basin.html", start="2024-11-01", end="2025-01-31",
+                cloud_cover=10, mesh_width=512)
+```
+
+The first call downloads the renderer once into the cache; after that the
+export works offline. `texture=None` needs nothing beyond the DEM and produces
+a file a fraction of the size.
+
+One choice worth knowing about, since it changes what you see: the elevation
+tint maps colour to each point's **rank**, not its elevation. On a mountain
+basin, where most of the land sits in the upper part of its own range, a linear
+ramp collapses into one flat tone and the drainage network disappears.
+
 ---
 
 ## Step 4 — Without writing any Python
