@@ -56,11 +56,17 @@ class BasinkitPlugin:
             return
         self._warned = True
 
-        from qgis.core import Qgis
+        from qgis.core import Qgis, QgsMessageLog
 
+        # The full instructions are several lines and the message bar is one,
+        # so the bar points at the log, where the snippet can be selected and
+        # copied. Putting a command in the bar also meant printing "None" on
+        # any platform where no interpreter path could be trusted.
+        QgsMessageLog.logMessage(message, "basinkit", Qgis.MessageLevel.Warning)
         self.iface.messageBar().pushMessage(
             "basinkit",
-            f"Python package missing. Install with: {deps.install_command()}",
+            "Python package missing. See the basinkit tab of the Log Messages "
+            "panel for the two ways to install it.",
             level=Qgis.MessageLevel.Warning,
             duration=15,
         )

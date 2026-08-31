@@ -35,6 +35,18 @@
   disabled. On a mountain basin a linear ramp collapses to one flat tone, because
   most of the terrain sits in the upper part of its own range.
 
+### QGIS plugin
+- The plugin version now tracks the package version.
+- Fixed a defect found by installing the plugin on macOS rather than by reading
+  the code: the "package missing" notice built its pip command from
+  `sys.executable`, which on macOS is `QGIS.app/Contents/MacOS/QGIS` -- the
+  application binary. Following the instruction opened a second QGIS window and
+  installed nothing. The plugin now offers a path only after verifying it is a
+  python executable, and always offers a Python Console snippet that runs pip
+  through `runpy` inside the interpreter already running, so it cannot target
+  the wrong site-packages. The docstring had warned about exactly this on
+  Windows; macOS had the same hole.
+
 ### Logo
 - The drainage inside the bowl of the `b` was four near-horizontal strokes
   meeting the stem at right angles, which read as a comb, or as an `E`, rather

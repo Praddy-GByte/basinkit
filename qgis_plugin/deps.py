@@ -3,13 +3,19 @@
 QGIS ships its own Python interpreter, and there is still no official mechanism
 for a plugin to declare a pip dependency -- the enhancement proposal for it has
 been open for years. So the plugin has to detect the gap itself and hand the
-user a command that will actually work, which is harder than it sounds: on
-Windows ``sys.executable`` is ``qgis-bin.exe``, not ``python.exe``, so the
-obvious recipe produces a command that silently does nothing.
+user something that will actually work, which is harder than it sounds.
+
+``sys.executable`` is not the interpreter on any desktop platform: on Windows it
+is ``qgis-bin.exe`` and on macOS it is ``QGIS.app/Contents/MacOS/QGIS``. Handing
+either of those to ``-m pip`` does not install anything -- on macOS it opens a
+second QGIS window. So a path is only offered when it has been verified to be a
+real interpreter, and there is always the Python Console fallback below, which
+needs no path at all.
 """
 
 from __future__ import annotations
 
+import os
 import platform
 import sys
 from pathlib import Path
@@ -21,32 +27,57 @@ REQUIRED = {"basinkit": "basinkit"}
 OPTIONAL = {"basinkit[stac]": "pystac_client"}
 
 
-def python_command() -> str:
-    """Best guess at the interpreter that owns QGIS's site-packages.
+def _is_interpreter(path: Path) -> bool:
+    """A real python executable, not the application binary beside it."""
+    return (path.is_file()
+            and os.access(path, os.X_OK)
+            and path.name.lower().startswith("python"))
 
-    ``sys.executable`` is wrong on Windows (QGIS bug #45646) and unreliable on
-    macOS, so the prefix is searched directly. This follows the approach the
-    qpip plugin settled on after hitting all three platforms.
+
+def _candidates() -> list[Path]:
+    """Places QGIS's own interpreter is known to sit, most likely first."""
+    out: list[Path] = []
+    prefix = Path(sys.prefix)
+    exe = Path(sys.executable) if sys.executable else None
+
+    if exe is not None:
+        out.append(exe)
+
+    if platform.system() == "Windows":
+        out += [prefix / "python.exe", prefix / "python3.exe",
+                prefix / "Scripts" / "python.exe"]
+    else:
+        out += [prefix / "bin" / "python3", prefix / "bin" / "python"]
+
+    if platform.system() == "Darwin" and exe is not None:
+        # walk up to the .app bundle and try the layouts QGIS has shipped
+        for parent in exe.parents:
+            if parent.suffix == ".app":
+                contents = parent / "Contents"
+                out += [contents / "MacOS" / "bin" / "python3",
+                        contents / "Resources" / "python" / "bin" / "python3",
+                        contents / "Frameworks" / "Python.framework" /
+                        "Versions" / "Current" / "bin" / "python3"]
+                break
+
+    return out
+
+
+def python_command() -> str | None:
+    """The interpreter that owns QGIS's site-packages, or ``None``.
+
+    Returning ``None`` is deliberate. A wrong path is worse than no path: it
+    produces a command that appears to work and installs nothing.
     """
     if (Path(sys.prefix) / "conda-meta").exists():
         return "python"
-
-    if platform.system() == "Windows":
-        base = Path(sys.prefix)
-        for name in ("python.exe", "python3.exe"):
-            candidate = base / name
-            if candidate.exists():
+    for candidate in _candidates():
+        try:
+            if _is_interpreter(candidate):
                 return str(candidate)
-        return "python"
-
-    if platform.system() == "Darwin":
-        base = Path(sys.prefix) / "bin"
-        for name in ("python3", "python"):
-            candidate = base / name
-            if candidate.exists():
-                return str(candidate)
-
-    return sys.executable or "python3"
+        except OSError:
+            continue
+    return None
 
 
 def missing(mapping: dict[str, str] | None = None) -> list[str]:
@@ -60,10 +91,27 @@ def missing(mapping: dict[str, str] | None = None) -> list[str]:
     return absent
 
 
-def install_command(distributions: list[str] | None = None) -> str:
-    """The exact command to paste into a terminal."""
+def install_command(distributions: list[str] | None = None) -> str | None:
+    """The exact terminal command, or ``None`` if no interpreter was found."""
+    interpreter = python_command()
+    if interpreter is None:
+        return None
     names = distributions or list(REQUIRED)
-    return f'"{python_command()}" -m pip install --upgrade {" ".join(names)}'
+    return f'"{interpreter}" -m pip install --upgrade {" ".join(names)}'
+
+
+def console_command(distributions: list[str] | None = None) -> str:
+    """Install from inside QGIS, with no interpreter path involved.
+
+    ``runpy`` runs pip in the interpreter that is already running, so the
+    packages land in exactly the site-packages QGIS imports from. This works on
+    every platform and is the fallback when no interpreter path can be trusted.
+    """
+    names = distributions or list(REQUIRED)
+    args = ", ".join(f'"{n}"' for n in names)
+    return ("import runpy, sys\n"
+            f'sys.argv = ["pip", "install", "--upgrade", {args}]\n'
+            'runpy.run_module("pip", run_name="__main__")')
 
 
 def status_message() -> str | None:
@@ -71,13 +119,20 @@ def status_message() -> str | None:
     absent = missing()
     if not absent:
         return None
-    return (
-        "basinkit needs the Python package "
-        f"{', '.join(absent)}, which QGIS does not ship.\n\n"
-        "Install it by running this in a terminal, then restart QGIS:\n\n"
-        f"    {install_command(absent)}\n\n"
-        "On Windows, use the OSGeo4W Shell rather than a plain Command Prompt."
-    )
+
+    head = ("basinkit needs the Python package "
+            f"{', '.join(absent)}, which QGIS does not ship.\n\n")
+    console = ("Open the QGIS Python Console (Plugins > Python Console), paste "
+               "this, then restart QGIS:\n\n"
+               + "\n".join("    " + line
+                           for line in console_command(absent).splitlines()))
+
+    terminal = install_command(absent)
+    if terminal is None:
+        return head + console
+    return (head + console + "\n\nOr, from a terminal:\n\n    " + terminal
+            + "\n\nOn Windows, use the OSGeo4W Shell rather than a plain "
+              "Command Prompt.")
 
 
 def version() -> str | None:
