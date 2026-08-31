@@ -3,7 +3,7 @@ name=basinkit
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Delineate a river basin from a point anywhere on Earth and load every open Earth observation layer, clipped to it.
-version=0.1.0
+version=0.3.0
 author=Pradeepika Kaushik
 email=pradeepikakaushik4@gmail.com
 
@@ -23,7 +23,14 @@ server=False
 
 tags=hydrology,watershed,catchment,basin,delineation,dem,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
 
-changelog=0.1.0
+changelog=0.3.0
+    The plugin version now tracks the basinkit package version, so it is clear
+    which plugin goes with which package. No algorithm has changed since 0.1.0.
+    - New icon: the b is drawn as a river basin with a dendritic stream network
+      draining to a single outlet
+    - Pairs with basinkit 0.3.0, which adds Basin.morphometry() -- the classical
+      Horton-Strahler-Schumm parameters -- to the Python API
+    0.1.0
     First release.
     - Delineate a basin from a canvas click, globally, via HydroBASINS graph traversal or DEM flow routing
     - Fetch DEM, land cover, soil, surface water, rivers and lakes clipped to the basin
