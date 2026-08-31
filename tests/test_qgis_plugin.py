@@ -119,3 +119,72 @@ def test_create_instance_returns_a_new_object():
     source = (PLUGIN / "processing_provider" / "algorithms" / "base.py").read_text()
     assert "return self.__class__()" in source
     assert "return self\n" not in source.split("def createInstance")[1][:200]
+
+
+# -- dependency detection ---------------------------------------------------
+# On macOS the plugin told users to run
+#     "QGIS.app/Contents/MacOS/QGIS" -m pip install basinkit
+# which is the application binary, not an interpreter: it opens a second QGIS
+# window and installs nothing. These tests pin the two properties that stop
+# that from coming back.
+
+def _deps():
+    import importlib.util
+    import sys
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1] / "qgis_plugin" / "deps.py"
+    spec = importlib.util.spec_from_file_location("_bk_deps", root)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["_bk_deps"] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_python_command_never_returns_the_application_binary(tmp_path, monkeypatch):
+    """A path is only offered once it is verified to be an interpreter."""
+    deps = _deps()
+
+    app = tmp_path / "QGIS.app" / "Contents" / "MacOS"
+    app.mkdir(parents=True)
+    binary = app / "QGIS"
+    binary.write_text("#!/bin/sh\n")
+    binary.chmod(0o755)
+
+    monkeypatch.setattr(deps.sys, "executable", str(binary))
+    monkeypatch.setattr(deps.sys, "prefix", str(app))
+    monkeypatch.setattr(deps.platform, "system", lambda: "Darwin")
+
+    assert deps.python_command() is None
+    assert deps.install_command(["basinkit"]) is None
+
+
+def test_python_command_finds_the_interpreter_in_the_bundle(tmp_path, monkeypatch):
+    deps = _deps()
+
+    app = tmp_path / "QGIS.app" / "Contents" / "MacOS"
+    (app / "bin").mkdir(parents=True)
+    binary = app / "QGIS"
+    binary.write_text("#!/bin/sh\n")
+    binary.chmod(0o755)
+    interpreter = app / "bin" / "python3"
+    interpreter.write_text("#!/bin/sh\n")
+    interpreter.chmod(0o755)
+
+    monkeypatch.setattr(deps.sys, "executable", str(binary))
+    monkeypatch.setattr(deps.sys, "prefix", str(app))
+    monkeypatch.setattr(deps.platform, "system", lambda: "Darwin")
+
+    assert deps.python_command() == str(interpreter)
+    assert deps.install_command(["basinkit"]).startswith(f'"{interpreter}" -m pip')
+
+
+def test_the_console_fallback_needs_no_path_and_is_always_offered():
+    """runpy runs pip inside the interpreter already running, so it cannot
+    target the wrong site-packages."""
+    deps = _deps()
+
+    snippet = deps.console_command(["basinkit"])
+    assert "runpy.run_module" in snippet
+    assert "sys.executable" not in snippet
+    assert "/" not in snippet.replace("basinkit", "")
