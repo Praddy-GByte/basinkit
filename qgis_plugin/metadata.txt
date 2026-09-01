@@ -3,7 +3,7 @@ name=basinkit
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Delineate a river basin from a point anywhere on Earth and load every open Earth observation layer, clipped to it.
-version=0.3.1
+version=0.3.2
 author=Pradeepika Kaushik
 email=pradeepikakaushik4@gmail.com
 
@@ -19,11 +19,21 @@ icon=icon.png
 experimental=False
 deprecated=False
 hasProcessingProvider=yes
+
+# The pip distribution this plugin needs. QGIS does not ship it, and there is
+# no mechanism to install it automatically, so the plugin detects it at load
+# and hands the user a command that works. Declaring it here is what puts it in
+# the "External dependencies" field on plugins.qgis.org.
+external_deps=basinkit>=0.3
 server=False
 
 tags=hydrology,watershed,catchment,basin,delineation,dem,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
 
-changelog=0.3.1
+changelog=0.3.2
+    - Declares its pip dependency in the external_deps metadata field, so it
+      shows in the External dependencies box on the plugin page.
+
+    0.3.1
     - Fixed 16 Qt6 compatibility issues found by the plugin repository's own
       checker: every Qt and QGIS enum is now spelled with its full scope
       (QgsWkbTypes.Type.Polygon rather than QgsWkbTypes.Polygon, and so on).
