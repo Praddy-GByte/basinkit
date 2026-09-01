@@ -188,3 +188,41 @@ def test_the_console_fallback_needs_no_path_and_is_always_offered():
     assert "runpy.run_module" in snippet
     assert "sys.executable" not in snippet
     assert "/" not in snippet.replace("basinkit", "")
+
+
+# -- Qt6 / QGIS 4 compatibility ---------------------------------------------
+# QGIS 4 runs on Qt6, where the short enum aliases were removed. The fully
+# scoped names work on both PyQt5 and PyQt6, so there is one correct spelling
+# and no version guard is needed. The plugin repository's own checker found 16
+# of these; this test stops them coming back.
+
+UNSCOPED = [
+    (r"QgsWkbTypes\.(Polygon|MultiPolygon|LineString|Point)\b", "QgsWkbTypes.Type."),
+    (r"QgsProcessing\.TypeVector\w+", "QgsProcessing.SourceType."),
+    (r"QgsProcessingParameterNumber\.(Integer|Double)\b", "QgsProcessingParameterNumber.Type."),
+    (r"QgsProcessingParameter\w*\.Flag\w+", "…Flag.Flag…"),
+    (r"QgsFeatureSink\.FastInsert\b", "QgsFeatureSink.Flag.FastInsert"),
+]
+
+
+def test_no_unscoped_qt_enums():
+    """Every Qt/QGIS enum must be spelled with its full scope."""
+    import re
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1] / "qgis_plugin"
+    bad = []
+    for path in sorted(root.rglob("*.py")):
+        if "__pycache__" in str(path):
+            continue
+        text = path.read_text()
+        for pattern, fix in UNSCOPED:
+            for hit in re.finditer(pattern, text):
+                # already scoped forms contain the scope name, skip them
+                if ".Type." in hit.group(0) or ".Flag." in hit.group(0) \
+                        or ".SourceType." in hit.group(0):
+                    continue
+                line = text[:hit.start()].count("\n") + 1
+                bad.append("%s:%d  %s  -> use %s"
+                           % (path.relative_to(root), line, hit.group(0), fix))
+    assert not bad, "unscoped enums break QGIS 4 (Qt6):\n  " + "\n  ".join(bad)

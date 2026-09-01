@@ -40,10 +40,10 @@ if QGIS_VERSION >= 33000:
 else:
     from qgis.core import QgsWkbTypes
 
-    WKB_POLYGON = QgsWkbTypes.Polygon
-    WKB_MULTIPOLYGON = QgsWkbTypes.MultiPolygon
-    WKB_LINESTRING = QgsWkbTypes.LineString
-    WKB_POINT = QgsWkbTypes.Point
+    WKB_POLYGON = QgsWkbTypes.Type.Polygon
+    WKB_MULTIPOLYGON = QgsWkbTypes.Type.MultiPolygon
+    WKB_LINESTRING = QgsWkbTypes.Type.LineString
+    WKB_POINT = QgsWkbTypes.Type.Point
 
 
 def make_field(name: str, kind):
@@ -57,7 +57,7 @@ if QGIS_VERSION >= 33000:
 else:
     from qgis.core import QgsProcessing
 
-    SOURCE_POLYGON = QgsProcessing.TypeVectorPolygon
+    SOURCE_POLYGON = QgsProcessing.SourceType.TypeVectorPolygon
 
 #: ``groupName`` and ``layerSortKey`` on LayerDetails arrived in QGIS 3.32.
 SUPPORTS_LAYER_GROUPING = QGIS_VERSION >= 33200

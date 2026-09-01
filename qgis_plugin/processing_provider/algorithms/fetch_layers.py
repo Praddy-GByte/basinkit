@@ -85,26 +85,26 @@ class FetchBasinLayersAlgorithm(BasinkitAlgorithm):
 
         start = QgsProcessingParameterNumber(
             self.START_YEAR, "Rainfall: first year",
-            type=QgsProcessingParameterNumber.Integer,
+            type=QgsProcessingParameterNumber.Type.Integer,
             defaultValue=2015, minValue=1981, maxValue=2100,
         )
-        start.setFlags(start.flags() | QgsProcessingParameterNumber.FlagAdvanced)
+        start.setFlags(start.flags() | QgsProcessingParameterNumber.Flag.FlagAdvanced)
         self.addParameter(start)
 
         end = QgsProcessingParameterNumber(
             self.END_YEAR, "Rainfall: last year",
-            type=QgsProcessingParameterNumber.Integer,
+            type=QgsProcessingParameterNumber.Type.Integer,
             defaultValue=2023, minValue=1981, maxValue=2100,
         )
-        end.setFlags(end.flags() | QgsProcessingParameterNumber.FlagAdvanced)
+        end.setFlags(end.flags() | QgsProcessingParameterNumber.Flag.FlagAdvanced)
         self.addParameter(end)
 
         budget = QgsProcessingParameterNumber(
             self.MAX_MEGAPIXELS, "Raster budget (megapixels)",
-            type=QgsProcessingParameterNumber.Integer,
+            type=QgsProcessingParameterNumber.Type.Integer,
             defaultValue=100, minValue=1, maxValue=4000,
         )
-        budget.setFlags(budget.flags() | QgsProcessingParameterNumber.FlagAdvanced)
+        budget.setFlags(budget.flags() | QgsProcessingParameterNumber.Flag.FlagAdvanced)
         self.addParameter(budget)
 
         self.addParameter(

@@ -96,22 +96,22 @@ class DelineateBasinAlgorithm(BasinkitAlgorithm):
         snap = QgsProcessingParameterNumber(
             self.SNAP_KM,
             "Snap to the nearest unit within (km)",
-            type=QgsProcessingParameterNumber.Double,
+            type=QgsProcessingParameterNumber.Type.Double,
             defaultValue=5.0,
             minValue=0.0,
         )
-        snap.setFlags(snap.flags() | QgsProcessingParameterNumber.FlagAdvanced)
+        snap.setFlags(snap.flags() | QgsProcessingParameterNumber.Flag.FlagAdvanced)
         self.addParameter(snap)
 
         ratio = QgsProcessingParameterNumber(
             self.RIVER_SNAP_RATIO,
             "Snap to a nearby main stem when it drains this many times more "
             "(0 disables)",
-            type=QgsProcessingParameterNumber.Double,
+            type=QgsProcessingParameterNumber.Type.Double,
             defaultValue=10.0,
             minValue=0.0,
         )
-        ratio.setFlags(ratio.flags() | QgsProcessingParameterNumber.FlagAdvanced)
+        ratio.setFlags(ratio.flags() | QgsProcessingParameterNumber.Flag.FlagAdvanced)
         self.addParameter(ratio)
 
         self.addParameter(
@@ -221,7 +221,7 @@ class DelineateBasinAlgorithm(BasinkitAlgorithm):
             float(provenance.get("snap_ratio", 0) or 0),
             provenance.get("citation", ""),
         ])
-        sink.addFeature(feature, QgsFeatureSink.FastInsert)
+        sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
         feedback.setProgress(100)
         return {self.OUTPUT: dest_id}
