@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.1 — 2026-09-01
+
+### QGIS plugin
+- The plugin repository's automated checker reported 16 Qt6 compatibility
+  issues on upload. QGIS 4 runs on Qt6, where the short enum aliases were
+  removed, so `QgsWkbTypes.Polygon`, `QgsProcessingParameterNumber.Integer`,
+  `QgsFeatureSink.FastInsert` and the rest would have raised at run time on
+  QGIS 4. All 16 are now written with their full scope. The scoped spelling
+  works on PyQt5 as well, so one code path covers QGIS 3.28 through 4.x and no
+  version guard was needed.
+- This is the reason `qgisMaximumVersion=4.99` had been an untested claim: the
+  plugin declared support for QGIS 4 without ever having been checked against
+  it. The checker did the checking.
+- A test scans the plugin source for unscoped enums so this class of defect
+  cannot return.
+
 ## 0.3.0 — 2026-08-31
 
 ### Morphometry
