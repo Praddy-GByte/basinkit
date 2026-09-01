@@ -223,6 +223,6 @@ def test_no_unscoped_qt_enums():
                         or ".SourceType." in hit.group(0):
                     continue
                 line = text[:hit.start()].count("\n") + 1
-                bad.append("%s:%d  %s  -> use %s"
-                           % (path.relative_to(root), line, hit.group(0), fix))
+                bad.append(f"{path.relative_to(root)}:{line}  "
+                           f"{hit.group(0)}  -> use {fix}")
     assert not bad, "unscoped enums break QGIS 4 (Qt6):\n  " + "\n  ".join(bad)
