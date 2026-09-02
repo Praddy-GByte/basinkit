@@ -2,7 +2,7 @@
 import json, re, pathlib
 from collections import OrderedDict
 
-A = pathlib.Path('/home/claude/basinkit/assets')
+A = pathlib.Path(__file__).resolve().parent.parent   # <repo>/assets
 VAR = {"--stem":"s", "--trib-1":"a", "--trib-2":"b", "--trib-3":"c", "--trib-4":"d"}
 DESC_OLD = ("The letter b drawn as a river basin: the stem is the trunk river, the bowl "
             "is the divide, and four coloured tributaries feed it from inside.")

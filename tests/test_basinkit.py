@@ -846,6 +846,96 @@ def test_a_stream_with_no_continuation_counts_once():
     assert _streams_per_order([1, 2, 3], [3, 3, 0], [1, 1, 2]) == {1: 2, 2: 1}
 
 
+def test_bifurcation_ratio_below_two_is_reported_as_impossible():
+    """Rb < 2 is not a low value; it is an arithmetic impossibility.
+
+    Every order-(u+1) stream is made by two order-u streams joining, so
+    N(u) >= 2*N(u+1). Three order-2 streams cannot sit above two order-3
+    streams. A published table that shows this counted reaches.
+    """
+    from basinkit.morphometry import _consistency
+
+    w = _consistency({1: 20, 2: 3, 3: 2}, [1, 2, 3], rbm=4.0)
+    floor = [x for x in w if x["check"] == "bifurcation_ratio_floor"]
+    assert len(floor) == 1
+    assert floor[0]["severity"] == "impossible"
+    assert floor[0]["orders"] == [2, 3]
+    assert "1.50" in floor[0]["message"]
+
+
+def test_a_clean_network_raises_nothing():
+    from basinkit.morphometry import _consistency
+
+    assert _consistency({1: 16, 2: 4, 3: 1}, [1, 2, 3], rbm=4.0) == []
+
+
+def test_more_than_one_stream_of_the_highest_order_is_impossible():
+    """Two order-3 streams in a 3rd-order basin would meet and make order 4."""
+    from basinkit.morphometry import _consistency
+
+    w = _consistency({1: 40, 2: 12, 3: 5}, [1, 2, 3], rbm=4.0)
+    top = [x for x in w if x["check"] == "single_highest_order_stream"]
+    assert len(top) == 1
+    assert top[0]["severity"] == "impossible"
+
+
+def test_an_unusual_bifurcation_ratio_is_flagged_but_not_called_wrong():
+    """Strahler's 3-5 is an empirical range, not a constraint."""
+    from basinkit.morphometry import _consistency
+
+    w = _consistency({1: 100, 2: 10, 3: 1}, [1, 2, 3], rbm=9.33)
+    assert [x["severity"] for x in w] == ["unusual"]
+
+
+def test_channel_gradient_follows_the_bed_not_the_basin_relief():
+    """A ridge top is not the head of the main channel.
+
+    The DEM here is a plain that falls 10 m over the 1 degree the channel
+    crosses, with one 2000 m peak away from the river. Basin relief divided
+    by channel length would report about 18 m/km; the bed falls about 0.09.
+    """
+    import numpy as np
+    import rioxarray  # noqa: F401
+    import xarray as xr
+    from shapely.geometry import LineString
+
+    from basinkit.morphometry import _stem_profile
+
+    lons = np.linspace(85.0, 86.0, 101)
+    lats = np.linspace(27.0, 27.5, 51)
+    z = np.tile(np.linspace(1010.0, 1000.0, 101), (51, 1))
+    z[45, 90] = 3000.0                       # a peak nowhere near the channel
+    dem = xr.DataArray(z, coords={"y": lats, "x": lons}, dims=("y", "x"))
+    dem = dem.rio.write_crs("EPSG:4326")
+
+    line = LineString([(85.0, 27.05), (86.0, 27.05)])
+    z_head, z_mouth = _stem_profile(line, "EPSG:4326", dem, n=50)
+
+    assert z_head - z_mouth == pytest.approx(10.0, abs=0.5)
+    assert (z_head - z_mouth) / 111.0 < 0.2   # not the 18 m/km relief shortcut
+
+
+def test_a_spike_in_the_profile_does_not_become_the_gradient():
+    """A centreline crossing a bank pixel must not invent a fall."""
+    import numpy as np
+    import rioxarray  # noqa: F401
+    import xarray as xr
+    from shapely.geometry import LineString
+
+    from basinkit.morphometry import _stem_profile
+
+    lons = np.linspace(85.0, 86.0, 101)
+    z = np.tile(np.linspace(100.0, 90.0, 101), (3, 1))
+    z[:, 50] = 400.0                          # a bridge deck on the centreline
+    dem = xr.DataArray(z, coords={"y": [27.0, 27.05, 27.1], "x": lons},
+                       dims=("y", "x")).rio.write_crs("EPSG:4326")
+
+    z_head, z_mouth = _stem_profile(
+        LineString([(85.0, 27.05), (86.0, 27.05)]), "EPSG:4326", dem, n=101)
+    assert z_head == pytest.approx(100.0, abs=1.0)
+    assert z_mouth == pytest.approx(90.0, abs=1.0)
+
+
 def test_morphometry_needs_strahler_orders():
     """Without orders none of the linear parameters mean anything."""
     from basinkit.morphometry import morphometry
