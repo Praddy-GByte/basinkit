@@ -1,5 +1,67 @@
 # Changelog
 
+## 0.3.3 — 2026-09-02
+
+Versions 0.3.1 and 0.3.2 were QGIS-plugin releases; the Python package was
+still at 0.3.0. This is the first package release since then, and it corrects
+a number that 0.3.0 got wrong.
+
+### Fixed — `channel_gradient_m_per_km` was not a channel gradient
+
+0.3.0 computed it as total basin relief divided by main channel length. Those
+are two different things. The highest point in a basin is a ridge top, usually
+far from the head of the main stem, so the old figure reported a fall the
+river never makes. On the Koshi it gave 15.1 m/km; the bed actually falls
+5,507 m over 572.7 km, which is **9.6 m/km**. On a low-relief basin the error
+is larger in proportion, because the ridges dominate the relief while the
+channel barely falls.
+
+The gradient is now read from the bed: the DEM is sampled at 400 points along
+the main channel from head to mouth, the profile is made monotonic downstream
+so that a centreline crossing a bank or a bridge deck cannot invent a fall,
+and the gradient is the drop between its two ends over the channel length.
+`main_channel_relief_m` reports that drop, so the two inputs are visible.
+
+**If you published a `channel_gradient_m_per_km` from 0.2.0–0.3.0, recompute
+it.** `relief_ratio` (H/Lb) is unchanged and was always correct; if the old
+number was what you wanted, that is the parameter you wanted.
+
+### Added — `morphometry()` checks its own stream counts
+
+Strahler ordering constrains the counts it produces. An order-*u+1* stream
+exists only where two order-*u* streams meet, so N(u) ≥ 2·N(u+1), and the
+bifurcation ratio can therefore never be below 2. A basin with one outlet has
+exactly one stream of its highest order, because two would join and make a
+higher one. Both are constraints, not tendencies.
+
+`morphometry()` now returns a `warnings` list. It is empty when the counts are
+consistent. Entries marked `severity="impossible"` mean a constraint is broken
+and the table should not be interpreted until that is resolved — in practice
+this almost always means dataset reaches were counted instead of Strahler
+streams. A third check flags a mean bifurcation ratio outside Strahler's usual
+3–5 as `severity="unusual"`, which is a flag and not an error: elongated
+basins and clipped networks do this legitimately.
+
+The Koshi and the Shipra both return no warnings.
+
+### Documentation
+
+- `docs/related-work.md` gains a morphometry section. Morphometry is not
+  unpackaged: GRASS `r.stream.stats` (Jasiewicz & Metz 2011) has computed the
+  full Horton set, with correct stream counting, since 2011, and the QGIS
+  repository carries ArcGeek Calculator, Drainage Basin Geomorphology and a
+  Hypsometric Curve plugin. The defensible claim is narrower — no *Python*
+  library returns these parameters from a coordinate — and it is a packaging
+  contribution, not a scientific one. The consistency checks above are the
+  part that is not packaging.
+- Named as neighbours: AquaFetch (JOSS 2025) and the HARBOR preprint, which
+  publish the unified-basin-data idea under other names, and the Sen Hydro
+  QGIS plugin, which delineates from a click using the same mghydro backend as
+  basinkit's `api` path.
+- Kirchner (1993) is cited as a caution against reading geomorphic meaning
+  into bifurcation ratios at all.
+
+
 ## 0.3.1 — 2026-09-01
 
 ### QGIS plugin

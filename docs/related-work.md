@@ -46,8 +46,12 @@ Two smaller differences: `get_rasterdataset` clips by extent with a buffer, not
 by polygon mask; and hydromt is a model-building toolchain whose purpose is
 producing wflow and SFINCS inputs, not a library for getting a basin's data.
 
-Deltares have said they intend to publish open global catalogs. That is the
-thing to ship before they do.
+hydromt has moved on since this page was first written: at 1.4.1 it ships more
+predefined catalogs than `artifact_data` and `deltares_data` -- `aws_data`,
+`gcs_cmip6_data` and `earthdatahub_data`. Those widen the climate and cloud-
+hosted coverage rather than replacing the internal global catalog, and Earth
+Data Hub is credentialed, so the account-free gap still stands. It is the
+neighbour to keep re-checking, because it is the one that could close it.
 
 ### rabpro — same scope, two accounts
 
@@ -55,7 +59,8 @@ thing to ship before they do.
 Global, and it does mask to the basin. But its docs require a Google Earth
 Engine account and a MERIT-Hydro username and password, it asks you to upload
 your basin to Earth Engine as an asset, and it returns zonal statistics rather
-than the data. It was also pulled from PyPI in 2022.
+than the data. (Checked again in August 2026: rabpro is on PyPI at 0.2.2. An
+earlier draft of this page said it had been pulled, which is no longer true.)
 
 ### watershed-workflow — the same pipeline, one continent
 
@@ -98,6 +103,79 @@ based, accurate, account-free, and delineation only. No EO data at all.
 
 **pysheds**, **pyflwdir**, **WhiteboxTools** — routing algorithms. You supply
 the DEM.
+
+**AquaFetch** (JOSS 2025) and **HARBOR** (Copernicus preprint, 2026) — the
+same *idea*, unified retrieval of basin data, published under other names.
+AquaFetch harmonises around seventy datasets but for pre-defined gauged
+catchments, not an arbitrary coordinate; HARBOR collates river-basin
+attributes into one repository with a toolkit. Neither returns polygon-masked
+rasters for a point you choose. They are the closest published statements of
+the concept and belong in any introduction that claims it is unaddressed.
+
+**Sen Hydro — Watershed Delineation** (QGIS plugin 5713) — the neighbour of
+basinkit's *plugin*, not of the library. It delineates from a clicked point
+using the same mghydro Global Watersheds API that backs basinkit's `api`
+backend, and adds river styling and a Senegal boundary layer. Anyone comparing
+the two QGIS plugins will see the delineation overlap immediately, so the
+plugin description has to lead with what Sen Hydro does not do: no EO layers,
+no morphometry, no offline backend.
+
+## Morphometry has its own neighbourhood, and it is older
+
+The claim above is about the data chain. `morphometry()` is a separate feature
+and it has separate incumbents — older and better established than the ones
+listed so far. Saying morphometry is unpackaged would be false.
+
+**GRASS GIS `r.stream.stats`** (Jasiewicz & Metz, *Computers & Geosciences*
+2011) is the real incumbent. It has computed the Horton set — stream counts
+and lengths by order, bifurcation and length ratios, drainage density — since
+2011, and it counts Strahler streams rather than dataset reaches, which is the
+part most re-implementations get wrong. It is a raster tool: you give it a
+flow-direction raster and a stream network, not a coordinate.
+
+**QGIS** ships two in its official repository. **ArcGeek Calculator** includes
+watershed morphometric analysis with Strahler ordering. **Drainage Basin
+Geomorphology** (plugin 4004, at 2.1.0 in August 2026) covers forty-odd
+parameters. A separate **Hypsometric Curve** plugin (3659) computes the curve
+and the integral from a DEM and a basin polygon.
+
+**ArcGIS** has RivEX, and several published toolboxes besides.
+
+So the honest statement is narrower than "nobody does this":
+
+> Morphometry is well served in the desktop-GIS and raster-tool world and has
+> been for over a decade. What has no implementation is a **Python library**
+> that returns the parameters from a coordinate, with the network and the
+> basin fetched for you.
+
+That is worth having, and it is not a scientific contribution — it is a
+packaging one. Claim it as such.
+
+### The one part that is not packaging
+
+Strahler ordering constrains the counts it produces, and the constraints are
+checkable. An order-*u+1* stream exists only where two order-*u* streams meet,
+so N(u) ≥ 2·N(u+1), and therefore Rb ≥ 2 — always, for every basin, with no
+exceptions and no tuning. A single-outlet basin has exactly one stream of its
+highest order for the same reason.
+
+Neither GRASS, nor the QGIS plugins, nor any Python code found so far reports
+these as checks. They compute Rb and hand it over. basinkit computes Rb and
+then tells you when the number it just produced cannot be true.
+
+This matters because the error is in print. A PLOS One paper from September
+2025 reports a mean bifurcation ratio of 1.85, individual sub-watershed values
+of 1.0 and 1.5, and five third-order streams in a third-order basin. All of
+those are impossible, all of them are consistent with counting reaches, and
+all of them would have been caught by a two-line check.
+
+One caution to state before anyone else does. Kirchner (1993, *Geology*)
+showed that Horton's laws hold for essentially any branching network, random
+ones included, so bifurcation ratios carry far less geomorphic information
+than the literature built on them assumes. That weakens the case for
+*interpreting* Rb. It strengthens the case for *screening* it: if the ratio is
+near-inevitable, a value below the floor is not an unusual basin, it is a
+broken calculation.
 
 ## The attack, and the honest answer
 
