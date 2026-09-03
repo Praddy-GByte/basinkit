@@ -1,5 +1,6 @@
-import json, time, traceback, warnings
+import json, pathlib, time, traceback, warnings
 warnings.filterwarnings("ignore")
+HERE = pathlib.Path(__file__).resolve().parent
 import numpy as np
 import basinkit as bk
 
@@ -69,5 +70,5 @@ def rain_cross():
             "relative_difference": round(abs(ch-tc)/max(ch,tc), 3)}
 run("rainfall_crosscheck", rain_cross)
 
-json.dump(out, open("/home/claude/verify/rest.json","w"), indent=2, default=str)
+json.dump(out, open(HERE / "rest.json", "w"), indent=2, default=str)
 print("DONE", flush=True)
