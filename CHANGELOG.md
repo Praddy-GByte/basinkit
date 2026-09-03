@@ -1,12 +1,12 @@
 # Changelog
 
-## 0.3.3 — 2026-09-02
+## 0.3.3 (2026-09-02)
 
 Versions 0.3.1 and 0.3.2 were QGIS-plugin releases; the Python package was
 still at 0.3.0. This is the first package release since then, and it corrects
 a number that 0.3.0 got wrong.
 
-### Fixed — `channel_gradient_m_per_km` was not a channel gradient
+### Fixed: `channel_gradient_m_per_km` was not a channel gradient
 
 0.3.0 computed it as total basin relief divided by main channel length. Those
 are two different things. The highest point in a basin is a ridge top, usually
@@ -22,11 +22,11 @@ so that a centreline crossing a bank or a bridge deck cannot invent a fall,
 and the gradient is the drop between its two ends over the channel length.
 `main_channel_relief_m` reports that drop, so the two inputs are visible.
 
-**If you published a `channel_gradient_m_per_km` from 0.2.0–0.3.0, recompute
+**If you published a `channel_gradient_m_per_km` from 0.2.0-0.3.0, recompute
 it.** `relief_ratio` (H/Lb) is unchanged and was always correct; if the old
 number was what you wanted, that is the parameter you wanted.
 
-### Added — `morphometry()` checks its own stream counts
+### Added: `morphometry()` checks its own stream counts
 
 Strahler ordering constrains the counts it produces. An order-*u+1* stream
 exists only where two order-*u* streams meet, so N(u) ≥ 2·N(u+1), and the
@@ -36,10 +36,10 @@ higher one. Both are constraints, not tendencies.
 
 `morphometry()` now returns a `warnings` list. It is empty when the counts are
 consistent. Entries marked `severity="impossible"` mean a constraint is broken
-and the table should not be interpreted until that is resolved — in practice
+and the table should not be interpreted until that is resolved; in practice
 this almost always means dataset reaches were counted instead of Strahler
 streams. A third check flags a mean bifurcation ratio outside Strahler's usual
-3–5 as `severity="unusual"`, which is a flag and not an error: elongated
+3-5 as `severity="unusual"`, which is a flag and not an error: elongated
 basins and clipped networks do this legitimately.
 
 The Koshi and the Shipra both return no warnings.
@@ -50,8 +50,8 @@ The Koshi and the Shipra both return no warnings.
   unpackaged: GRASS `r.stream.stats` (Jasiewicz & Metz 2011) has computed the
   full Horton set, with correct stream counting, since 2011, and the QGIS
   repository carries ArcGeek Calculator, Drainage Basin Geomorphology and a
-  Hypsometric Curve plugin. The defensible claim is narrower — no *Python*
-  library returns these parameters from a coordinate — and it is a packaging
+  Hypsometric Curve plugin. The defensible claim is narrower: no *Python*
+  library returns these parameters from a coordinate, and it is a packaging
   contribution, not a scientific one. The consistency checks above are the
   part that is not packaging.
 - Named as neighbours: AquaFetch (JOSS 2025) and the HARBOR preprint, which
@@ -62,7 +62,7 @@ The Koshi and the Shipra both return no warnings.
   into bifurcation ratios at all.
 
 
-## 0.3.1 — 2026-09-01
+## 0.3.1 (2026-09-01)
 
 ### QGIS plugin
 - The plugin repository's automated checker reported 16 Qt6 compatibility
@@ -78,7 +78,7 @@ The Koshi and the Shipra both return no warnings.
 - A test scans the plugin source for unscoped enums so this class of defect
   cannot return.
 
-## 0.3.0 — 2026-08-31
+## 0.3.0 (2026-08-31)
 
 ### Morphometry
 - `Basin.morphometry()` computes the classical Horton-Strahler-Schumm
@@ -141,7 +141,7 @@ The Koshi and the Shipra both return no warnings.
   general `.tittle` rule that follows it, so both `i` dots stayed invisible for
   anyone who had asked for less motion.
 
-## 0.2.0 — 2026-08-31
+## 0.2.0 (2026-08-31)
 
 ### Fixed
 Four defects in the ESRI annual land-cover path, found by trying to build a
@@ -178,7 +178,7 @@ year-by-year change animation. All four are now regression tests.
   value. On a mountain basin a linear ramp collapses to one flat tone, because
   most of the terrain sits in the upper part of its own range.
 
-## 0.1.0 — 2026-08-30
+## 0.1.0 (2026-08-30)
 
 First release. On PyPI as `basinkit`; archived at
 [10.5281/zenodo.22181934](https://doi.org/10.5281/zenodo.22181934).
@@ -331,7 +331,7 @@ First release. On PyPI as `basinkit`; archived at
   package for every NumPy-2-removed API.
 
 ### Verified
-- Test suite run on Python 3.10, 3.11 and 3.12 — the CI matrix previously
+- Test suite run on Python 3.10, 3.11 and 3.12. The CI matrix previously
   claimed three versions and only one had ever run.
 - Paths an audit found untested and now covered: `explore()` with leafmap,
   `plot()`, `from_file()` including reprojection, the DEM backend's window-edge

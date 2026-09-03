@@ -1,7 +1,7 @@
 # Verification scripts
 
 These produce the numbers in `docs/verification.md`. They hit real endpoints,
-so they are slow and they will drift as upstream data changes — which is the
+so they are slow and they will drift as upstream data changes, which is the
 point.
 
 ```bash

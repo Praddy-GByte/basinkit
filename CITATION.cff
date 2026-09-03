@@ -5,7 +5,7 @@
 # resolves to the newest release. Cite the version in a paper, the concept when
 # you mean the software in general.
 cff-version: 1.2.0
-message: "If you use basinkit in published work, please cite it as below, and cite the underlying datasets — Basin.license_report() prints those."
+message: "If you use basinkit in published work, please cite it as below, and cite the underlying datasets. Basin.license_report() prints those."
 title: "basinkit: basin-scale acquisition of open Earth observation data"
 abstract: >-
   A Python package that delineates the upstream river basin of any coordinate
