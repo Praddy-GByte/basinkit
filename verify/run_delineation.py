@@ -4,9 +4,10 @@ Two independent comparisons per basin:
   internal -- our equal-area sum vs HydroBASINS' own UP_AREA field
   external -- our area vs the operating agency's published figure
 """
-import json, sys, time, traceback, warnings
+import json, pathlib, sys, time, traceback, warnings
 warnings.filterwarnings("ignore")
-sys.path.insert(0, "/home/claude/verify")
+HERE = pathlib.Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
 
 import basinkit as bk
 from basins import REFERENCE
@@ -41,5 +42,5 @@ for name, lat, lon, published, tol, rain, region in REFERENCE:
     results.append(row)
     print(json.dumps(row, default=str), flush=True)
 
-json.dump(results, open("/home/claude/verify/delineation.json", "w"), indent=2, default=str)
+json.dump(results, open(HERE / "delineation.json", "w"), indent=2, default=str)
 print("DONE", flush=True)

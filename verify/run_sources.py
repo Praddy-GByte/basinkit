@@ -3,8 +3,9 @@
 Small basin on purpose: STAC imagery over a 4-million-km2 basin is not a test,
 it is a denial-of-service against yourself.
 """
-import json, time, traceback, warnings
+import json, pathlib, time, traceback, warnings
 warnings.filterwarnings("ignore")
+HERE = pathlib.Path(__file__).resolve().parent
 import numpy as np
 import basinkit as bk
 
@@ -59,5 +60,5 @@ for name, fn in CASES:
                          "tb": traceback.format_exc()[-500:]}
         print(f"FAIL {name:<16} {time.time()-t:6.1f}s  {type(exc).__name__}: {str(exc)[:200]}", flush=True)
 
-json.dump(results, open("/home/claude/verify/sources.json", "w"), indent=2, default=str)
+json.dump(results, open(HERE / "sources.json", "w"), indent=2, default=str)
 print("DONE", flush=True)
