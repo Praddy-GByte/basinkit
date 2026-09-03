@@ -20,14 +20,14 @@ tool. Drop any of them and the claim is false.
 
 | clause | what it excludes |
 |---|---|
-| *software package* | mghydro Global Watersheds — global, account-free, multi-dataset, but a web app |
-| *any global outlet coordinate* | watershed-workflow, HyRiver, StreamStats, Model My Watershed — all US-only |
+| *software package* | mghydro Global Watersheds: global, account-free, multi-dataset, but a web app |
+| *any global outlet coordinate* | watershed-workflow, HyRiver, StreamStats, Model My Watershed, all US-only |
 | *no account for any default source* | rabpro (Earth Engine + MERIT-Hydro logins), Caravan (Earth Engine), eodag (per-provider credentials) |
 | *polygon-masked gridded arrays* | delineator (geometry only), mghydro and rabpro (zonal statistics), hydromt (extent-based clipping) |
 
 ## The four to cite
 
-### hydromt — the closest, and the real threat
+### hydromt: the closest, and the real threat
 
 [Deltares/hydromt](https://github.com/Deltares/hydromt). Concede all of this:
 `get_basin_geometry` takes a point and returns the upstream basin, with
@@ -39,7 +39,7 @@ Where it stops: **the account-free catalog is a sample.** `artifact_data` covers
 the Piave basin in northern Italy and is what you get when no catalog is
 supplied. The catalog with global coverage is `deltares_data`, and the
 documentation states it is *"only accessible when connected to the Deltares
-network."* Everyone outside Deltares assembles and hosts their own — which is
+network."* Everyone outside Deltares assembles and hosts their own, which is
 exactly the work basinkit removes.
 
 Two smaller differences: `get_rasterdataset` clips by extent with a buffer, not
@@ -53,7 +53,7 @@ hosted coverage rather than replacing the internal global catalog, and Earth
 Data Hub is credentialed, so the account-free gap still stands. It is the
 neighbour to keep re-checking, because it is the one that could close it.
 
-### rabpro — same scope, two accounts
+### rabpro: same scope, two accounts
 
 [VeinsOfTheEarth/rabpro](https://github.com/VeinsOfTheEarth/rabpro), JOSS 2022.
 Global, and it does mask to the basin. But its docs require a Google Earth
@@ -62,7 +62,7 @@ your basin to Earth Engine as an asset, and it returns zonal statistics rather
 than the data. (Checked again in August 2026: rabpro is on PyPI at 0.2.2. An
 earlier draft of this page said it had been pulled, which is no longer true.)
 
-### watershed-workflow — the same pipeline, one continent
+### watershed-workflow: the same pipeline, one continent
 
 [environmental-modeling-workflows/watershed-workflow](https://github.com/environmental-modeling-workflows/watershed-workflow).
 Delineation plus automatic download of DEM, hydrography, land cover and soils,
@@ -73,7 +73,7 @@ Alaska/Hawaii/Puerto Rico)."*
 It is the strongest evidence that the design is right, and the clearest proof
 that nobody had done it globally.
 
-### Global Watersheds — the conceptual wound
+### Global Watersheds: the conceptual wound
 
 [mghydro.com/watersheds](https://mghydro.com/watersheds/). Click a point
 anywhere, get a basin and a report drawing on population, land cover,
@@ -81,30 +81,30 @@ WorldClim, GLEAM, GRACE, irrigation and dams. Global, account-free,
 multi-dataset, no install at all.
 
 It is not a package, and it returns summary statistics and vector geometry
-rather than gridded arrays — the boundaries and rivers download as GeoPackage,
+rather than gridded arrays: the boundaries and rivers download as GeoPackage,
 not the data. But it is the honest answer to *"why does this need to be a
 library?"*, and the answer is: because a report is not an input to a model.
 
 **Disclose the dependency.** basinkit's `api` backend calls this service. It is
 never the default, it is recorded in provenance, and its MERIT-Hydro lineage
-makes it non-commercial — but a reviewer will find it, so say it first.
+makes it non-commercial, but a reviewer will find it, so say it first.
 
 ## Also worth naming
 
-**Caravan** (Kratzert et al., *Sci. Data* 2023; GRDC-Caravan, *ESSD* 2025) —
+**Caravan** (Kratzert et al., *Sci. Data* 2023; GRDC-Caravan, *ESSD* 2025) is
 a dataset and its derivation code, not a tool. It requires catchment boundaries
 as *input*, runs on Earth Engine, and yields basin-mean forcing for a fixed set
 of gauged catchments. Caravan starts where basinkit finishes.
 
-**delineator** and **upstream-delineator** (Heberger) — global, MERIT-Hydro
+**delineator** and **upstream-delineator** (Heberger): global, MERIT-Hydro
 based, accurate, account-free, and delineation only. No EO data at all.
 
-**HyRiver** — the model for how this should feel as an API, and US-only.
+**HyRiver**: the model for how this should feel as an API, and US-only.
 
-**pysheds**, **pyflwdir**, **WhiteboxTools** — routing algorithms. You supply
+**pysheds**, **pyflwdir**, **WhiteboxTools**: routing algorithms. You supply
 the DEM.
 
-**AquaFetch** (JOSS 2025) and **HARBOR** (Copernicus preprint, 2026) — the
+**AquaFetch** (JOSS 2025) and **HARBOR** (Copernicus preprint, 2026): the
 same *idea*, unified retrieval of basin data, published under other names.
 AquaFetch harmonises around seventy datasets but for pre-defined gauged
 catchments, not an arbitrary coordinate; HARBOR collates river-basin
@@ -112,7 +112,7 @@ attributes into one repository with a toolkit. Neither returns polygon-masked
 rasters for a point you choose. They are the closest published statements of
 the concept and belong in any introduction that claims it is unaddressed.
 
-**Sen Hydro — Watershed Delineation** (QGIS plugin 5713) — the neighbour of
+**Sen Hydro - Watershed Delineation** (QGIS plugin 5713): the neighbour of
 basinkit's *plugin*, not of the library. It delineates from a clicked point
 using the same mghydro Global Watersheds API that backs basinkit's `api`
 backend, and adds river styling and a Senegal boundary layer. Anyone comparing
@@ -123,12 +123,12 @@ no morphometry, no offline backend.
 ## Morphometry has its own neighbourhood, and it is older
 
 The claim above is about the data chain. `morphometry()` is a separate feature
-and it has separate incumbents — older and better established than the ones
+and it has separate incumbents, older and better established than the ones
 listed so far. Saying morphometry is unpackaged would be false.
 
 **GRASS GIS `r.stream.stats`** (Jasiewicz & Metz, *Computers & Geosciences*
-2011) is the real incumbent. It has computed the Horton set — stream counts
-and lengths by order, bifurcation and length ratios, drainage density — since
+2011) is the real incumbent. It has computed the Horton set (stream counts
+and lengths by order, bifurcation and length ratios, drainage density) since
 2011, and it counts Strahler streams rather than dataset reaches, which is the
 part most re-implementations get wrong. It is a raster tool: you give it a
 flow-direction raster and a stream network, not a coordinate.
@@ -148,14 +148,14 @@ So the honest statement is narrower than "nobody does this":
 > that returns the parameters from a coordinate, with the network and the
 > basin fetched for you.
 
-That is worth having, and it is not a scientific contribution — it is a
+That is worth having, and it is not a scientific contribution; it is a
 packaging one. Claim it as such.
 
 ### The one part that is not packaging
 
 Strahler ordering constrains the counts it produces, and the constraints are
 checkable. An order-*u+1* stream exists only where two order-*u* streams meet,
-so N(u) ≥ 2·N(u+1), and therefore Rb ≥ 2 — always, for every basin, with no
+so N(u) ≥ 2·N(u+1), and therefore Rb ≥ 2: always, for every basin, with no
 exceptions and no tuning. A single-outlet basin has exactly one stream of its
 highest order for the same reason.
 
@@ -187,7 +187,7 @@ broken calculation.
 The attack is right about the components and wrong about the claim. **No
 component here is new and none is claimed to be.** What is new is that the
 combination has never been shipped under the account-free constraint at global
-scope — and that constraint is not cosmetic. It is what rules out Earth Engine,
+scope, and that constraint is not cosmetic. It is what rules out Earth Engine,
 Earthdata Login and the Climate Data Store, and therefore forces a different
 dataset selection and a different fetcher design than every prior tool. The
 nineteen sources basinkit can reach are nineteen because of it.

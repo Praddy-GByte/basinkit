@@ -11,7 +11,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 **A coordinate goes in; a delineated basin and every open Earth observation
-layer clipped to it comes out — with no account, login or credential anywhere
+layer clipped to it comes out, with no account, login or credential anywhere
 in the chain.**
 
 Existing tools each stop somewhere. HyRiver and watershed-workflow are US-only.
@@ -40,7 +40,7 @@ basin.export_3d("koshi.html")                # an interactive 3D page
 morph = basin.morphometry()                  # Horton-Strahler-Schumm, in full
 ```
 
-**New here?** The [tutorial](docs/tutorial.md) walks through the whole thing —
+**New here?** The [tutorial](docs/tutorial.md) walks through the whole thing:
 why each step exists, what every method returns and in what units, how to save
 it, and what to do when a basin comes back the wrong size.
 
@@ -51,7 +51,7 @@ pip install basinkit
 basinkit fetch --lat 26.87 --lon 87.15 --out koshi/
 ```
 
-Or without a terminal either — there is a **QGIS plugin** in `qgis_plugin/`.
+Or without a terminal either: there is a **QGIS plugin** in `qgis_plugin/`.
 Click an outlet on the map canvas and the basin and its data land in your
 project. See [its README](qgis_plugin/README.md).
 
@@ -80,7 +80,7 @@ again from scratch on the data side, because `eodag`, `earthaccess`,
 basinkit is that missing join, for the whole planet.
 
 The precise claim, and the four packages that make it non-obvious, are in
-[Related work](docs/related-work.md) — including the two that do this better
+[Related work](docs/related-work.md), including the two that do this better
 than basinkit within their own scope.
 
 ### Three things it does that the alternatives do not
@@ -99,7 +99,7 @@ the OpenTopography API allows fifty calls a day on a non-academic key; Earth
 Engine requires a Google Cloud project and forbids commercial use on the free
 tier. basinkit routes around all of it.
 
-**It tells you what you are allowed to do with the result — and what it cannot
+**It tells you what you are allowed to do with the result, and what it cannot
 get you.** `basinkit catalog` and `Basin.license_report()` read from the same
 machine-readable table the fetchers use, so the licence shown is the licence
 that applied. The seven datasets basinkit documents but cannot download are
@@ -126,12 +126,12 @@ figures rather than against HydroBASINS itself:
 | Rhine @ Lobith | 159,776 | 160,800 | 0.6% |
 
 **n = 12, median error 0.74%**, eight within 1% and nine within 3%. Twelve
-is a small sample of large, well-mapped rivers — they were chosen because their
+is a small sample of large, well-mapped rivers; they were chosen because their
 areas are published, which biases toward basins that have been studied. The
 three that diverge by more than 3% do so for a physical reason, not a
 delineation error, and the full write-up says which.
 
-The Amazon — 4.67 million km², 35,625 sub-basins — takes 43 seconds. Rainfall,
+The Amazon (4.67 million km², 35,625 sub-basins) takes 43 seconds. Rainfall,
 reflectance and radar are checked the same way: CHIRPS lands inside the
 published Koshi climatology, a Sentinel-2 July composite gives an NDVI median of
 0.82 over temperate farmland, Sentinel-1 RTC gives −9.3 dB over vegetated land.
@@ -172,10 +172,10 @@ any delineation tool and most of them bury it:
 |---|---|---|---|
 | `hydrobasins` *(default)* | 15 arc-sec, ~460 m | SRTM, February 2000 | HydroSHEDS |
 | `api` | 3 arc-sec, ~90 m | MERIT-Hydro | yes, error-removed |
-| `dem` | 1 arc-sec, ~30 m | Copernicus, 2011–2015 | routed on the fly |
+| `dem` | 1 arc-sec, ~30 m | Copernicus, 2011-2015 | routed on the fly |
 
 The default routes on a quarter-century-old 460 m grid. That is fine for a
-large basin and wrong for a small or heavily modified one — which is what the
+large basin and wrong for a small or heavily modified one, which is what the
 other two backends are for.
 
 Two failure modes are handled explicitly rather than silently:
@@ -196,18 +196,18 @@ export. A polygon always says where it came from.
 
 | layer | dataset | resolution | account |
 |---|---|---|---|
-| `dem()` | Copernicus GLO-30 / GLO-90 / NASADEM / SRTM | 30–90 m | no |
+| `dem()` | Copernicus GLO-30 / GLO-90 / NASADEM / SRTM | 30-90 m | no |
 | `landcover()` | ESA WorldCover / ESRI annual LULC | 10 m | no |
 | `soil()` | SoilGrids 250 m, 13 properties, 6 depths | 250 m | no |
 | `available_water_capacity()` | derived: field capacity − wilting point | 250 m | no |
-| `precipitation()` | CHIRPS v3.0 / PERSIANN-CDR / TerraClimate | 0.05–0.25° | no |
+| `precipitation()` | CHIRPS v3.0 / PERSIANN-CDR / TerraClimate | 0.05-0.25° | no |
 | `water_balance()` | TerraClimate P/AET/PET/Q/soil + closure residual | 4 km | no |
 | `surface_water()` | JRC Global Surface Water (37 years of Landsat) | 30 m | no |
 | `sentinel2()` | Sentinel-2 L2A via Earth Search | 10 m | no |
 | `landsat()` | Landsat C2 L2, 1982→ via Planetary Computer | 30 m | no |
 | `sentinel1()` | Sentinel-1 RTC, terrain-corrected, global | 10 m | no |
 | `rivers()` / `lakes()` | HydroRIVERS / HydroLAKES | vector | no |
-| `attributes()` | BasinATLAS — 281 pre-computed basin attributes | vector | no |
+| `attributes()` | BasinATLAS: 281 pre-computed basin attributes | vector | no |
 
 **Documented but not fetchable** (`basinkit catalog` marks these `DOC`):
 ERA5-Land, GPM IMERG, GloFAS and GRACE need an account and a client basinkit
@@ -216,7 +216,7 @@ all. Asking for one returns instructions, not a stack trace.
 
 ### The fast way to characterise a basin
 
-`attributes()` returns BasinATLAS's 281 pre-computed variables — climate,
+`attributes()` returns BasinATLAS's 281 pre-computed variables: climate,
 physiography, land cover, soil, geology, human footprint. Its `_u` columns are
 already aggregated over everything upstream, so one lookup describes the whole
 catchment without touching a raster:
@@ -252,7 +252,7 @@ A few things basinkit handles that trip up hand-rolled pipelines:
   projection centred on the basin itself.
 - **CHIRPS v3.0 is wetter than v2.0** by construction. basinkit will not splice
   the two into one series.
-- **Landsat from Earth Search is requester-pays** — anonymous users get a 403,
+- **Landsat from Earth Search is requester-pays**: anonymous users get a 403,
   authenticated ones get a bill. basinkit takes Landsat from Planetary
   Computer instead.
 - **BasinATLAS encodes extent in the middle of a column name**, not as a
@@ -264,20 +264,20 @@ A few things basinkit handles that trip up hand-rolled pipelines:
 
 ## QGIS
 
-`qgis_plugin/` is a Processing provider with three algorithms — delineate a
+`qgis_plugin/` is a Processing provider with three algorithms: delineate a
 basin from a canvas click, fetch layers clipped to it, and basin statistics.
 Being Processing algorithms, they work in batch mode, in the Model Builder and
 under `qgis_process`.
 
 Install the zip through *Plugins → Manage and Install Plugins → Install from
 ZIP*. QGIS ships its own Python and there is still no official way for a plugin
-to declare a pip dependency, so `basinkit` itself is installed separately — the
+to declare a pip dependency, so `basinkit` itself is installed separately; the
 plugin prints the exact command for your installation.
 
 ## Citation
 
 If basinkit is useful in published work, please cite it *and* the underlying
-datasets — `Basin.license_report()` prints the citations for the layers you
+datasets. `Basin.license_report()` prints the citations for the layers you
 actually used.
 
 ## Licence

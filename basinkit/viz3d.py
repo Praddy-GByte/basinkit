@@ -545,7 +545,7 @@ def export_3d(
     lat, lon = basin.centroid
     default_facts = {
         "Basin area": f"{basin.area_km2:,.0f} km²",
-        "Elevation": f"{meta['zmin']:,.0f} – {meta['zmax']:,.0f} m",
+        "Elevation": f"{meta['zmin']:,.0f} - {meta['zmax']:,.0f} m",
         "Relief": f"{meta['zmax'] - meta['zmin']:,.0f} m",
     }
     credit = ("Built with basinkit. Elevation: Copernicus DEM. "

@@ -1,7 +1,7 @@
 # basinkit for QGIS
 
 Click a point on any river in the world. Get the basin above it, and the open
-Earth observation data inside it — clipped to the polygon, not to its bounding
+Earth observation data inside it, clipped to the polygon, not to its bounding
 box, and without an account anywhere.
 
 <img src="icon.png" alt="basinkit" width="72">
@@ -10,16 +10,16 @@ box, and without an account anywhere.
 
 Three algorithms in the Processing Toolbox, under **basinkit → River basins**:
 
-**Delineate river basin** — click an outlet on the map canvas, get the upstream
+**Delineate river basin**: click an outlet on the map canvas, get the upstream
 basin as a polygon. Works anywhere on Earth. The output carries its own
 provenance: which method ran, which dataset version, the licence, and how far
 the outlet had to be moved.
 
-**Fetch basin data layers** — takes a basin polygon and downloads elevation,
+**Fetch basin data layers**: takes a basin polygon and downloads elevation,
 land cover, soil, surface water, rivers, lakes and rainfall for it. Everything
 outside the polygon is nodata, so the layers drop straight onto a map.
 
-**Basin statistics** — area on an equal-area projection, elevation range,
+**Basin statistics**: area on an equal-area projection, elevation range,
 relief, mean slope, land cover fractions, and an HTML report.
 
 All three are Processing algorithms, so batch mode, the Model Builder and
@@ -37,7 +37,7 @@ python -m pip install --upgrade "basinkit[stac]"
 ```
 
 If you are unsure which interpreter QGIS uses, install the plugin first and
-open it — the message bar will print the exact command for your installation.
+open it; the message bar will print the exact command for your installation.
 
 **2. Install the plugin.** *Plugins → Manage and Install Plugins → Install from
 ZIP*, and pick `basinkit_qgis-0.1.0.zip`.
@@ -48,7 +48,7 @@ ZIP*, and pick `basinkit_qgis-0.1.0.zip`.
 
 This is the one thing worth knowing. A coordinate a pixel or two off the
 channel can return a basin three orders of magnitude too small, and nothing
-crashes — during testing, the Rhine at Lobith came back as 271 km² instead of
+crashes. During testing, the Rhine at Lobith came back as 271 km² instead of
 160,800, because a gauge coordinate sits on the *bank*, and on a big river the
 bank belongs to a tiny side catchment.
 
@@ -61,7 +61,7 @@ blue line.
 
 | method | good for | resolution floor | first run |
 |---|---|---|---|
-| `auto` | most cases | — | as below |
+| `auto` | most cases | - | as below |
 | `hydrobasins` | any size, including the Amazon | ~130 km² | one ~80 MB download, then cached |
 | `dem` | small headwater catchments | one 30 m pixel | DEM tiles for the window |
 | `api` | a quick first look | ~90 m | nothing |

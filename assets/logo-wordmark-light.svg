@@ -2,7 +2,7 @@
      viewBox="0 0 3989 1000" width="3989" height="1000"
      role="img" aria-labelledby="wm-title wm-desc">
 <title id="wm-title">basinkit</title>
-<desc id="wm-desc">The basinkit wordmark. The b is drawn as a river basin: its bowl is the drainage divide, a dendritic stream network fills it and drains to the single outlet at the foot of the stem, and the two i tittles are gauge points — a small one upstream and a large one downstream, the way a river grows.</desc>
+<desc id="wm-desc">The basinkit wordmark. The b is drawn as a river basin: its bowl is the drainage divide, a dendritic stream network fills it and drains to the single outlet at the foot of the stem, and the two i tittles are gauge points: a small one upstream and a large one downstream, the way a river grows.</desc>
 <style>
   :root { --divide: #B79A6B; --trib-1: #159C7A; --trib-2: #2A78D6; --trib-3: #6B3FA0; --trib-4: #E4611F; --stem: #0B6FA4; --ground: #FFFFFF; --tint: #0B6FA4; --word: #12191C; }
 

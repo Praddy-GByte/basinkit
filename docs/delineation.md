@@ -17,7 +17,7 @@ bk.Basin.from_point(lat, lon, backend="auto")   # default
 HydroBASINS ships every sub-basin with a pointer to the unit it drains into.
 Finding everything upstream is then a breadth-first walk over a few hundred
 thousand nodes, not a fill over hundreds of millions of raster cells. The Koshi
-basin — 54,000 km², 423 level-12 units — delineates in about five seconds, and a
+basin (54,000 km², 423 level-12 units) delineates in about five seconds, and a
 basin ten times larger takes about the same, because the cost is in the graph,
 not the area.
 
@@ -29,7 +29,7 @@ so a 20 km² headwater catchment cannot be resolved: you get the whole unit.
 
 **The outlet is not on the channel.** A coordinate read off a map, or taken from
 a gauge record, is often a pixel or two from the modelled stream. Routing from a
-hillslope cell returns a few hectares instead of a few hundred km² — and it
+hillslope cell returns a few hectares instead of a few hundred km², and it
 returns it *silently*, which is what makes it dangerous. The DEM backend snaps
 to the local maximum of upstream area, refuses to snap onto anything draining
 less than `min_uparea_km2`, and reports how far it moved:
@@ -48,7 +48,7 @@ returning a truncated basin.
     basinkit builds the flow network with `outlets="edge"`, not `outlets="min"`.
     With `outlets="min"`, `pyflwdir` routes the entire window toward its single
     lowest cell, which on a cropped DEM pulls the network away from the real
-    channels — during development a river with 2,500 km² of upstream area came
+    channels. During development a river with 2,500 km² of upstream area came
     back with 0.2 km² of accumulation at exactly the same coordinate, purely
     because the window had been shifted. `edge` lets flow leave wherever it
     reaches the boundary, which is what a window cut out of a larger landscape
@@ -76,7 +76,7 @@ agree with the dataset about which units are in the basin. For the Koshi it is
 0.15%.
 
 **It is not an accuracy figure and must never be quoted as one.** Both numbers
-come from the same polygons, so the comparison is close to circular — it can
+come from the same polygons, so the comparison is close to circular: it can
 only catch a bug in the traversal, never an error in HydroBASINS itself. The
 accuracy figure is the comparison against the operating agency's published
 area, which for the Koshi is 54,100 km² and 0.73%. Quoting the 0.15% instead

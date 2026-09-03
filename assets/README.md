@@ -3,14 +3,14 @@
 **The mark is the letter.** The `b` of basinkit is drawn as a river basin: its
 bowl is the catchment divide, and inside the counter a dendritic stream network
 runs down to a single outlet at the foot of the stem. The network is generated,
-not drawn by hand — every junction opens downstream at an acute angle, each
+not drawn by hand: every junction opens downstream at an acute angle, each
 tributary is aimed at the open catchment in front of it, and the strokes taper
 from trunk to headwater, which is what makes it read as drainage rather than as
 decoration. The four hues mark the four tributary systems. The two
-`i` tittles become gauge points — the same object as the outlet at the foot of
+`i` tittles become gauge points, the same object as the outlet at the foot of
 the `b`. They are deliberately unequal: a small one on the first `i` and a large
 one on the second, standing on a common baseline, so the pair reads left to
-right the way a river actually grows — a headwater gauge upstream, a main-stem
+right the way a river actually grows: a headwater gauge upstream, a main-stem
 gauge downstream.
 
 So the logo is made *of* the name rather than sitting beside it, and the icon
@@ -35,7 +35,7 @@ come from `logo-small.svg`, because the full network has more detail than
 
 ## Notes
 
-**The animation draws the letter in order** — stem, bowl, then the network from
+**The animation draws the letter in order**: stem, bowl, then the network from
 the trunk outward to the headwaters, then the outlet pops and ripples. Every stroke carries `pathLength="100"`, so one set of
 keyframes draws paths of very different real lengths at the same apparent
 speed.
@@ -46,7 +46,7 @@ gets the finished letter immediately, with no animation at all.
 **The lettering is glyph outlines, not text.** An SVG shown through `<img>`
 cannot load a web font, so live text would render in whatever face the viewer
 happens to have. The outlines come from Archivo (SIL OFL 1.1), pulled straight
-from the TTF with `fontTools` — so the wordmark uses the font's own metrics
+from the TTF with `fontTools`, so the wordmark uses the font's own metrics
 rather than eyeballed positions.
 
 **The drawn `b` is matched to the font.** Its ink height maps to Archivo's
@@ -55,7 +55,7 @@ to the `i` stem (139 units). Getting the stem wrong by a third is instantly
 visible next to real letters, and was: the first pass drew it at 88.
 
 **Use the pinned variants on GitHub.** The theme-aware file keys off
-`prefers-color-scheme`, which is the *browser's* setting — a reader running
+`prefers-color-scheme`, which is the *browser's* setting: a reader running
 GitHub in dark mode on a light OS would get near-black lettering on a dark
 ground. GitHub's documented answer is `<picture>`:
 

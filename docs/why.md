@@ -17,12 +17,12 @@ Outside the US, the pieces exist but nothing joins them:
 | a basin polygon | clipped data | a downloader that takes polygons, not boxes |
 | both | reproducibility | provenance and licence tracking |
 
-The delineation half exists as **scripts** —
+The delineation half exists as **scripts**:
 [`mheberger/delineator`](https://github.com/mheberger/delineator) works globally
 and well, but it is a clone-and-configure repository that wants tens of
 gigabytes of MERIT tiles downloaded by hand first.
 
-The data half exists as **bbox downloaders** — `eodag`, `earthaccess`,
+The data half exists as **bbox downloaders**: `eodag`, `earthaccess`,
 `pystac-client`, `dem-stitcher`. Every one of them is good at what it does and
 none of them has any concept of a basin.
 
@@ -50,7 +50,7 @@ the polygon everywhere, including in the zonal statistics.
 ### No account, by construction
 
 Twenty of the twenty-six catalogued datasets are reachable with no credentials
-at all, and those twenty are the default stack. That is not a coincidence — it
+at all, and those twenty are the default stack. That is not a coincidence; it
 is the selection criterion. Where a well-known route requires an account,
 basinkit finds the anonymous mirror of the same data:
 

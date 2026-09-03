@@ -1,7 +1,7 @@
 # Publishing basinkit
 
 The order below is not arbitrary. **Zenodo only ingests releases created while
-the integration is already switched on** — enable it after you tag and that
+the integration is already switched on**. Enable it after you tag and that
 release gets no DOI, and there is no backfill. The fix would be to bump the
 version and cut another release, so it is worth getting right the first time.
 
@@ -20,7 +20,7 @@ sed -i     "s/Praddy-GByte/$GH_USER/g" CITATION.cff pyproject.toml   # Linux
 
 ---
 
-## 1. Repository — 20 minutes
+## 1. Repository: 20 minutes
 
 ```bash
 cd basinkit
@@ -50,13 +50,13 @@ shows a "Cite this repository" button on the right.
 
 ---
 
-## 2. PyPI trusted publisher — 15 minutes
+## 2. PyPI trusted publisher: 15 minutes
 
 The workflow publishes over OIDC, so there is no API token to create or leak.
 The project does not exist on PyPI yet, which is what a *pending* publisher is
 for.
 
-1. Create an account at `pypi.org` and enable 2FA — an authenticator app is enough.
+1. Create an account at `pypi.org` and enable 2FA; an authenticator app is enough.
 2. Avatar → **Your account** → **Publishing** (`pypi.org/manage/account/publishing/`).
    It sits under your account rather than a project because the project does not
    exist yet.
@@ -67,7 +67,7 @@ for.
    | PyPI Project Name | `basinkit` |
    | Owner | your GitHub username |
    | Repository name | `basinkit` |
-   | Workflow name | `release.yml` &nbsp;— **filename only**, not the full path |
+   | Workflow name | `release.yml` &nbsp;(**filename only**, not the full path) |
    | Environment name | `pypi` |
 
    The environment is mandatory here because `release.yml` declares
@@ -84,7 +84,7 @@ not leave a long gap between this step and step 6.
 
 ---
 
-## 3. Zenodo — 10 minutes, and it must come before the release
+## 3. Zenodo: 10 minutes, and it must come before the release
 
 1. `zenodo.org` → **Log in with GitHub** → **Authorize zenodo**.
 2. Profile menu → **GitHub** → **Sync now**.
@@ -101,13 +101,13 @@ it will mark the record's licence unknown. Both are already true.
 The two reports and the README currently point at nothing. Now that the URLs
 exist, put them in:
 
-- `README.md` — repository, PyPI and DOI badges at the top
-- `docs/verification.md` — the run-of-record line
-- both published reports — the footer
+- `README.md`: repository, PyPI and DOI badges at the top
+- `docs/verification.md`: the run-of-record line
+- both published reports: the footer
 
 ---
 
-## 5. Cut the release — 5 minutes
+## 5. Cut the release: 5 minutes
 
 ```bash
 git add -A && git commit -m "Add citation metadata and publishing links"
@@ -129,11 +129,11 @@ Watch it: `gh run watch`.
 
 ---
 
-## 6. Close the loop — 10 minutes
+## 6. Close the loop: 10 minutes
 
 1. `pip install basinkit` in a clean virtualenv. If that fails, nothing else
    matters.
-2. Copy the **version DOI** from the Zenodo record — cite the version, not the
+2. Copy the **version DOI** from the Zenodo record; cite the version, not the
    concept DOI, in papers.
 3. Put it in `CITATION.cff`, commit, push.
 4. Add the badges:
@@ -165,11 +165,11 @@ related; do not do this for names you have no claim to.
 
 ## Afterwards
 
-**QGIS plugin** — `plugins.qgis.org` → register → **Share a plugin** → upload
+**QGIS plugin**: `plugins.qgis.org` → register → **Share a plugin** → upload
 `basinkit_qgis-0.1.0.zip`. Reviewers check the metadata, the licence and that it
 loads. The plugin repository is a discovery channel that keeps working long
 after a launch post has scrolled away.
 
-**JOSS** — needs the public repository, documentation, a test suite and an
+**JOSS**: needs the public repository, documentation, a test suite and an
 archived DOI, all of which now exist, plus a short `paper.md`. Review is public
 and typically runs six to twelve weeks.
