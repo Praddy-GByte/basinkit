@@ -30,11 +30,14 @@ from .exceptions import (
     NotImplementedSource,
     OutletSnapError,
 )
+from .river import Confluence, River
 
-__version__ = "0.3.3"
+__version__ = "0.4.0"
 
 __all__ = [
     "Basin",
+    "River",
+    "Confluence",
     "catalog", "cache", "clip", "delineate", "sources",
     "BasinkitError", "DelineationError", "OutletSnapError",
     "DataSourceError", "LicenseError", "MissingDependency",

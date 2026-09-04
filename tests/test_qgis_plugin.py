@@ -200,7 +200,7 @@ UNSCOPED = [
     (r"QgsWkbTypes\.(Polygon|MultiPolygon|LineString|Point)\b", "QgsWkbTypes.Type."),
     (r"QgsProcessing\.TypeVector\w+", "QgsProcessing.SourceType."),
     (r"QgsProcessingParameterNumber\.(Integer|Double)\b", "QgsProcessingParameterNumber.Type."),
-    (r"QgsProcessingParameter\w*\.Flag\w+", "…Flag.Flag…"),
+    (r"QgsProcessingParameter\w*\.Flag\w+", "...Flag.Flag..."),
     (r"QgsFeatureSink\.FastInsert\b", "QgsFeatureSink.Flag.FastInsert"),
 ]
 

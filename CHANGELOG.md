@@ -1,5 +1,51 @@
 # Changelog
 
+## 0.4.0 (2026-09-04)
+
+### Added: `River`, the river above a point
+
+`Basin` answers "what drains into here". `River` answers "what is the river
+that arrives here", which is the question people ask first.
+
+```python
+river = bk.River.from_point(23.1793, 75.7849)
+river.report("shipra.html")
+```
+
+The main stem is traced from the outlet upstream, taking the larger
+contributing area at every junction. What comes back: course length, sinuosity,
+Strahler order, modelled mean discharge, source and mouth with their
+elevations, the fall of the bed and its gradient, the distance still to run to
+the sea, every tributary joining the main stem with the share of the flow it
+carries, and the longitudinal profile sampled from the DEM. `report()` writes
+all of it as one self-contained HTML page with the long profile drawn and the
+confluences that matter marked on it.
+
+Three limits are stated beside the numbers rather than in a footnote, because
+the page gets screenshotted and the caveat has to travel with the figure. The
+river ends where you clicked, so `distance_to_sea_km` records what is left
+below it. Discharge is HydroRIVERS' modelled long-term natural average and does
+not know about dams or abstraction. HydroRIVERS maps reaches down to about
+10 square kilometres of catchment, so the source sits at the top of the mapped
+network rather than at the spring.
+
+No new dependency and no new data source: the same HydroRIVERS download that
+serves `Basin` serves this.
+
+### Changed: what the package says it is
+
+The one-line description led with "delineate", which is the crowded word.
+QGIS already has QCT Watershed, DDM HydroLogic, Sen Hydro and GRASS for
+delineation, and a reader who sees that word first stops reading. Worse, the
+description never mentioned morphometry at all, so an independent reviewer
+assessing the plugin did not notice it exists.
+
+The description now leads with the outcome and names morphometry, in
+`pyproject.toml`, `qgis_plugin/metadata.txt`, the README and the docs home
+page. Nothing about the software changed; what changed is that the software
+now says what it does.
+
+
 ## 0.3.3 (2026-09-02)
 
 Versions 0.3.1 and 0.3.2 were QGIS-plugin releases; the Python package was

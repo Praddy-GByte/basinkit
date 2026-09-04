@@ -2,12 +2,13 @@
 name=basinkit
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
-description=Delineate a river basin from a point anywhere on Earth and load every open Earth observation layer, clipped to it.
-version=0.3.2
+description=Click a river anywhere on Earth and get an analysis-ready basin package: elevation, land cover, soil, rainfall, surface water, rivers, and full Horton-Strahler morphometry, clipped to the basin.
+version=0.4.0
 author=Pradeepika Kaushik
 email=pradeepikakaushik4@gmail.com
 
-about=Click a point on any river in the world and get the basin draining into it, then pull DEM, land cover, soil, rainfall, surface water, rivers and lakes for that basin -- clipped and masked to the polygon, not to its bounding box. No account is needed for any of it. Delineation is validated against published gauge areas on six continents.
+about=Click a point on any river in the world and get the basin draining into it, then pull DEM, land cover, soil, rainfall, surface water, rivers and lakes for that basin -- clipped and masked to the polygon, not to its bounding box. No account is needed for any of it. Delineation is validated against published gauge areas on six continents, with a median area error below one percent.
+    Other plugins delineate from a clicked point, and Sen Hydro does it well through the same public mghydro service this plugin can use. Three things here are different. The data: elevation, land cover, soil, rainfall, surface water, rivers and lakes come back as layers clipped to the polygon, not as a report. The morphometry: the full Horton-Strahler-Schumm set from one algorithm, with Strahler streams counted as streams rather than as the reaches a river dataset splits them into. And the offline path: the default backend walks the HydroBASINS level-12 graph from a cached local copy, so after the first download it needs no network at all. Every algorithm is a Processing algorithm, so batch mode, the Model Builder and qgis_process all work.
     EXTERNAL DEPENDENCY: this plugin requires the Python package "basinkit", which QGIS does not ship. If it is missing the plugin will tell you the exact pip command for your QGIS Python installation. See the plugin homepage for details.
 
 tracker=https://github.com/Praddy-GByte/basinkit/issues
@@ -24,12 +25,33 @@ hasProcessingProvider=yes
 # no mechanism to install it automatically, so the plugin detects it at load
 # and hands the user a command that works. Declaring it here is what puts it in
 # the "External dependencies" field on plugins.qgis.org.
-external_deps=basinkit>=0.3
+external_deps=basinkit>=0.4
 server=False
 
 tags=hydrology,watershed,catchment,basin,delineation,dem,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
 
-changelog=0.3.2
+changelog=0.3.3
+    - Pairs with basinkit 0.3.3, which corrects channel_gradient_m_per_km. Up to
+      0.3.0 it divided total basin relief by main channel length, which reports
+      a fall the river never makes, because the highest point in a basin is a
+      ridge top and not the head of the main stem. It is now read from the bed:
+      the DEM is sampled along the main channel and the drop between its ends is
+      divided by the channel length. On the Koshi that is 9.6 m/km, not 15.1.
+      The Basin statistics algorithm never reported this figure, so nothing in
+      the plugin's own output changes; it matters if you called morphometry()
+      from the Python Console or a script, where the old value should be
+      recomputed.
+    - Basin.morphometry() now checks its own stream counts. Two of the checks
+      are impossibilities rather than oddities: an order-u+1 stream is formed
+      where two order-u streams meet, so N(u) >= 2*N(u+1) and the bifurcation
+      ratio can never fall below 2, and a basin with one outlet has exactly one
+      stream of its highest order. Counts that break either are reported rather
+      than returned as numbers.
+    - The plugin description now says plainly what this does that a
+      delineate-from-a-click plugin does not, rather than leaving a reader to
+      work it out.
+
+    0.3.2
     - Declares its pip dependency in the external_deps metadata field, so it
       shows in the External dependencies box on the plugin page.
 
