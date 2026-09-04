@@ -22,6 +22,34 @@ outside the polygon is nodata, so the layers drop straight onto a map.
 **Basin statistics**: area on an equal-area projection, elevation range,
 relief, mean slope, land cover fractions, and an HTML report.
 
+## How this differs from the other basin plugins
+
+The QGIS repository already has plugins that delineate from a clicked point.
+**Sen Hydro - Watershed Delineation** does it well, and through the same public
+Global Watersheds service (mghydro.com) that this plugin can also use, so the
+delineation step overlaps and there is no point pretending otherwise. What is
+different here:
+
+**The data comes back as layers.** Elevation, land cover, soil, rainfall,
+surface water, rivers and lakes are fetched and clipped to the polygon, as
+rasters and vectors you can style and analyse. Not a statistics table, not a
+report.
+
+**Morphometry.** The full Horton-Strahler-Schumm set from one algorithm, with
+Strahler streams counted as streams rather than as the reaches a river dataset
+splits them into. That distinction changes the bifurcation ratios enough to
+change what a table means, and the algorithm now flags counts that Strahler
+ordering makes impossible.
+
+**It works offline.** The default backend walks the HydroBASINS level-12 graph
+from a locally cached copy, so after the first download no network is needed.
+The mghydro path is there as a quick alternative, not as the only route. Note
+that its MERIT-Hydro lineage is CC BY-NC, so that one path is not clean for
+commercial work; the plugin records which backend ran.
+
+**Everything is a Processing algorithm**, so it runs in batch mode, in the
+Model Builder and under `qgis_process`.
+
 All three are Processing algorithms, so batch mode, the Model Builder and
 `qgis_process` work with them.
 

@@ -5,9 +5,11 @@
 
 **There is no basin-native data acquisition layer for South Asia.** HyRiver is
 US-only. rabpro and eodag take bounding boxes. basinkit is that missing layer,
-and it works everywhere else too: a coordinate goes in, a delineated basin and
-every open Earth observation layer clipped to it comes out, with no account
-anywhere in the chain.
+and it works everywhere else too: click a river anywhere on Earth and get an
+analysis-ready basin package. The basin polygon, elevation, land cover, soil,
+rainfall, surface water and rivers clipped to it, the river's own profile, and
+the full Horton-Strahler-Schumm morphometry, with no account anywhere in the
+chain.
 
 ```python
 import basinkit as bk

@@ -10,9 +10,10 @@
 [![Tests](https://github.com/Praddy-GByte/basinkit/actions/workflows/ci.yml/badge.svg)](https://github.com/Praddy-GByte/basinkit/actions)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-**A coordinate goes in; a delineated basin and every open Earth observation
-layer clipped to it comes out, with no account, login or credential anywhere
-in the chain.**
+**Click a river anywhere on Earth. Get an analysis-ready basin package: the
+basin polygon, elevation, land cover, soil, rainfall, surface water and rivers
+clipped to it, the river's own profile, and the full Horton-Strahler-Schumm
+morphometry. No account, login or credential anywhere in the chain.**
 
 Existing tools each stop somewhere. HyRiver and watershed-workflow are US-only.
 rabpro is global but needs Google Earth Engine and MERIT-Hydro credentials.
@@ -38,6 +39,9 @@ water = basin.surface_water()                # 37 years of Landsat, pre-reduced
 basin.download_all("koshi/")                 # the whole stack, one call
 basin.export_3d("koshi.html")                # an interactive 3D page
 morph = basin.morphometry()                  # Horton-Strahler-Schumm, in full
+
+river = bk.River.from_point(26.87, 87.15)    # the river arriving at that point
+river.report("koshi-river.html")             # one page: course, profile, tributaries
 ```
 
 **New here?** The [tutorial](docs/tutorial.md) walks through the whole thing:
