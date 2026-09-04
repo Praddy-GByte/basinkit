@@ -30,7 +30,21 @@ server=False
 
 tags=hydrology,watershed,catchment,basin,delineation,dem,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
 
-changelog=0.3.3
+changelog=0.4.0
+    - New algorithm: Basin morphometry. The full Horton-Strahler-Schumm set
+      from one run, with the per-order table showing Strahler streams and
+      dataset reaches side by side, and the counts tested against what Strahler
+      ordering allows. A bifurcation ratio below 2 and more than one stream of
+      the basin's highest order are both impossible, and are now reported
+      instead of being handed back as numbers to interpret. Until now
+      morphometry was in the Python package but not reachable from QGIS.
+    - The plugin description no longer leads with "delineate". QGIS already has
+      several delineation plugins, and the old wording put this one in that
+      queue while never mentioning morphometry at all, so a reader had no
+      reason to look further.
+    - Requires basinkit 0.4 or newer.
+
+    0.3.3
     - Pairs with basinkit 0.3.3, which corrects channel_gradient_m_per_km. Up to
       0.3.0 it divided total basin relief by main channel length, which reports
       a fall the river never makes, because the highest point in a basin is a
