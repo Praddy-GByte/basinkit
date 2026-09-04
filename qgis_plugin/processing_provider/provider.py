@@ -9,6 +9,7 @@ from qgis.PyQt.QtGui import QIcon
 
 from .algorithms.delineate import DelineateBasinAlgorithm
 from .algorithms.fetch_layers import FetchBasinLayersAlgorithm
+from .algorithms.morphometry import BasinMorphometryAlgorithm
 from .algorithms.statistics import BasinStatisticsAlgorithm
 
 
@@ -20,6 +21,7 @@ class BasinkitProvider(QgsProcessingProvider):
             DelineateBasinAlgorithm(),
             FetchBasinLayersAlgorithm(),
             BasinStatisticsAlgorithm(),
+            BasinMorphometryAlgorithm(),
         ):
             self.addAlgorithm(algorithm)
 

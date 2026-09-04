@@ -8,7 +8,7 @@ box, and without an account anywhere.
 
 ## What you get
 
-Three algorithms in the Processing Toolbox, under **basinkit → River basins**:
+Four algorithms in the Processing Toolbox, under **basinkit → River basins**:
 
 **Delineate river basin**: click an outlet on the map canvas, get the upstream
 basin as a polygon. Works anywhere on Earth. The output carries its own
@@ -18,6 +18,17 @@ the outlet had to be moved.
 **Fetch basin data layers**: takes a basin polygon and downloads elevation,
 land cover, soil, surface water, rivers, lakes and rainfall for it. Everything
 outside the polygon is nodata, so the layers drop straight onto a map.
+
+**Basin morphometry**: the classical Horton-Strahler-Schumm set from one run.
+Streams, lengths and bifurcation ratios per Strahler order; drainage density,
+stream frequency, texture, form factor, elongation and circularity ratios,
+relief ratio, ruggedness and Melton numbers, the hypsometric integral, and the
+gradient of the main channel. Streams are counted as Strahler streams, not as
+the reaches a river dataset splits them into, and both counts are shown side by
+side. The counts are then tested against what Strahler ordering allows: N(u) is
+at least twice N(u+1), so the bifurcation ratio can never fall below 2 (Shreve
+1966), and a basin with one outlet has exactly one stream of its highest order.
+Counts that break either are reported rather than returned as numbers.
 
 **Basin statistics**: area on an equal-area projection, elevation range,
 relief, mean slope, land cover fractions, and an HTML report.
@@ -50,7 +61,7 @@ commercial work; the plugin records which backend ran.
 **Everything is a Processing algorithm**, so it runs in batch mode, in the
 Model Builder and under `qgis_process`.
 
-All three are Processing algorithms, so batch mode, the Model Builder and
+All four are Processing algorithms, so batch mode, the Model Builder and
 `qgis_process` work with them.
 
 ## Install
