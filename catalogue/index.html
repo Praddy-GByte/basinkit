@@ -1,0 +1,2711 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Point to river basin to every open Earth observation layer">
+      
+      
+      
+        <link rel="canonical" href="https://praddy-gbyte.github.io/basinkit/catalogue/">
+      
+      
+        <link rel="prev" href="../related-work/">
+      
+      
+        <link rel="next" href="../verification/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/logo-32.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Data catalogue - basinkit</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#data-catalogue" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="basinkit" class="md-header__button md-logo" aria-label="basinkit" data-md-component="logo">
+      
+  <img src="../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            basinkit
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Data catalogue
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Praddy-GByte/basinkit" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="basinkit" class="md-nav__button md-logo" aria-label="basinkit" data-md-component="logo">
+      
+  <img src="../assets/logo.svg" alt="logo">
+
+    </a>
+    basinkit
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Praddy-GByte/basinkit" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../why/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Why basinkit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../delineation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delineation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../related-work/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Related work
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data catalogue
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data catalogue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#climate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Climate
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Climate">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chirps-chirps-v30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        chirps -- CHIRPS v3.0
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era5_land-era5-land-documented-only-account" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        era5_land -- ERA5-Land documented only [account]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imerg-gpm-imerg-v07-documented-only-account" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        imerg -- GPM IMERG V07 documented only [account]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#persiann-persiann-cdr-v1r1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        persiann -- PERSIANN-CDR v1r1
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#terraclimate-terraclimate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        terraclimate -- TerraClimate
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hydrography" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hydrography
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hydrography">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hydroatlas-basinatlas-riveratlas-v10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydroatlas -- BasinATLAS / RiverATLAS v1.0
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydrobasins-hydrobasins-v1c-pfafstetter-levels-1-12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydrobasins -- HydroBASINS v1c (Pfafstetter levels 1-12)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydrolakes-hydrolakes-v10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydrolakes -- HydroLAKES v1.0
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydrorivers-hydrorivers-v10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydrorivers -- HydroRIVERS v1.0
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hydrology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hydrology
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hydrology">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#glofas-glofas-v4-cems-floods-documented-only-account" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        glofas -- GloFAS v4 (CEMS-Floods) documented only [account]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grace-grace-grace-fo-mascons-rl063-documented-only-account" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        grace -- GRACE / GRACE-FO mascons RL06.3 documented only [account]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grdc-grdc-river-discharge-documented-only-gated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        grdc -- GRDC river discharge documented only [gated]
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#imagery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Imagery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Imagery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hls-hls-v20-hlss30-hlsl30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hls -- HLS v2.0 (HLSS30 / HLSL30)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#landsat-landsat-collection-2-level-2-45789" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        landsat -- Landsat Collection 2 Level-2 (4/5/7/8/9)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sentinel1_rtc-sentinel-1-rtc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sentinel1_rtc -- Sentinel-1 RTC
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sentinel2-sentinel-2-l2a" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sentinel2 -- Sentinel-2 L2A
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#landcover" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Landcover
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Landcover">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#esri_lulc-esri-impact-observatory-10-m-annual-lulc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        esri_lulc -- ESRI / Impact Observatory 10 m Annual LULC
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worldcover-esa-worldcover-v100v200" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        worldcover -- ESA WorldCover v100/v200
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#soil" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Soil
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Soil">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#soilgrids-soilgrids-250-m-v20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        soilgrids -- SoilGrids 250 m v2.0
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#terrain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Terrain
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Terrain">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cop30-copernicus-dem-glo-30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cop30 -- Copernicus DEM GLO-30
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cop90-copernicus-dem-glo-90" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cop90 -- Copernicus DEM GLO-90
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabdem-fabdem-v1-2-documented-only-gated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fabdem -- FABDEM V1-2 documented only [gated]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#merit_hydro-merit-hydro-v101-documented-only-gated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        merit_hydro -- MERIT Hydro v1.0.1 documented only [gated]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nasadem-nasadem-hgt-v001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nasadem -- NASADEM HGT v001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#srtm30-srtm-gl1-v003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        srtm30 -- SRTM GL1 v003
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#water" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Water
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Water">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#jrc_gsw-jrc-global-surface-water-v14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        jrc_gsw -- JRC Global Surface Water v1.4
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notebooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Notebooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../notebooks/01_quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    basinkit quickstartFrom an outlet coordinate to a fully characterised river basin, with no accountanywhere in the chain.We'll use the Sapta Koshi at Chatara (26.87 N, 87.15 E) -- a Himalayan basinthat drains Everest and empties onto the Gangetic plain. It is a good test casebecause its area is independently published, so we can check the answer.
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#climate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Climate
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Climate">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chirps-chirps-v30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        chirps -- CHIRPS v3.0
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era5_land-era5-land-documented-only-account" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        era5_land -- ERA5-Land documented only [account]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imerg-gpm-imerg-v07-documented-only-account" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        imerg -- GPM IMERG V07 documented only [account]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#persiann-persiann-cdr-v1r1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        persiann -- PERSIANN-CDR v1r1
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#terraclimate-terraclimate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        terraclimate -- TerraClimate
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hydrography" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hydrography
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hydrography">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hydroatlas-basinatlas-riveratlas-v10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydroatlas -- BasinATLAS / RiverATLAS v1.0
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydrobasins-hydrobasins-v1c-pfafstetter-levels-1-12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydrobasins -- HydroBASINS v1c (Pfafstetter levels 1-12)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydrolakes-hydrolakes-v10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydrolakes -- HydroLAKES v1.0
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydrorivers-hydrorivers-v10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydrorivers -- HydroRIVERS v1.0
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hydrology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hydrology
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hydrology">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#glofas-glofas-v4-cems-floods-documented-only-account" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        glofas -- GloFAS v4 (CEMS-Floods) documented only [account]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grace-grace-grace-fo-mascons-rl063-documented-only-account" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        grace -- GRACE / GRACE-FO mascons RL06.3 documented only [account]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grdc-grdc-river-discharge-documented-only-gated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        grdc -- GRDC river discharge documented only [gated]
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#imagery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Imagery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Imagery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hls-hls-v20-hlss30-hlsl30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hls -- HLS v2.0 (HLSS30 / HLSL30)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#landsat-landsat-collection-2-level-2-45789" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        landsat -- Landsat Collection 2 Level-2 (4/5/7/8/9)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sentinel1_rtc-sentinel-1-rtc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sentinel1_rtc -- Sentinel-1 RTC
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sentinel2-sentinel-2-l2a" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sentinel2 -- Sentinel-2 L2A
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#landcover" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Landcover
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Landcover">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#esri_lulc-esri-impact-observatory-10-m-annual-lulc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        esri_lulc -- ESRI / Impact Observatory 10 m Annual LULC
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worldcover-esa-worldcover-v100v200" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        worldcover -- ESA WorldCover v100/v200
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#soil" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Soil
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Soil">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#soilgrids-soilgrids-250-m-v20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        soilgrids -- SoilGrids 250 m v2.0
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#terrain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Terrain
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Terrain">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cop30-copernicus-dem-glo-30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cop30 -- Copernicus DEM GLO-30
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cop90-copernicus-dem-glo-90" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cop90 -- Copernicus DEM GLO-90
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabdem-fabdem-v1-2-documented-only-gated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fabdem -- FABDEM V1-2 documented only [gated]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#merit_hydro-merit-hydro-v101-documented-only-gated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        merit_hydro -- MERIT Hydro v1.0.1 documented only [gated]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nasadem-nasadem-hgt-v001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nasadem -- NASADEM HGT v001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#srtm30-srtm-gl1-v003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        srtm30 -- SRTM GL1 v003
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#water" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Water
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Water">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#jrc_gsw-jrc-global-surface-water-v14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        jrc_gsw -- JRC Global Surface Water v1.4
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="data-catalogue">Data catalogue<a class="headerlink" href="#data-catalogue" title="Permanent link">&para;</a></h1>
+<p>Generated from <code>basinkit/catalog.py</code>, the same table the fetchers read.
+Run <code>basinkit catalog</code> for the live version.</p>
+<p><strong>19 of 26 datasets can be fetched today</strong>; 19 need no account.</p>
+<p>Entries marked <strong>documented only</strong> are ones basinkit knows about but cannot download -- asking for one raises an error carrying the access route and licence, rather than pretending to be a feature.</p>
+<h2 id="climate">Climate<a class="headerlink" href="#climate" title="Permanent link">&para;</a></h2>
+<h3 id="chirps-chirps-v30"><code>chirps</code> -- CHIRPS v3.0<a class="headerlink" href="#chirps-chirps-v30" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>0.05 degree</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>1981 to near-real-time</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>60N-60S</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>Public domain</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>https://data.chc.ucsb.edu/products/CHIRPS/v3.0/ (anonymous)</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>v3.0 is gauge-undercatch corrected and systematically wetter than v2.0. basinkit refuses to concatenate v2 and v3 into one series.</p>
+<h3 id="era5_land-era5-land-documented-only-account"><code>era5_land</code> -- ERA5-Land <strong>documented only</strong> <strong>[account]</strong><a class="headerlink" href="#era5_land-era5-land-documented-only-account" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>0.1 degree (~9 km), hourly</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>1950 to present (~6 day lag)</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Global</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>CC BY 4.0</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>Copernicus CDS via cdsapi (ECMWF account + personal access token)</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td><strong>no</strong></td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>Requires a free account and a one-time manual licence click per dataset, and requests are queued for minutes to hours. Never put it on a synchronous path. Use reanalysis-era5-land-timeseries for point extraction: far faster than gridded pulls.</p>
+<h3 id="imerg-gpm-imerg-v07-documented-only-account"><code>imerg</code> -- GPM IMERG V07 <strong>documented only</strong> <strong>[account]</strong><a class="headerlink" href="#imerg-gpm-imerg-v07-documented-only-account" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>0.1 degree, 30-min</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>1998-06 to present</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Global</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>CC BY 4.0</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>NASA earthaccess (Earthdata Login)</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td><strong>no</strong></td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>The Planetary Computer mirror is abandoned and returns zero items. Go through NASA.</p>
+<h3 id="persiann-persiann-cdr-v1r1"><code>persiann</code> -- PERSIANN-CDR v1r1<a class="headerlink" href="#persiann-persiann-cdr-v1r1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>0.25 degree, daily</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>1983-01-01 to present</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>60N-60S</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>No constraints on access or use</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>NOAA NCEI ERDDAP griddap (server-side spatial and temporal subsetting)</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>Underused: ERDDAP subsets server-side, so a 40-year basin series is one small request rather than a terabyte of tiles.</p>
+<h3 id="terraclimate-terraclimate"><code>terraclimate</code> -- TerraClimate<a class="headerlink" href="#terraclimate-terraclimate" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>1/24 degree (~4 km), monthly</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>1958 to present</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Global land</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>CC0-1.0</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>climate.northwestknowledge.net (anonymous NetCDF)</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>Carries q (runoff), aet, pet, def and soil moisture, so a first-order water balance needs no other source. CC0: the most permissive licence in the catalogue.</p>
+<h2 id="hydrography">Hydrography<a class="headerlink" href="#hydrography" title="Permanent link">&para;</a></h2>
+<h3 id="hydroatlas-basinatlas-riveratlas-v10"><code>hydroatlas</code> -- BasinATLAS / RiverATLAS v1.0<a class="headerlink" href="#hydroatlas-basinatlas-riveratlas-v10" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>vector, 281 attributes</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>static</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Global</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>CC BY 4.0</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>figshare article 9890531 (resolve file IDs via the anonymous API)</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>281 pre-computed environmental attributes per basin. The fastest way to characterise a catchment without downloading a single raster.</p>
+<h3 id="hydrobasins-hydrobasins-v1c-pfafstetter-levels-1-12"><code>hydrobasins</code> -- HydroBASINS v1c (Pfafstetter levels 1-12)<a class="headerlink" href="#hydrobasins-hydrobasins-v1c-pfafstetter-levels-1-12" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>vector, level 12 median ~130 km2</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>static</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Global ex-Antarctica</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>CC BY 4.0</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>https://data.hydrosheds.org/file/hydrobasins/standard/</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>basinkit's default delineation backend: the NEXT_DOWN field makes upstream aggregation a graph traversal instead of a raster fill.</p>
+<p><em>Cite:</em> Lehner, B. &amp; Grill, G. (2013). Hydrological Processes 27(15).</p>
+<h3 id="hydrolakes-hydrolakes-v10"><code>hydrolakes</code> -- HydroLAKES v1.0<a class="headerlink" href="#hydrolakes-hydrolakes-v10" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>1.4M lakes &gt;10 ha</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>static</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Global</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>CC BY 4.0</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>https://data.hydrosheds.org/file/hydrolakes/</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="hydrorivers-hydrorivers-v10"><code>hydrorivers</code> -- HydroRIVERS v1.0<a class="headerlink" href="#hydrorivers-hydrorivers-v10" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>vector, 8.5M reaches</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>static</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Global</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>CC BY 4.0</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>https://data.hydrosheds.org/file/hydrorivers/</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>Carries discharge and stream order attributes per reach.</p>
+<h2 id="hydrology">Hydrology<a class="headerlink" href="#hydrology" title="Permanent link">&para;</a></h2>
+<h3 id="glofas-glofas-v4-cems-floods-documented-only-account"><code>glofas</code> -- GloFAS v4 (CEMS-Floods) <strong>documented only</strong> <strong>[account]</strong><a class="headerlink" href="#glofas-glofas-v4-cems-floods-documented-only-account" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>0.05 degree river network, daily</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>1979 to present</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>70N-70S</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>CEMS-Floods licence</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>CEMS Early Warning Data Store (ewds.climate.copernicus.eu/api)</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td><strong>no</strong></td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td><strong>no</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Moved off the main CDS. Needs its own ECMWF token, separate from ERA5. Pre-migration code fails with 'dataset not found'.</p>
+<h3 id="grace-grace-grace-fo-mascons-rl063-documented-only-account"><code>grace</code> -- GRACE / GRACE-FO mascons RL06.3 <strong>documented only</strong> <strong>[account]</strong><a class="headerlink" href="#grace-grace-grace-fo-mascons-rl063-documented-only-account" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>0.5 degree grid (~300 km effective)</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>2002-04 to present</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Global</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>NASA public domain</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>JPL PO.DAAC via earthaccess (Earthdata Login). The CSR anonymous mirror was unreachable when this was last checked.</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td><strong>no</strong></td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>Effective resolution is ~300 km, so it is meaningless below roughly 200,000 km2. Apply the provided scale factors and subtract the GIA correction or the storage anomalies will be wrong.</p>
+<h3 id="grdc-grdc-river-discharge-documented-only-gated"><code>grdc</code> -- GRDC river discharge <strong>documented only</strong> <strong>[gated]</strong><a class="headerlink" href="#grdc-grdc-river-discharge-documented-only-gated" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>~10,000 stations</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>1806 to present</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Global</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>GRDC terms: no commercial use, no redistribution at all</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>Web portal order form only. No API exists.</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td><strong>no</strong></td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td><strong>no</strong></td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td><strong>no</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The strictest licence here: you may not cache it, ship it, or put it in a demo notebook. basinkit will locate the nearest stations and hand you the order link, and will not touch the values.</p>
+<h2 id="imagery">Imagery<a class="headerlink" href="#imagery" title="Permanent link">&para;</a></h2>
+<h3 id="hls-hls-v20-hlss30-hlsl30"><code>hls</code> -- HLS v2.0 (HLSS30 / HLSL30)<a class="headerlink" href="#hls-hls-v20-hlss30-hlsl30" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>30 m harmonised</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>2013 to present (2020+ anonymously)</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Global land</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>NASA public domain</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>Planetary Computer STAC for 2020+; NASA Earthdata login before that</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="landsat-landsat-collection-2-level-2-45789"><code>landsat</code> -- Landsat Collection 2 Level-2 (4/5/7/8/9)<a class="headerlink" href="#landsat-landsat-collection-2-level-2-45789" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>30 m</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>1982 to present</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Global</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>US public domain</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>Planetary Computer STAC (anonymous SAS signing)</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>Use Planetary Computer, not Earth Search: the latter points at the requester-pays usgs-landsat bucket, which silently costs money.</p>
+<h3 id="sentinel1_rtc-sentinel-1-rtc"><code>sentinel1_rtc</code> -- Sentinel-1 RTC<a class="headerlink" href="#sentinel1_rtc-sentinel-1-rtc" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>10 m gamma-0</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>2014-10-10 to present</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Global</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>CC BY 4.0</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>Planetary Computer STAC (anonymous SAS signing)</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>Radiometrically terrain-corrected, so unlike plain GRD it is usable for flood mapping in relief. Cloud-independent inundation mapping with no account.</p>
+<h3 id="sentinel2-sentinel-2-l2a"><code>sentinel2</code> -- Sentinel-2 L2A<a class="headerlink" href="#sentinel2-sentinel-2-l2a" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>10/20/60 m</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>2015-06-27 to present</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Global</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>Copernicus open (attribution)</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>Earth Search v1 STAC -&gt; s3://sentinel-cogs (fully anonymous COG)</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>The cleanest optical route that exists: no token layer at all.</p>
+<h2 id="landcover">Landcover<a class="headerlink" href="#landcover" title="Permanent link">&para;</a></h2>
+<h3 id="esri_lulc-esri-impact-observatory-10-m-annual-lulc"><code>esri_lulc</code> -- ESRI / Impact Observatory 10 m Annual LULC<a class="headerlink" href="#esri_lulc-esri-impact-observatory-10-m-annual-lulc" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>10 m, 9 classes</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>2017-2024</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Global</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>CC BY 4.0</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>Planetary Computer STAC io-lulc-annual-v02</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>The only anonymous annual land-cover time series. Use this, not WorldCover, when you need change over time.</p>
+<h3 id="worldcover-esa-worldcover-v100v200"><code>worldcover</code> -- ESA WorldCover v100/v200<a class="headerlink" href="#worldcover-esa-worldcover-v100v200" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>10 m, 11 classes</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>2020 and 2021 epochs</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>60S-82.75N</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>CC BY 4.0</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>s3://esa-worldcover (anonymous COG, 3x3 degree tiles)</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>v100 and v200 use different algorithms. ESA says explicitly they are not comparable for change detection, so basinkit refuses to difference them.</p>
+<h2 id="soil">Soil<a class="headerlink" href="#soil" title="Permanent link">&para;</a></h2>
+<h3 id="soilgrids-soilgrids-250-m-v20"><code>soilgrids</code> -- SoilGrids 250 m v2.0<a class="headerlink" href="#soilgrids-soilgrids-250-m-v20" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>250 m, 6 depths</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>static</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Global</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>CC BY 4.0</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>ISRIC WCS (maps.isric.org) and REST point query</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>Native CRS is Interrupted Goode Homolosine. basinkit reprojects the request bbox for you; hand-rolled WCS calls that skip this land in the wrong hemisphere. wv0033 and wv1500 are field capacity and wilting point.</p>
+<h2 id="terrain">Terrain<a class="headerlink" href="#terrain" title="Permanent link">&para;</a></h2>
+<h3 id="cop30-copernicus-dem-glo-30"><code>cop30</code> -- Copernicus DEM GLO-30<a class="headerlink" href="#cop30-copernicus-dem-glo-30" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>1 arc-sec (~30 m)</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>2011-2015 acquisition, 2021 product</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Global minus withheld tiles (e.g. Armenia/Azerbaijan)</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>Copernicus DEM free-and-open licence</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>AWS Open Data s3://copernicus-dem-30m (anonymous COG)</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>Not literally complete: a few national tiles are absent from the public bucket. basinkit falls back to GLO-90 and then the OpenTopography mirror for those, and records which source filled each tile.</p>
+<p><em>Cite:</em> European Space Agency (2021). Copernicus DEM GLO-30.</p>
+<h3 id="cop90-copernicus-dem-glo-90"><code>cop90</code> -- Copernicus DEM GLO-90<a class="headerlink" href="#cop90-copernicus-dem-glo-90" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>3 arc-sec (~90 m)</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>2011-2015</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Truly global</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>Copernicus DEM free-and-open licence</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>AWS Open Data s3://copernicus-dem-90m (anonymous COG)</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>Gap-filler for GLO-30 holes and the sane choice for basins &gt;100,000 km2.</p>
+<h3 id="fabdem-fabdem-v1-2-documented-only-gated"><code>fabdem</code> -- FABDEM V1-2 <strong>documented only</strong> <strong>[gated]</strong><a class="headerlink" href="#fabdem-fabdem-v1-2-documented-only-gated" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>1 arc-sec, bare-earth</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>2023</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>80N-60S</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>CC BY-NC-SA 4.0</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>University of Bristol data repository (manual)</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td><strong>no</strong></td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td><strong>no</strong></td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td><strong>no</strong></td>
+</tr>
+</tbody>
+</table>
+<p>LICENCE LANDMINE. Non-commercial AND ShareAlike: anything you derive from it inherits those terms. Opt-in only; basinkit prints the licence before the first byte is fetched.</p>
+<h3 id="merit_hydro-merit-hydro-v101-documented-only-gated"><code>merit_hydro</code> -- MERIT Hydro v1.0.1 <strong>documented only</strong> <strong>[gated]</strong><a class="headerlink" href="#merit_hydro-merit-hydro-v101-documented-only-gated" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>3 arc-sec (~90 m)</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>2019</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>90N-60S</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>CC BY-NC 4.0 or ODbL 1.0</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>Google Form -&gt; emailed password -&gt; Dropbox (no API exists)</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td><strong>no</strong></td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td><strong>no</strong></td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td><strong>no</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Hydrologically conditioned flow direction, HAND and upstream area, and the best product of its kind. But acquisition cannot be automated and both licence options poison a permissive package. Opt-in, bring your own copy.</p>
+<h3 id="nasadem-nasadem-hgt-v001"><code>nasadem</code> -- NASADEM HGT v001<a class="headerlink" href="#nasadem-nasadem-hgt-v001" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>1 arc-sec (~30 m)</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>Feb 2000 (reprocessed)</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>60N-56S</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>NASA public domain</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>OpenTopography S3 mirror (anonymous) or Planetary Computer STAC</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>Best SRTM-lineage DEM: void-filled with ASTER and ICESat, better geolocation.</p>
+<h3 id="srtm30-srtm-gl1-v003"><code>srtm30</code> -- SRTM GL1 v003<a class="headerlink" href="#srtm30-srtm-gl1-v003" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>1 arc-sec (~30 m)</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>Feb 2000</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>60N-56S</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>NASA public domain</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>OpenTopography S3 mirror (anonymous)</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>Voids over water and steep terrain. Prefer NASADEM or COP30 unless you specifically need the original SRTM epoch.</p>
+<h2 id="water">Water<a class="headerlink" href="#water" title="Permanent link">&para;</a></h2>
+<h3 id="jrc_gsw-jrc-global-surface-water-v14"><code>jrc_gsw</code> -- JRC Global Surface Water v1.4<a class="headerlink" href="#jrc_gsw-jrc-global-surface-water-v14" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resolution</td>
+<td>30 m</td>
+</tr>
+<tr>
+<td>Temporal</td>
+<td>1984-03 to 2021-12</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>78N-56S</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>CC BY 4.0</td>
+</tr>
+<tr>
+<td>Access</td>
+<td>storage.googleapis.com/global-surface-water (anonymous, 10x10 deg tiles)</td>
+</tr>
+<tr>
+<td>Fetchable by basinkit</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Commercial use</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Redistribution</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>This is a pre-reduced 37-year Landsat water stack. It is what most people spend a week of Earth Engine compute recreating.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.sections", "content.code.copy", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,1565 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Point to river basin to every open Earth observation layer">
+      
+      
+      
+        <link rel="canonical" href="https://praddy-gbyte.github.io/basinkit/tutorial/">
+      
+      
+        <link rel="prev" href="../why/">
+      
+      
+        <link rel="next" href="../delineation/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/logo-32.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Tutorial - basinkit</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#tutorial" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="basinkit" class="md-header__button md-logo" aria-label="basinkit" data-md-component="logo">
+      
+  <img src="../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            basinkit
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Tutorial
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Praddy-GByte/basinkit" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="basinkit" class="md-nav__button md-logo" aria-label="basinkit" data-md-component="logo">
+      
+  <img src="../assets/logo.svg" alt="logo">
+
+    </a>
+    basinkit
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Praddy-GByte/basinkit" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../why/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Why basinkit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-basinkit-is-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What basinkit is for
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-get-the-basin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Get the basin
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Get the basin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#put-the-point-on-the-river" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Put the point on the river
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#choosing-a-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choosing a backend
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-the-answer-before-you-trust-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check the answer before you trust it
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-the-polygon-matters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the polygon matters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-ask-for-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Ask for data
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Ask for data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#terrain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Terrain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#land-cover" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Land cover
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#soil" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Soil
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rainfall-and-water-balance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rainfall and water balance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#surface-water-rivers-and-lakes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Surface water, rivers and lakes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pre-computed-basin-attributes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pre-computed basin attributes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#satellite-imagery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Satellite imagery
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-save-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Save it
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Save it">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#see-it-in-three-dimensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See it in three dimensions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-without-writing-any-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Without writing any Python
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-attribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Attribution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-something-goes-wrong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When something goes wrong
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-basinkit-does-not-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What basinkit does not do
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../delineation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delineation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../related-work/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Related work
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../catalogue/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data catalogue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notebooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Notebooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../notebooks/01_quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    basinkit quickstartFrom an outlet coordinate to a fully characterised river basin, with no accountanywhere in the chain.We'll use the Sapta Koshi at Chatara (26.87 N, 87.15 E) -- a Himalayan basinthat drains Everest and empties onto the Gangetic plain. It is a good test casebecause its area is independently published, so we can check the answer.
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-basinkit-is-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What basinkit is for
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-get-the-basin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Get the basin
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Get the basin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#put-the-point-on-the-river" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Put the point on the river
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#choosing-a-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choosing a backend
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-the-answer-before-you-trust-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check the answer before you trust it
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-the-polygon-matters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the polygon matters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-ask-for-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Ask for data
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Ask for data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#terrain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Terrain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#land-cover" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Land cover
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#soil" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Soil
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rainfall-and-water-balance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rainfall and water balance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#surface-water-rivers-and-lakes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Surface water, rivers and lakes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pre-computed-basin-attributes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pre-computed basin attributes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#satellite-imagery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Satellite imagery
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-save-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Save it
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Save it">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#see-it-in-three-dimensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See it in three dimensions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-without-writing-any-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Without writing any Python
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-attribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Attribution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-something-goes-wrong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When something goes wrong
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-basinkit-does-not-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What basinkit does not do
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="tutorial">Tutorial<a class="headerlink" href="#tutorial" title="Permanent link">&para;</a></h1>
+<p>This is the long-form walkthrough. If you want the runnable version instead,
+open the <a href="../notebooks/01_quickstart/">Quickstart notebook</a>: same material,
+in cells you can execute.</p>
+<hr />
+<h2 id="what-basinkit-is-for">What basinkit is for<a class="headerlink" href="#what-basinkit-is-for" title="Permanent link">&para;</a></h2>
+<p>You have a point on a river. You want the catchment that drains into it, and
+you want elevation, land cover, soil, rainfall and imagery for that catchment,
+clipped to the actual basin, not to a rectangle around it.</p>
+<p>Done by hand, that is a two-day job for someone who has done it before, and a
+two-week job for someone who hasn't:</p>
+<ol>
+<li>Download a continental HydroSHEDS shapefile and trace the basin upstream by hand</li>
+<li>Register for Earthdata; work out which SRTM tiles you need; download forty of them</li>
+<li>Mosaic, reproject, clip</li>
+<li>Repeat on a different portal, with a different login, for land cover</li>
+<li>Repeat again, in a different file format, for rainfall</li>
+</ol>
+<p>basinkit is those five steps as five function calls, with <strong>no account, login
+or API key for any of its default sources.</strong></p>
+<p>It is worth being clear about the part that goes wrong silently. The common
+errors in that manual workflow are not crashes; they are wrong numbers that
+look fine: area computed in square degrees, nodata values averaged into a mean,
+scale factors never applied, a basin clipped to its bounding box so that half
+the "basin mean" is actually the neighbouring catchment. basinkit gets those
+right, and that is most of what it is for.</p>
+<h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>basinkit<span class="w">          </span><span class="c1"># core</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"basinkit[all]"</span><span class="w">   </span><span class="c1"># everything, including the imagery stack</span>
+</code></pre></div>
+<p>Python 3.10 or newer. On Windows, if <code>pip</code> fails while building GDAL or
+rasterio, install those two from conda-forge first and then re-run:</p>
+<div class="highlight"><pre><span></span><code>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>gdal<span class="w"> </span>rasterio
+</code></pre></div>
+<hr />
+<h2 id="step-1-get-the-basin">Step 1: Get the basin<a class="headerlink" href="#step-1-get-the-basin" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">basinkit</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bk</span>
+
+<span class="n">basin</span> <span class="o">=</span> <span class="n">bk</span><span class="o">.</span><span class="n">Basin</span><span class="o">.</span><span class="n">from_point</span><span class="p">(</span><span class="mf">26.87</span><span class="p">,</span> <span class="mf">87.15</span><span class="p">)</span>   <span class="c1"># Sapta Koshi at Chatara</span>
+<span class="n">basin</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>&lt;Basin area=54,497 km2 centroid=(27.974, 87.021) backend='hydrobasins'&gt;
+</code></pre></div>
+<p>Note the argument order: <strong>latitude first, then longitude.</strong> Swapping them is
+the single most common mistake, and basinkit raises rather than silently
+delineating a basin in the wrong hemisphere.</p>
+<h3 id="put-the-point-on-the-river">Put the point on the river<a class="headerlink" href="#put-the-point-on-the-river" title="Permanent link">&para;</a></h3>
+<p>This matters more than anything else on this page. A coordinate that sits a
+pixel or two off the channel (on the bank, on a road beside the river) can
+return a basin three orders of magnitude too small, and <strong>nothing crashes</strong>.
+You get a polygon, it looks plausible, and every number downstream is wrong.</p>
+<p>basinkit defends against this by snapping to the nearest river reach and
+recording how far it moved, in <code>basin.provenance</code>. Read that field:</p>
+<div class="highlight"><pre><span></span><code><span class="n">basin</span><span class="o">.</span><span class="n">provenance</span><span class="p">[</span><span class="s2">"snap_km"</span><span class="p">]</span>        <span class="c1"># how far the outlet was moved, in km</span>
+<span class="n">basin</span><span class="o">.</span><span class="n">provenance</span><span class="p">[</span><span class="s2">"backend"</span><span class="p">]</span>        <span class="c1"># which delineation route ran</span>
+</code></pre></div>
+<p>If the snap distance is large and unexpected, your coordinate was wrong.</p>
+<h3 id="choosing-a-backend">Choosing a backend<a class="headerlink" href="#choosing-a-backend" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">basin</span> <span class="o">=</span> <span class="n">bk</span><span class="o">.</span><span class="n">Basin</span><span class="o">.</span><span class="n">from_point</span><span class="p">(</span><span class="mf">26.87</span><span class="p">,</span> <span class="mf">87.15</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">"dem"</span><span class="p">)</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>backend</th>
+<th>base grid</th>
+<th>source</th>
+<th>best for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hydrobasins</code></td>
+<td>15 arc-sec (~460 m)</td>
+<td>SRTM, Feb 2000</td>
+<td>large basins; fast at any size</td>
+</tr>
+<tr>
+<td><code>api</code></td>
+<td>3 arc-sec (~90 m)</td>
+<td>MERIT-Hydro</td>
+<td>mid-size basins, error-corrected</td>
+</tr>
+<tr>
+<td><code>dem</code></td>
+<td>1 arc-sec (~30 m)</td>
+<td>Copernicus DEM</td>
+<td>small headwater catchments</td>
+</tr>
+<tr>
+<td><code>auto</code></td>
+<td>-</td>
+<td>picks for you</td>
+<td>the default; start here</td>
+</tr>
+</tbody>
+</table>
+<p><code>hydrobasins</code> walks a pre-computed upstream graph, so it is fast whether the
+basin is 50 km² or 5,000,000 km². <code>dem</code> routes flow on the fly, which is slower
+but resolves small catchments the coarse grid cannot see. <strong>If your basin is
+smaller than about 100 km², use <code>backend="dem"</code>.</strong></p>
+<h3 id="check-the-answer-before-you-trust-it">Check the answer before you trust it<a class="headerlink" href="#check-the-answer-before-you-trust-it" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"computed  </span><span class="si">{</span><span class="n">basin</span><span class="o">.</span><span class="n">area_km2</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> km2"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"reported  </span><span class="si">{</span><span class="n">basin</span><span class="o">.</span><span class="n">provenance</span><span class="p">[</span><span class="s1">'reported_up_area_km2'</span><span class="p">]</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> km2"</span><span class="p">)</span>
+</code></pre></div>
+<p><code>area_km2</code> is computed here, by reprojecting to an equal-area projection
+centred on your basin, not by summing degrees. <code>reported_up_area_km2</code> comes
+from HydroBASINS and is derived completely independently. If the two disagree
+by more than a few percent, something is wrong with the outlet.</p>
+<p>Against published gauge areas at twelve gauges on six continents, the median
+error is 0.74%. Where basinkit disagrees, the reason is written down; see
+<a href="../verification/">Verification</a>.</p>
+<h3 id="why-the-polygon-matters">Why the polygon matters<a class="headerlink" href="#why-the-polygon-matters" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">basin</span><span class="o">.</span><span class="n">bbox_efficiency</span>    <span class="c1"># 0.55 → the basin fills 55% of its bounding box</span>
+</code></pre></div>
+<p>Everything below is masked to the <strong>polygon</strong>, not to the box. For a long, thin
+or dendritic basin, a bounding-box download can be more than half water you did
+not ask for, and if you then take a mean, that half is in your answer.</p>
+<hr />
+<h2 id="step-2-ask-for-data">Step 2: Ask for data<a class="headerlink" href="#step-2-ask-for-data" title="Permanent link">&para;</a></h2>
+<p>Every method returns data already clipped and masked to the basin, in EPSG:4326.</p>
+<h3 id="terrain">Terrain<a class="headerlink" href="#terrain" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">dem</span> <span class="o">=</span> <span class="n">basin</span><span class="o">.</span><span class="n">dem</span><span class="p">()</span>                     <span class="c1"># Copernicus GLO-30, metres</span>
+<span class="n">stats</span> <span class="o">=</span> <span class="n">basin</span><span class="o">.</span><span class="n">terrain_stats</span><span class="p">()</span>
+</code></pre></div>
+<p><code>terrain_stats()</code> returns the standard morphometry:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="s1">'area_km2'</span><span class="p">:</span> <span class="mf">54497.1</span><span class="p">,</span> <span class="s1">'elev_min_m'</span><span class="p">:</span> <span class="mf">70.7</span><span class="p">,</span> <span class="s1">'elev_max_m'</span><span class="p">:</span> <span class="mf">8733.0</span><span class="p">,</span>
+ <span class="s1">'elev_mean_m'</span><span class="p">:</span> <span class="mf">3785.9</span><span class="p">,</span> <span class="s1">'relief_m'</span><span class="p">:</span> <span class="mf">8662.3</span><span class="p">,</span> <span class="s1">'slope_mean_deg'</span><span class="p">:</span> <span class="mf">12.86</span><span class="p">,</span>
+ <span class="s1">'bbox_efficiency'</span><span class="p">:</span> <span class="mf">0.546</span><span class="p">}</span>
+</code></pre></div>
+<p>For very large basins basinkit coarsens automatically rather than trying to
+hold a billion pixels in memory. The factor it used is recorded in
+<code>dem.attrs["basinkit_coarsen_factor"]</code>, so you always know what resolution you
+actually got.</p>
+<h3 id="land-cover">Land cover<a class="headerlink" href="#land-cover" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">lc</span> <span class="o">=</span> <span class="n">basin</span><span class="o">.</span><span class="n">landcover</span><span class="p">()</span>                       <span class="c1"># ESA WorldCover, 10 m</span>
+<span class="n">lc</span> <span class="o">=</span> <span class="n">basin</span><span class="o">.</span><span class="n">landcover</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="s2">"esri"</span><span class="p">,</span> <span class="n">year</span><span class="o">=</span><span class="mi">2023</span><span class="p">)</span>   <span class="c1"># Esri annual, 2017-2024</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">basinkit.sources.landcover</span><span class="w"> </span><span class="kn">import</span> <span class="n">class_fractions</span>
+<span class="n">class_fractions</span><span class="p">(</span><span class="n">lc</span><span class="p">)</span>      <span class="c1"># {'Tree cover': 0.31, 'Grassland': 0.22, ...}</span>
+</code></pre></div>
+<h3 id="soil">Soil<a class="headerlink" href="#soil" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">clay</span> <span class="o">=</span> <span class="n">basin</span><span class="o">.</span><span class="n">soil</span><span class="p">(</span><span class="s2">"clay"</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="s2">"0-5cm"</span><span class="p">)</span>       <span class="c1"># SoilGrids</span>
+<span class="n">awc</span>  <span class="o">=</span> <span class="n">basin</span><span class="o">.</span><span class="n">available_water_capacity</span><span class="p">()</span>        <span class="c1"># volumetric %</span>
+</code></pre></div>
+<p>Plant-available water capacity is field capacity minus wilting point.
+SoilGrids publishes both but not the difference, and its native projection is
+Interrupted Goode Homolosine; basinkit does the subtraction and the
+reprojection for you.</p>
+<h3 id="rainfall-and-water-balance">Rainfall and water balance<a class="headerlink" href="#rainfall-and-water-balance" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">rain</span> <span class="o">=</span> <span class="n">basin</span><span class="o">.</span><span class="n">precipitation</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">2024</span><span class="p">)</span>              <span class="c1"># CHIRPS, mm/month</span>
+<span class="n">rain</span> <span class="o">=</span> <span class="n">basin</span><span class="o">.</span><span class="n">precipitation</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="s2">"terraclimate"</span><span class="p">)</span>   <span class="c1"># or persiann</span>
+<span class="n">wb</span>   <span class="o">=</span> <span class="n">basin</span><span class="o">.</span><span class="n">water_balance</span><span class="p">(</span><span class="mi">2015</span><span class="p">,</span> <span class="mi">2020</span><span class="p">)</span>              <span class="c1"># ppt, aet, pet, q, soil</span>
+</code></pre></div>
+<p><code>precipitation()</code> returns a <strong>basin-mean monthly time series</strong>, weighted by
+cosine of latitude so that high-latitude cells are not over-counted. It is not
+a raster.</p>
+<p><code>water_balance()</code> returns a Dataset. Its <code>residual</code> term is P − AET − Q:
+storage change plus model error. Look at it before you trust any single
+component.</p>
+<h3 id="surface-water-rivers-and-lakes">Surface water, rivers and lakes<a class="headerlink" href="#surface-water-rivers-and-lakes" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">occ</span>    <span class="o">=</span> <span class="n">basin</span><span class="o">.</span><span class="n">surface_water</span><span class="p">(</span><span class="s2">"occurrence"</span><span class="p">)</span>   <span class="c1"># JRC, 37 years of Landsat, %</span>
+<span class="n">rivers</span> <span class="o">=</span> <span class="n">basin</span><span class="o">.</span><span class="n">rivers</span><span class="p">(</span><span class="n">min_order</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>           <span class="c1"># HydroRIVERS, GeoDataFrame</span>
+<span class="n">lakes</span>  <span class="o">=</span> <span class="n">basin</span><span class="o">.</span><span class="n">lakes</span><span class="p">(</span><span class="n">min_area_km2</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>       <span class="c1"># HydroLAKES, GeoDataFrame</span>
+</code></pre></div>
+<h3 id="pre-computed-basin-attributes">Pre-computed basin attributes<a class="headerlink" href="#pre-computed-basin-attributes" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">attrs</span> <span class="o">=</span> <span class="n">basin</span><span class="o">.</span><span class="n">attributes</span><span class="p">()</span>      <span class="c1"># 281 BasinATLAS variables</span>
+</code></pre></div>
+<p>These are already aggregated over everything upstream, so they characterise the
+whole catchment without touching a raster. They cost one 2.7 GB download the
+first time and nothing after that. Requires <code>backend="hydrobasins"</code>, because
+BasinATLAS is keyed by HydroBASINS id.</p>
+<h3 id="satellite-imagery">Satellite imagery<a class="headerlink" href="#satellite-imagery" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">s2</span> <span class="o">=</span> <span class="n">basin</span><span class="o">.</span><span class="n">sentinel2</span><span class="p">(</span><span class="s2">"2023-10-01"</span><span class="p">,</span> <span class="s2">"2023-12-31"</span><span class="p">,</span> <span class="n">cloud_cover</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span class="n">ls</span> <span class="o">=</span> <span class="n">basin</span><span class="o">.</span><span class="n">landsat</span><span class="p">(</span><span class="s2">"1990-01-01"</span><span class="p">,</span> <span class="s2">"1990-12-31"</span><span class="p">)</span>        <span class="c1"># back to 1982</span>
+<span class="n">s1</span> <span class="o">=</span> <span class="n">basin</span><span class="o">.</span><span class="n">sentinel1</span><span class="p">(</span><span class="s2">"2023-01-01"</span><span class="p">,</span> <span class="s2">"2023-03-31"</span><span class="p">)</span>      <span class="c1"># radar, sees through cloud</span>
+</code></pre></div>
+<p>Dates are strings. By default these return a <strong>median composite</strong> over the
+period, which suppresses cloud without needing a cloud mask. Pass
+<code>composite=None</code> to get the full time stack instead.</p>
+<hr />
+<h2 id="step-3-save-it">Step 3: Save it<a class="headerlink" href="#step-3-save-it" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="n">manifest</span> <span class="o">=</span> <span class="n">basin</span><span class="o">.</span><span class="n">download_all</span><span class="p">(</span><span class="s2">"koshi/"</span><span class="p">)</span>
+<span class="n">manifest</span><span class="p">[</span><span class="s2">"layers"</span><span class="p">]</span>
+</code></pre></div>
+<p>Writes to <code>koshi/</code>:</p>
+<div class="highlight"><pre><span></span><code>basin.geojson        the basin polygon
+dem.tif              elevation
+landcover.tif        land cover classes
+soil.tif             soil property
+surface_water.tif    JRC occurrence
+precipitation.csv    basin-mean monthly series
+rivers.gpkg          river reaches
+manifest.json        what was fetched, from where, and what failed
+</code></pre></div>
+<p>Each layer is attempted independently, so one failing source (a polar basin
+with no CHIRPS coverage, say) does not abort the rest. Failures land in
+<code>manifest["failed"]</code> with the reason, rather than raising.</p>
+<p>Every GeoTIFF is written with its <strong>nodata value declared in the header</strong>. This
+sounds like a detail; it is the difference between your clip appearing correctly
+in QGIS and appearing as a grey rectangle.</p>
+<h3 id="see-it-in-three-dimensions">See it in three dimensions<a class="headerlink" href="#see-it-in-three-dimensions" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">basin</span><span class="o">.</span><span class="n">export_3d</span><span class="p">(</span><span class="s2">"koshi.html"</span><span class="p">)</span>                 <span class="c1"># terrain + Sentinel-2 + rivers</span>
+<span class="n">basin</span><span class="o">.</span><span class="n">export_3d</span><span class="p">(</span><span class="s2">"koshi.html"</span><span class="p">,</span> <span class="n">texture</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>   <span class="c1"># terrain only, much smaller</span>
+</code></pre></div>
+<p>Writes one self-contained HTML file (imagery, elevation, river geometry and
+the renderer are all embedded), so it opens from a memory stick on a laptop
+with no network. Drag to orbit, scroll to zoom, toggle between the satellite
+composite and an elevation tint, and stretch the vertical exaggeration.</p>
+<p>The imagery window matters. The default is post-monsoon, which is usually the
+cleanest; give it a dry-season window for your own region:</p>
+<div class="highlight"><pre><span></span><code><span class="n">basin</span><span class="o">.</span><span class="n">export_3d</span><span class="p">(</span><span class="s2">"basin.html"</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="s2">"2024-11-01"</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">"2025-01-31"</span><span class="p">,</span>
+                <span class="n">cloud_cover</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">mesh_width</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+</code></pre></div>
+<p>The first call downloads the renderer once into the cache; after that the
+export works offline. <code>texture=None</code> needs nothing beyond the DEM and produces
+a file a fraction of the size.</p>
+<p>One choice worth knowing about, since it changes what you see: the elevation
+tint maps colour to each point's <strong>rank</strong>, not its elevation. On a mountain
+basin, where most of the land sits in the upper part of its own range, a linear
+ramp collapses into one flat tone and the drainage network disappears.</p>
+<hr />
+<h2 id="step-4-without-writing-any-python">Step 4: Without writing any Python<a class="headerlink" href="#step-4-without-writing-any-python" title="Permanent link">&para;</a></h2>
+<p>Install the QGIS plugin (<code>Plugins → Manage and Install Plugins → Install from
+ZIP</code>), then open the Processing Toolbox. Three algorithms appear under
+<strong>basinkit</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Delineate river basin</strong></td>
+<td>Point in, basin polygon out</td>
+</tr>
+<tr>
+<td><strong>Fetch basin data layers</strong></td>
+<td>Basin polygon in, clipped rasters out</td>
+</tr>
+<tr>
+<td><strong>Basin statistics</strong></td>
+<td>Area, relief, mean slope, land cover fractions as HTML</td>
+</tr>
+</tbody>
+</table>
+<p>The normal sequence is to run the first, check the polygon on the canvas, then
+feed it to the second. The plugin needs the <code>basinkit</code> Python package; if it is
+missing, it prints the exact <code>pip</code> command for QGIS's own Python, which is not
+the same Python as your terminal.</p>
+<hr />
+<h2 id="step-5-attribution">Step 5: Attribution<a class="headerlink" href="#step-5-attribution" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">basin</span><span class="o">.</span><span class="n">license_report</span><span class="p">((</span><span class="s2">"hydrobasins"</span><span class="p">,</span> <span class="s2">"cop30"</span><span class="p">,</span> <span class="s2">"worldcover"</span><span class="p">,</span> <span class="s2">"chirps"</span><span class="p">)))</span>
+</code></pre></div>
+<p>Prints licence and citation text for the layers you actually used. Paste it
+into your methods section.</p>
+<p>Every default layer is CC BY 4.0 or more permissive, which means you may
+redistribute it and use it commercially, <strong>provided you attribute it.</strong> That is
+not decoration; it is the licence condition.</p>
+<div class="highlight"><pre><span></span><code><span class="n">bk</span><span class="o">.</span><span class="n">Basin</span><span class="o">.</span><span class="n">check_license</span><span class="p">(</span><span class="s2">"cop30"</span><span class="p">,</span> <span class="n">commercial</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>   <span class="c1"># raises if not permitted</span>
+</code></pre></div>
+<p>The licence table in basinkit is executable. Datasets whose terms forbid
+redistribution are blocked at the API rather than described in a footnote:
+<code>merit_hydro</code>, <code>grdc</code> and <code>fabdem</code> will not silently download.</p>
+<hr />
+<h2 id="when-something-goes-wrong">When something goes wrong<a class="headerlink" href="#when-something-goes-wrong" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Basin is absurdly small</td>
+<td>Outlet was off the channel, or on the bank</td>
+<td>Move the point onto the river; check <code>provenance["snap_km"]</code></td>
+</tr>
+<tr>
+<td>Basin is in the wrong place entirely</td>
+<td>Lat and lon swapped</td>
+<td>Latitude first</td>
+</tr>
+<tr>
+<td>Small headwater returns nothing sensible</td>
+<td>Basin below the coarse grid's resolution</td>
+<td><code>backend="dem"</code></td>
+</tr>
+<tr>
+<td><code>attributes()</code> raises</td>
+<td>BasinATLAS needs a HydroBASINS id</td>
+<td><code>backend="hydrobasins"</code></td>
+</tr>
+<tr>
+<td>Raster looks like a grey rectangle in QGIS</td>
+<td>Older export without declared nodata</td>
+<td>Re-export with current version</td>
+</tr>
+<tr>
+<td>Very slow on a continental basin</td>
+<td>Pixel budget is coarsening a huge mosaic</td>
+<td>Expected; check <code>basinkit_coarsen_factor</code></td>
+</tr>
+<tr>
+<td>Plugin says <code>basinkit</code> is not installed</td>
+<td>QGIS uses its own Python</td>
+<td>Run the pip command the plugin prints, then restart QGIS</td>
+</tr>
+<tr>
+<td><code>Access denied (403)</code> from <code>data.hydrosheds.org</code></td>
+<td>Some hosts refuse datacenter addresses (cloud VMs, CI runners, some campus proxies)</td>
+<td>Run it from a normal network, or download the file once elsewhere and drop it in the cache directory (<code>BASINKIT_CACHE</code> sets where that is)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="what-basinkit-does-not-do">What basinkit does not do<a class="headerlink" href="#what-basinkit-does-not-do" title="Permanent link">&para;</a></h2>
+<p>It is an acquisition layer, not a modelling one. There is no rainfall-runoff
+model, no calibration, no forecasting, no routing. It gives you the data a
+model needs, correctly clipped and correctly scaled: the first twenty percent
+of a project, which happens to be where most of the lost weeks and most of the
+silent errors are.</p>
+<p>For the modelling step, feed its output to wflow, SWAT, Raven or HBV.</p>
+<hr />
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../notebooks/01_quickstart/">Quickstart notebook</a>: the same material, runnable</li>
+<li><a href="../delineation/">Delineation</a>: how each backend works and where each fails</li>
+<li><a href="../catalogue/">Data catalogue</a>: all 26 datasets, what is implemented, what each is licensed under</li>
+<li><a href="../verification/">Verification</a>: the twelve-gauge test and the disagreements</li>
+<li><a href="../related-work/">Related work</a>: what else exists and where basinkit differs</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.sections", "content.code.copy", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,1351 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Point to river basin to every open Earth observation layer">
+      
+      
+      
+        <link rel="canonical" href="https://praddy-gbyte.github.io/basinkit/verification/">
+      
+      
+        <link rel="prev" href="../catalogue/">
+      
+      
+        <link rel="next" href="../notebooks/01_quickstart/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/logo-32.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Verification - basinkit</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#verification" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="basinkit" class="md-header__button md-logo" aria-label="basinkit" data-md-component="logo">
+      
+  <img src="../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            basinkit
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Verification
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Praddy-GByte/basinkit" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="basinkit" class="md-nav__button md-logo" aria-label="basinkit" data-md-component="logo">
+      
+  <img src="../assets/logo.svg" alt="logo">
+
+    </a>
+    basinkit
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Praddy-GByte/basinkit" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../why/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Why basinkit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../delineation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delineation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../related-work/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Related work
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../catalogue/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data catalogue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#delineation-against-published-gauge-areas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delineation against published gauge areas
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Delineation against published gauge areas">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-distribution-not-the-best-basin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The distribution, not the best basin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-murray-is-not-a-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Murray is not a failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#merit-hydro-not-a-check-a-migration-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MERIT-Hydro: not a check, a migration path
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rainfall-against-published-climatology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rainfall against published climatology
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optical-imagery-end-to-end" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optical imagery end to end
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#clipping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clipping
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-catalogue-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The catalogue audit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basinatlas-as-an-independent-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BasinATLAS as an independent check
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#defects-this-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Defects this found
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#platform-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Platform coverage
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notebooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Notebooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../notebooks/01_quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    basinkit quickstartFrom an outlet coordinate to a fully characterised river basin, with no accountanywhere in the chain.We'll use the Sapta Koshi at Chatara (26.87 N, 87.15 E) -- a Himalayan basinthat drains Everest and empties onto the Gangetic plain. It is a good test casebecause its area is independently published, so we can check the answer.
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#delineation-against-published-gauge-areas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delineation against published gauge areas
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Delineation against published gauge areas">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-distribution-not-the-best-basin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The distribution, not the best basin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-murray-is-not-a-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Murray is not a failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#merit-hydro-not-a-check-a-migration-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MERIT-Hydro: not a check, a migration path
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rainfall-against-published-climatology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rainfall against published climatology
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optical-imagery-end-to-end" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optical imagery end to end
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#clipping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clipping
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-catalogue-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The catalogue audit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basinatlas-as-an-independent-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BasinATLAS as an independent check
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#defects-this-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Defects this found
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#platform-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Platform coverage
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="verification">Verification<a class="headerlink" href="#verification" title="Permanent link">&para;</a></h1>
+<p>Every number on this page was produced by running the package, not by
+inspecting it. The scripts are in <code>verify/</code>, and every figure below traces to a
+single run of <code>verify/run_delineation.py</code> against basinkit 0.1.0 on
+26 August 2026, not to a mixture of runs.</p>
+<p>Prepared by Pradeepika Kaushik.</p>
+<h2 id="delineation-against-published-gauge-areas">Delineation against published gauge areas<a class="headerlink" href="#delineation-against-published-gauge-areas" title="Permanent link">&para;</a></h2>
+<p>Twelve reference gauges, one per major basin, on six continents. The published
+areas come from operating agencies and GRDC station records, <strong>not</strong> from
+HydroBASINS, so agreement is an external check rather than a tautology.</p>
+<table>
+<thead>
+<tr>
+<th>basin</th>
+<th style="text-align: right;">basinkit</th>
+<th style="text-align: right;">published</th>
+<th style="text-align: right;">error</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Danube @ Bratislava</td>
+<td style="text-align: right;">131,449</td>
+<td style="text-align: right;">131,300</td>
+<td style="text-align: right;">0.11%</td>
+</tr>
+<tr>
+<td>Amazon @ Obidos</td>
+<td style="text-align: right;">4,671,504</td>
+<td style="text-align: right;">4,680,000</td>
+<td style="text-align: right;">0.18%</td>
+</tr>
+<tr>
+<td>Godavari @ Polavaram</td>
+<td style="text-align: right;">306,750</td>
+<td style="text-align: right;">307,800</td>
+<td style="text-align: right;">0.34%</td>
+</tr>
+<tr>
+<td>Mississippi @ Vicksburg</td>
+<td style="text-align: right;">2,979,823</td>
+<td style="text-align: right;">2,964,000</td>
+<td style="text-align: right;">0.53%</td>
+</tr>
+<tr>
+<td>Rhine @ Lobith</td>
+<td style="text-align: right;">159,776</td>
+<td style="text-align: right;">160,800</td>
+<td style="text-align: right;">0.64%</td>
+</tr>
+<tr>
+<td>Sapta Koshi @ Chatara</td>
+<td style="text-align: right;">54,497</td>
+<td style="text-align: right;">54,100</td>
+<td style="text-align: right;">0.73%</td>
+</tr>
+<tr>
+<td>Mekong @ Pakse</td>
+<td style="text-align: right;">549,061</td>
+<td style="text-align: right;">545,000</td>
+<td style="text-align: right;">0.75%</td>
+</tr>
+<tr>
+<td>Columbia @ The Dalles</td>
+<td style="text-align: right;">619,618</td>
+<td style="text-align: right;">613,800</td>
+<td style="text-align: right;">0.95%</td>
+</tr>
+<tr>
+<td>Zambezi @ Victoria Falls</td>
+<td style="text-align: right;">519,436</td>
+<td style="text-align: right;">507,000</td>
+<td style="text-align: right;">2.45%</td>
+</tr>
+<tr>
+<td>Parana @ Corrientes</td>
+<td style="text-align: right;">2,127,355</td>
+<td style="text-align: right;">1,950,000</td>
+<td style="text-align: right;">9.10%</td>
+</tr>
+<tr>
+<td>Niger @ Lokoja</td>
+<td style="text-align: right;">1,747,192</td>
+<td style="text-align: right;">2,074,000</td>
+<td style="text-align: right;">15.76%</td>
+</tr>
+<tr>
+<td>Murray @ Wentworth</td>
+<td style="text-align: right;">541,385</td>
+<td style="text-align: right;">950,000</td>
+<td style="text-align: right;">43.01%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-distribution-not-the-best-basin">The distribution, not the best basin<a class="headerlink" href="#the-distribution-not-the-best-basin" title="Permanent link">&para;</a></h3>
+<p><strong>n = 12.</strong> Median error <strong>0.74%</strong>. Eight of twelve within 1%, nine within
+3%. Excluding the three basins whose published figure includes large
+non-contributing area (below), n = 9, median 0.64%, worst 2.45%.</p>
+<p>Twelve is a small sample and these are large, well-mapped rivers; the gauges
+were chosen because their areas are published, which biases toward basins that
+have been studied. Quoting a single basin would make the package look four
+times more accurate than it is; the Koshi alone reads 0.73%, and the best of the
+twelve reads 0.11%. Neither is the number.</p>
+<p>The Amazon result is still worth pausing on: 4.67 million km² across 35,625
+sub-basins, delineated in 43 seconds, 0.18% from the published figure. That is
+what graph traversal buys over raster fill.</p>
+<h3 id="the-murray-is-not-a-failure">The Murray is not a failure<a class="headerlink" href="#the-murray-is-not-a-failure" title="Permanent link">&para;</a></h3>
+<p>A 43% shortfall looks like a bug until you look at the water balance:</p>
+<div class="highlight"><pre><span></span><code>delineated area          541,385 km²
+nominal published area   950,000 km²
+mean annual rainfall         434 mm
+mean annual runoff          27.5 mm
+runoff coefficient           0.063
+</code></pre></div>
+<p>A runoff coefficient of 6% over half a million square kilometres is the
+signature of a basin most of which does not drain to its own outlet. The
+Murray-Darling has vast internally-draining western areas; the 950,000 km²
+figure is the nominal basin, while HydroBASINS routes only what actually
+reaches Wentworth. <strong>basinkit's answer is the hydrologically contributing
+area</strong>, and for most modelling purposes that is the number you want. The
+divergence is worth knowing about, not worth hiding.</p>
+<p>The Niger and Paraná gaps have the same character on a smaller scale: both have
+large arid or wetland zones whose contribution is intermittent.</p>
+<h2 id="merit-hydro-not-a-check-a-migration-path">MERIT-Hydro: not a check, a migration path<a class="headerlink" href="#merit-hydro-not-a-check-a-migration-path" title="Permanent link">&para;</a></h2>
+<p>This was presented as independent confirmation. It is better read as the
+opposite.</p>
+<table>
+<thead>
+<tr>
+<th>backend</th>
+<th>base grid</th>
+<th>source</th>
+<th style="text-align: right;">Koshi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hydrobasins</code> <em>(default)</em></td>
+<td>15 arc-sec, ~460 m</td>
+<td>SRTM, February 2000</td>
+<td style="text-align: right;">54,497 km²</td>
+</tr>
+<tr>
+<td><code>api</code></td>
+<td>3 arc-sec, ~90 m</td>
+<td>MERIT-Hydro, error-removed</td>
+<td style="text-align: right;">54,045 km²</td>
+</tr>
+<tr>
+<td><code>dem</code></td>
+<td>1 arc-sec, ~30 m</td>
+<td>Copernicus, 2011-2015</td>
+<td style="text-align: right;">-</td>
+</tr>
+</tbody>
+</table>
+<p>The two agree to <strong>0.8%</strong> with different source DEMs, different algorithms and
+no shared code, which is real evidence that neither is badly wrong. But
+agreement is not the interesting fact here. The default backend routes on a
+quarter-century-old 460 m grid. MERIT-Hydro is five times finer and
+hydrologically conditioned. A South Asian toolkit that runs at 90 m is a reason
+to exist; one that agrees with the 450 m product is a validation exercise.</p>
+<p>The obstacle is not technical: the 90 m path is already implemented as the
+<code>api</code> backend. It is licensing: MERIT-Hydro is CC BY-NC 4.0 or ODbL, acquisition
+cannot be automated, and the current route depends on one research group's
+server. Making 90 m the <em>default</em> means solving distribution, not routing.</p>
+<h2 id="rainfall-against-published-climatology">Rainfall against published climatology<a class="headerlink" href="#rainfall-against-published-climatology" title="Permanent link">&para;</a></h2>
+<p>Sapta Koshi basin, 2010-2019:</p>
+<table>
+<thead>
+<tr>
+<th>product</th>
+<th style="text-align: right;">basin mean</th>
+<th>published range</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CHIRPS v3.0</td>
+<td style="text-align: right;">1,335 mm/yr</td>
+<td>1,200-1,500 mm/yr</td>
+</tr>
+<tr>
+<td>TerraClimate</td>
+<td style="text-align: right;">1,002 mm/yr</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<p>CHIRPS lands inside the published band. TerraClimate reads 25% lower, which is
+a known characteristic rather than a defect: it is downscaled from coarse
+reanalysis and systematically under-resolves orographic enhancement in high
+mountains. <strong>For a Himalayan or Andean basin, prefer CHIRPS.</strong> TerraClimate's
+value is its water balance terms, not its rainfall.</p>
+<h2 id="optical-imagery-end-to-end">Optical imagery end to end<a class="headerlink" href="#optical-imagery-end-to-end" title="Permanent link">&para;</a></h2>
+<p>Rur basin at Jülich (1,555 km²), Sentinel-2 median composite, July-August 2023:</p>
+<table>
+<thead>
+<tr>
+<th>quantity</th>
+<th style="text-align: right;">value</th>
+<th>expected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>red reflectance (mean)</td>
+<td style="text-align: right;">0.047</td>
+<td>0.03-0.08 for vegetated land</td>
+</tr>
+<tr>
+<td>NIR reflectance (mean)</td>
+<td style="text-align: right;">0.290</td>
+<td>0.25-0.40</td>
+</tr>
+<tr>
+<td><strong>NDVI (median)</strong></td>
+<td style="text-align: right;"><strong>0.82</strong></td>
+<td>0.6-0.85, temperate cropland and forest in July</td>
+</tr>
+<tr>
+<td>finite fraction</td>
+<td style="text-align: right;">0.500</td>
+<td>bbox efficiency 0.509</td>
+</tr>
+</tbody>
+</table>
+<p>Getting a correct NDVI requires the search, the nodata masking, the scale, the
+offset, the solar-day grouping, the composite and the polygon clip all to be
+right at once. It is the single most informative check in the suite.</p>
+<p>Sentinel-1 RTC on the same basin returns a mean γ⁰ of <strong>−9.3 dB</strong>, within the
+published −15 to −5 dB range for vegetated land.</p>
+<h2 id="clipping">Clipping<a class="headerlink" href="#clipping" title="Permanent link">&para;</a></h2>
+<p>The finite fraction of every clipped layer tracks <code>bbox_efficiency</code> to within a
+couple of percent: Sentinel-2 0.500 against 0.509, Landsat 0.514, Sentinel-1
+0.514, exported GeoTIFFs 0.602 against 0.601 on the Danube. That is the clip
+doing exactly what it claims, measured rather than asserted.</p>
+<h2 id="the-catalogue-audit">The catalogue audit<a class="headerlink" href="#the-catalogue-audit" title="Permanent link">&para;</a></h2>
+<p>Rating the package honestly meant auditing what it claims against what it does.
+Two things came out of that.</p>
+<p><strong>Eight of twenty-six catalogued datasets had no fetcher.</strong> The catalogue listed
+them with resolution, licence and access route, and <code>grace</code> and <code>hydroatlas</code>
+even showed <code>auth=none, commercial=yes</code>, so a reader would reasonably conclude
+they could be downloaded. Fixed three ways: <code>hydroatlas</code> is now implemented,
+<code>grace</code> was corrected to <code>auth=account</code> (the CSR anonymous mirror was
+unreachable; the working route is JPL via Earthdata Login), and the remaining
+six raise <code>NotImplementedSource</code> carrying the access route and licence.</p>
+<div class="highlight"><pre><span></span><code>&gt;&gt;&gt; basinkit.catalog.require("glofas")
+NotImplementedSource: GloFAS v4 (CEMS-Floods) is catalogued but basinkit
+cannot fetch it yet.
+    Access : CEMS Early Warning Data Store (ewds.climate.copernicus.eu/api)
+    Licence: CEMS-Floods licence
+    Auth   : account required
+    Once you have it locally, pass the geometry to
+    basinkit.clip.clip_raster() to cut it to the basin.
+</code></pre></div>
+<p><strong>Seven public methods had never been executed.</strong> <code>plot()</code> was one of them, and
+it crashed on NumPy 2.x: <code>ndarray.ptp()</code> was removed in NumPy 2.0 while
+<code>pyproject</code> allows <code>numpy&gt;=1.24</code>. <code>explore()</code> was another: leafmap simply was
+not installed, so the interactive path had never run at all. Both now have
+tests, and one of those tests scans the whole package for every NumPy-2-removed
+API.</p>
+<h2 id="basinatlas-as-an-independent-check">BasinATLAS as an independent check<a class="headerlink" href="#basinatlas-as-an-independent-check" title="Permanent link">&para;</a></h2>
+<p>Implementing BasinATLAS produced an unplanned validation. It ships its own mean
+elevation per basin, derived from a different DEM by a different group:</p>
+<table>
+<thead>
+<tr>
+<th>quantity</th>
+<th style="text-align: right;">BasinATLAS</th>
+<th style="text-align: right;">basinkit (COP-DEM)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Koshi mean elevation</td>
+<td style="text-align: right;">3,782 m</td>
+<td style="text-align: right;">3,786 m</td>
+</tr>
+</tbody>
+</table>
+<p><strong>0.1% apart.</strong> Its precipitation reads 851 mm/yr against CHIRPS's 1,335, the
+same orographic under-resolution seen in TerraClimate, and for the same reason:
+BasinATLAS's climate layers come from WorldClim, downscaled from coarse
+gridded data.</p>
+<h2 id="defects-this-found">Defects this found<a class="headerlink" href="#defects-this-found" title="Permanent link">&para;</a></h2>
+<p>Verification is only worth doing if it changes the code. It changed twelve
+things, and every one is now a regression test.</p>
+<table>
+<thead>
+<tr>
+<th>what</th>
+<th>how it showed up</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Outlet on a riverbank</strong></td>
+<td>Rhine at Lobith returned 271 km² instead of 160,800. The point sits in a 270 km² bank unit; the main stem is 200 m away. Godavari at Polavaram, same story, 454 m. HydroBASINS' own <code>UP_AREA</code> agreed with the tiny answer, so every internal check still passed. Fixed by snapping when a nearby unit drains ≥10× more, with a warning.</td>
+</tr>
+<tr>
+<td><strong>Sentinel-2 offset applied twice</strong></td>
+<td>Earth Search pre-applies the baseline-04.00 BOA offset and flags it, while still publishing the nominal −0.1. Applying it again gave a <strong>mean reflectance of −0.05</strong> over a green catchment.</td>
+</tr>
+<tr>
+<td><strong>Nodata averaged into composites</strong></td>
+<td>Optical products encode "no observation" as 0. A basin straddles several MGRS tiles, so most scenes cover a fraction of it, and an unmasked Sentinel-2 median came back <strong>87% zero</strong>.</td>
+</tr>
+<tr>
+<td><strong>Clip broken on every Dataset</strong></td>
+<td><code>Dataset</code> has no <code>.values</code> array; reaching for one picks up a method. The clip worked on every single-band raster and failed on every multi-band STAC result.</td>
+</tr>
+<tr>
+<td><strong>Rasters exported without nodata</strong></td>
+<td>Correctly masked in memory, then written to GeoTIFF with no declared nodata, so QGIS paints the outside solid black and rasterio returns no mask. The clip silently stopped existing the moment the file left Python.</td>
+</tr>
+<tr>
+<td><strong>Nodata sentinel averaged in mosaics</strong></td>
+<td>JRC surface water uses 255 without declaring it, so an averaging resample produced occurrence values of <strong>101%</strong>.</td>
+</tr>
+<tr>
+<td><strong><code>outlets="min"</code> in flow routing</strong></td>
+<td>Routes a whole DEM window to its lowest cell. A river with 2,500 km² upstream came back with 0.2 km² at the same coordinate, purely because the window shifted.</td>
+</tr>
+<tr>
+<td><strong><code>Basin.plot()</code> broken on NumPy 2</strong></td>
+<td><code>ndarray.ptp()</code> was removed in NumPy 2.0; <code>pyproject</code> allows <code>numpy&gt;=1.24</code>. Found only by auditing which methods no test had ever called.</td>
+</tr>
+<tr>
+<td><strong>BasinATLAS extent code misread</strong></td>
+<td>Extent is the first letter of a column's <em>third</em> token (<code>pre_mm_uyr</code> upstream, <code>run_mm_syr</code> sub-catchment), not a trailing suffix. Read as a suffix it matched nothing and <code>attributes()</code> returned an empty dict.</td>
+</tr>
+<tr>
+<td><strong>BasinATLAS scaled integers</strong></td>
+<td>Stored as integers to keep the tables compact. Read raw, the Koshi averages 50 °C and a 204° slope.</td>
+</tr>
+<tr>
+<td><strong>The README's own example was wrong</strong></td>
+<td>Found on release day by running it. <code>from_point(26.5, 85.2)</code>, advertised as "14,384 km²", sits 16 km off the Bagmati channel and returns 434 km². The delineation was correct and HydroBASINS' <code>UP_AREA</code> agreed with it to 0.2%; the <em>coordinate</em> was wrong and the printed figure had gone stale. The first code block a new user ran disagreed with its own output by a factor of thirty. Fixed by moving every documented example to the Chatara outlet the network suite verifies, adding an off-channel advisory warning, and pinning the documented coordinate to the tested one.</td>
+</tr>
+<tr>
+<td><strong>ESRI land cover returned the wrong year</strong></td>
+<td>Found while trying to build a year-by-year change animation. Every annual item ends at 00:00 on 1 January, so a naive year window matches the previous year's map at the boundary instant: asking for 2024 (the package default) returned the 2023 map. Nothing raised, and the array was entirely valid. Three more defects sat in the same code path: the WorldCover legend applied to ESRI codes (reporting cloud as forest), a Dataset returned where a DataArray was expected, and two tiles stacked on a time axis instead of mosaicked.</td>
+</tr>
+</tbody>
+</table>
+<p>Ten of the twelve produce answers that look entirely plausible: an empty
+dict, a negative reflectance, a 271 km² Rhine. <strong>Only two of the twelve raised an
+exception</strong>, and both were found by auditing which methods no test had ever
+called, not by the suite. That is the argument for checking against published
+values rather than snapshots: a snapshot test would have locked the other eight
+in as the expected answer.</p>
+<h2 id="platform-coverage">Platform coverage<a class="headerlink" href="#platform-coverage" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>offline suite</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python 3.10</td>
+<td>31 passed, 2 skipped</td>
+<td>skips are optional extras not in <code>[dev]</code></td>
+</tr>
+<tr>
+<td>Python 3.11</td>
+<td>48 passed</td>
+<td>full extras installed</td>
+</tr>
+<tr>
+<td>Python 3.12</td>
+<td>31 passed, 2 skipped</td>
+<td></td>
+</tr>
+<tr>
+<td>Windows, macOS</td>
+<td><strong>not run</strong></td>
+<td>CI declares them; nobody has executed them</td>
+</tr>
+</tbody>
+</table>
+<p>Linux only so far. The CI matrix claims three operating systems and three
+Python versions; two of the three Pythons are now real, the two other operating
+systems are still a claim.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.sections", "content.code.copy", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
