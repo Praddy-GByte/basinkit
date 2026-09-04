@@ -8,30 +8,38 @@ cff-version: 1.2.0
 message: "If you use basinkit in published work, please cite it as below, and cite the underlying datasets. Basin.license_report() prints those."
 title: "basinkit: basin-scale acquisition of open Earth observation data"
 abstract: >-
-  A Python package that delineates the upstream river basin of any coordinate
-  on Earth and returns open Earth observation layers clipped and masked to that
-  polygon rather than to its bounding box. Nineteen datasets are reachable
-  without an account. Delineation is validated against published gauge areas on
-  six continents.
+  A Python package that turns a coordinate on any river into an analysis-ready
+  basin package. It returns the upstream basin polygon; open Earth observation
+  layers clipped and masked to that polygon rather than to its bounding box;
+  the profile of the river arriving at the point, with its long profile and the
+  tributaries that feed it; and the classical Horton-Strahler-Schumm
+  morphometry, with streams counted as Strahler streams rather than as the
+  reaches a river dataset splits them into. Nineteen datasets are reachable
+  without an account, login or credential. Delineation is validated against
+  published gauge areas on six continents.
 type: software
 authors:
   - given-names: Pradeepika
     family-names: Kaushik
     # orcid: "https://orcid.org/0000-0000-0000-0000"   # add yours
-version: 0.2.0
+version: 0.4.0
 doi: "10.5281/zenodo.22181934"
 identifiers:
   - type: doi
     value: "10.5281/zenodo.22181933"
     description: "Concept DOI -- always resolves to the latest version"
-date-released: 2026-08-30
+date-released: 2026-09-04
 license: MIT
 repository-code: "https://github.com/Praddy-GByte/basinkit"
 url: "https://github.com/Praddy-GByte/basinkit"
 keywords:
   - hydrology
-  - watershed delineation
   - river basin
+  - morphometry
+  - geomorphology
+  - drainage network
+  - strahler order
+  - watershed delineation
   - remote sensing
   - earth observation
   - open data
