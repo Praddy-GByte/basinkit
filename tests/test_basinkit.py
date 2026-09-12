@@ -1141,12 +1141,39 @@ def test_documented_example_uses_one_verified_coordinate():
 
 
 def test_readme_quotes_a_distribution_not_a_single_basin():
+    """The README must not offer one flattering accuracy figure.
+
+    It used to lead with twelve hand-picked gauges and a median error of 0.74
+    percent. That figure describes those twelve, which were selected because their
+    areas are published and are therefore large, well-mapped rivers. Blind
+    validation across 2,550 gauges puts the median error below 100 km2 at 181
+    percent, so the accuracy belongs to a size band rather than to the tool.
+
+    So this asserts three things: a sample size is stated, the accuracy is
+    broken out by catchment size, and no headline figure appears without that
+    context.
+    """
     import pathlib
     import re
 
     readme = (pathlib.Path(__file__).resolve().parent.parent / "README.md").read_text()
-    assert re.search(r"n = 12", readme), "sample size must be stated"
+
+    assert re.search(r"\b\d[\d,]{2,}\s+gauges\b", readme), (
+        "the sample size must be stated, and it must be the blind sample "
+        "rather than the twelve demonstration basins"
+    )
     assert "median" in readme.lower()
+
+    # Reported by size, which is the only way these numbers mean anything.
+    for band in ("100,000", "10,000", "2,000", "below 100"):
+        assert band in readme, f"accuracy is not broken out around {band} km2"
+
+    # The old headline, and its descendants, must not reappear unqualified.
+    for banned in ("median error is 0.74", "below one percent",
+                   "under one percent"):
+        assert banned not in readme.lower(), (
+            f"{banned!r} is the single-figure claim this test exists to stop"
+        )
 
 
 @pytest.mark.network
@@ -1165,3 +1192,62 @@ def test_published_reference_is_used_for_the_accuracy_claim():
         "exactly why it must not be quoted as accuracy"
     )
     assert 0.004 < external_error < 0.02
+
+def test_every_source_accepts_progress():
+    """One argument, spelled the same way, everywhere.
+
+    `basin.dem(progress=False)` worked while `basin.soil(progress=False)`
+    raised TypeError, because the Basin methods forward **kwargs and only some
+    of the underlying source functions declared the argument. A script that
+    silences one of them should not have to know which ones support it, and the
+    failure only appears at runtime, on the call that downloads.
+    """
+    import inspect
+
+    from basinkit.sources import attributes, climate, landcover, soil, vectors, water
+
+    # basinkit.sources re-exports a function called dem, which shadows the
+    # module of the same name, so this one is imported by its full path.
+    from basinkit.sources.dem import dem as dem_fn
+
+    functions = [
+        dem_fn, landcover.worldcover,
+        soil.soilgrids, soil.available_water_capacity,
+        climate.chirps, climate.persiann, climate.terraclimate,
+        climate.water_balance,
+        vectors.hydrorivers, vectors.hydrolakes,
+        water.global_surface_water,
+        attributes.hydroatlas, attributes.describe,
+    ]
+    missing = [
+        f.__name__ for f in functions
+        if "progress" not in inspect.signature(f).parameters
+        and not any(p.kind is p.VAR_KEYWORD
+                    for p in inspect.signature(f).parameters.values())
+    ]
+    assert not missing, f"these reject progress=: {missing}"
+
+
+def test_the_corrective_switch_is_gated_on_distance():
+    """A river a kilometre away is not the river the click is on.
+
+    The corrective re-delineation fires when the river network and a DEM
+    routing of the same point agree that HydroBASINS over-captured. Those two
+    stop being independent when the click is not on a river at all: both then
+    describe whatever drain happens to be nearby. Central Delhi went from
+    36,944 km2 to 18 before this gate existed.
+
+    All 25 corrective switches that were right had their corroborating reach
+    within 0.91 km; five clicks that would have been rewritten wrongly all had
+    theirs beyond 1.3 km. The gate only ever prevents a switch, so its worst
+    case is a correction not made, and it cost one in 300 gauges.
+    """
+    import inspect
+
+    from basinkit.delineate import _auto
+
+    source = inspect.getsource(_auto)
+    assert "act_within_km" in source, "the distance gate is gone"
+    assert "largest_distance_km" in source, (
+        "the gate must test how far the corroborating river is"
+    )

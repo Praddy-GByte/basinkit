@@ -9,9 +9,23 @@ Prepared by Pradeepika Kaushik.
 
 ## Delineation against published gauge areas
 
-Twelve reference gauges, one per major basin, on six continents. The published
-areas come from operating agencies and GRDC station records, **not** from
-HydroBASINS, so agreement is an external check rather than a tautology.
+Two checks live here, and they answer different questions.
+
+The **twelve-gauge check** below is a demonstration on named rivers. Those
+twelve were selected because their areas are published, which concentrates the
+sample in large, well-mapped basins, so its median error of 0.74% describes
+that class of river rather than the tool's range. It is kept because the three
+basins that diverge are instructive about what a published area includes.
+
+The **blind check** further down is the validation the package's claims rest
+on: 2,740 delineations at 2,550 gauges in 99 countries, drawn by seed before
+any result was seen.
+
+### The twelve named rivers
+
+The published areas come from operating agencies and GRDC station records,
+**not** from HydroBASINS, so agreement is an external check rather than a
+tautology.
 
 | basin | basinkit | published | error |
 |---|---:|---:|---:|
@@ -66,6 +80,170 @@ divergence is worth knowing about, not worth hiding.
 
 The Niger and Paraná gaps have the same character on a smaller scale: both have
 large arid or wetland zones whose contribution is intermittent.
+
+---
+
+## The blind check
+
+The twelve above were picked. These were not.
+
+**Source.** The Global Streamflow Indices and Metadata archive (Do et al. 2018,
+*Earth Syst. Sci. Data* 10, 765-785): 30,959 gauges whose catchment areas come
+from the agencies that operate them. 18,785 carry an agency area, sit inside
+HydroSHEDS coverage, and are absent from GSIM's own list of distrusted
+coordinates.
+
+**Method.** Four samples, four seeds, drawn before anything was run. Every
+station attempted is recorded, failures included. GSIM ships two coordinates per
+station: the agency's original, and one its authors moved so that the delineated
+area would match the reported area. 16,412 of 18,785 were moved that way. All of
+this uses the **original**, so no reported area ever entered a delineation.
+
+One trap, found before the first run: `GSIM_metadata.csv` reports area in square
+**miles** for its 2,395 USGS stations and square kilometres for everyone else.
+Taking that column at face value manufactures a 61% error across North America
+and nowhere else. The figures here use `area.meta`, which is km2 throughout.
+
+### By catchment size
+
+| catchment area | median error | within 20% | out by >100% |
+|---|---:|---:|---:|
+| above 100,000 km2 | 0.3% | 92% | 0% |
+| 10,000 to 100,000 | 1.3% | 92% | 0% |
+| 2,000 to 10,000 | 1.7% | 96% | 0% |
+| 500 to 2,000 | 8.9% | 78% | 4% |
+| 100 to 500 | 30% | 40% | 16% |
+| below 100 | 181% | 22% | 58% |
+
+Weighted to the catalogue's own size mix: 61.9% within 20%, 16.7% out by more
+than 100%.
+
+### By continent
+
+Equal effort per continent and size band, because the catalogue is 72% European
+and North American and sampling it in proportion measures the North Atlantic and
+calls the result global. Pooled per continent, between 59 and 68% of answers
+land within 20%, from Africa to South America. Comparing catchments under
+500 km2 against those over 10,000 within each continent separately, the median
+error is larger by 53x in Asia, 62x in North America, 65x in Africa, 102x in
+Europe and 217x in South America. Not one continent escapes it.
+
+Two of 1,240 could not be attempted: gauges in French Polynesia, where the
+HydroSHEDS regional files stop at longitude 180 degrees. The tool raised a clear
+error naming the cause rather than returning a polygon.
+
+### Whose mistake it is
+
+Every HydroBASINS unit carries `UP_AREA`, the dataset's own figure for
+everything draining through it. The traversal reproduces that to within 1% on
+95.3% of stations, and on 96.2% of the stations whose answer is wrong by more
+than a fifth. The walk is right; the outlet unit is wrong. A level-12 unit has a
+median area near 130 km2, so a point on a creek draining 0.8 km2 still lands
+inside some unit whose outlet is on the trunk river, and the trunk's whole basin
+comes back.
+
+Scored by overlap rather than area, on 360 stations against GSIM's own catchment
+boundaries: median IoU is 0.10 below 100 km2 and 0.99 above 10,000. Spearman
+correlation between area error and overlap is -0.847, and of 230 answers within
+20% on area, **none** had an overlap below 0.5, so the area metric is not hiding
+a right-size-wrong-place failure here. GSIM's own boundaries differ from the
+agency areas by 2.0% at the median, which is the reference's own floor.
+
+### Against other implementations
+
+59 catchments under 2,000 km2, one Copernicus 30 m window per station, three D8
+implementations on the identical raster:
+
+| method | answered | median error | within 20% |
+|---|---:|---:|---:|
+| HydroBASINS (default) | 100% | 41.6% | 34% |
+| basinkit on the DEM | 100% | 4.6% | 68% |
+| pysheds | 100% | 17.6% | 56% |
+| WhiteboxTools 2.4.0 | 76% | 8.6% | 51% |
+
+Where all three return a basin they agree to within 5% on 73% of stations, which
+locates the small-catchment limit in the resolution of pre-computed sub-basins
+rather than in any one implementation.
+
+Two harness settings were corrected before scoring, since both would have
+understated a baseline: pysheds' `catchment` defaults to `snap='corner'`, which
+returns a single cell, and rioxarray writes the DEM with nodata 0, which leaves
+interior pits and reduces WhiteboxTools' flow accumulation from 8.5 million
+cells to 9,248.
+
+25% of these stations sit outside what any of the four reproduces, at both
+snapping distances tried. That is the ceiling this catalogue supports, rather
+than a property of the tools.
+
+### What the checks in 0.5.0 are worth
+
+The river-network check fires when the basin exceeds twice the area draining to
+the largest river within 2 km of the outlet: **85% precision, 3.2% false
+alarms, 30% recall**, with precision from 75% in Europe to 93% in Africa.
+
+The corrective re-delineation, tested on 300 gauges drawn after all of it was
+designed and used nowhere else: **19 corrected, 279 unchanged, 0 made worse**,
+with the median error where it acted falling from 1,731% to 4.3%.
+
+### Outlets that are not on rivers
+
+Every gauge sits on a river by construction, so a gauge sample does not cover
+a click on a city, a lake surface or a desert. Those are tested separately, and
+they set the distance gate on the refinement step:
+
+| outlet | sub-basin route | refinement ungated | 0.5.0 as shipped | published |
+|---|---:|---:|---:|---:|
+| central Delhi | 36,944 | 18 | 36,944 + warning | about 9,700 |
+| Lake Victoria surface | 195 | 195 | 195 + warning | about 184,000 |
+| Lake Baikal surface | 786 | 786 | 786 + warning | about 560,000 |
+| Sahara interior | 145 | 145 | 145 + warning | endorheic |
+| Svalbard | 115 | 18 | 115 + warning | small, plausible |
+
+The switch is now gated on the distance to the river it would judge by. All 25
+corrective switches that were right had theirs within 0.91 km, median 0.15 km;
+all five of these had theirs beyond 1.3 km. The gate costs one correction in
+300 and prevents all five.
+
+None of those outlets has a resolvable catchment at this grid: a lake surface
+and a closed depression have no upstream network to assemble. The package now
+identifies each situation by name, reports it, and leaves the more conservative
+of the two available answers in place.
+
+Clicks that are refused outright, with the reason named: open ocean, Antarctica,
+a coordinate a few hundred metres offshore, and latitude and longitude
+swapped.
+
+An earlier version searched 1 km instead of 2 and rewrote two correct
+continental answers, including a Mekong gauge whose 373,000 km2 became 9.5
+because the only mapped reach within a kilometre drained 5.9 km2. That is why
+the radius is 2 km.
+
+### Prior art
+
+The finding that automatic delineation fails on small catchments is not new and
+is not claimed as new. Kauffeldt et al. (2013, *HESS* 17, 2845-2857) plotted
+area error against basin size for 7,518 GRDC gauges. Lehner (2012, GRDC Report
+41) wrote it plainly: small watersheds are found close to any location,
+including incorrect ones. Godet et al. (2024), Johnston et al. (2009) and
+Heberger (2025) all stratify by size. Caravan encodes it as a 100 km2 floor,
+HYSETS replaces catchments under 50 km2 with bounding boxes, MERIT-Basins stops
+at 25 km2.
+
+What differs here is narrow: the large-sample studies feed the reported area
+into the outlet-snapping objective and then score against that same reported
+area. This does not.
+
+### Limits
+
+- Australasia contributes 43 scorable stations in the whole archive and none
+  above 100,000 km2, so that row is indicative rather than measured.
+- Remote Pacific islands are outside HydroSHEDS altogether.
+- One threshold was validated on unseen data. The design around it was not.
+- The baseline is two implementations, not five, and all three compared route
+  D8 on the same Copernicus grid.
+- Agency areas can be stale or refer to a different structure, and GSIM's
+  boundaries come from the same HydroSHEDS grid, so the overlap metric measures
+  agreement with the accepted delineation rather than with the ground.
 
 ## MERIT-Hydro: not a check, a migration path
 

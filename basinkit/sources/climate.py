@@ -193,6 +193,7 @@ def terraclimate(
     end: int | None = None,
     *,
     aggregate: bool = True,
+    progress: bool = True,
 ):
     """TerraClimate monthly water balance over the basin, read via OPeNDAP.
 
@@ -286,7 +287,7 @@ def _as_date(value, *, end_of_year: bool = False) -> str:
 
 def persiann(
     geometry, start: str | int = "2000-01-01", end: str | int | None = None,
-    *, aggregate: bool = True
+    *, aggregate: bool = True, progress: bool = True
 ):
     """PERSIANN-CDR daily rainfall via NOAA ERDDAP (server-side subsetting)."""
     import xarray as xr
@@ -338,15 +339,17 @@ def persiann(
     return da
 
 
-def water_balance(geometry, start: int = 2000, end: int | None = None):
+def water_balance(geometry, start: int = 2000, end: int | None = None, *,
+                  progress: bool = True):
     """Monthly basin water balance from TerraClimate, with a closure check.
 
     Returns the standard terms plus ``residual = ppt - aet - q``. A residual
-    that does not hover near zero is not a bug in the arithmetic: it is storage
+    that does not hover near zero is not an arithmetic error: it is storage
     change plus the model's own error, and it is worth looking at before you
     trust any of the components.
     """
-    ds = terraclimate(geometry, WATER_BALANCE_VARS, start, end, aggregate=True)
+    ds = terraclimate(geometry, WATER_BALANCE_VARS, start, end, aggregate=True,
+                      progress=progress)
     if all(v in ds for v in ("ppt", "aet", "q")):
         ds["residual"] = ds["ppt"] - ds["aet"] - ds["q"]
         ds["residual"].attrs["long_name"] = (

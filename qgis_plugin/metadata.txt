@@ -3,13 +3,13 @@ name=basinkit
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Click a river anywhere on Earth and get an analysis-ready basin package: elevation, land cover, soil, rainfall, surface water, rivers, and full Horton-Strahler morphometry, clipped to the basin.
-version=0.4.0
+version=0.5.0
 author=Pradeepika Kaushik
 email=pradeepikakaushik4@gmail.com
 
-about=Click a point on any river in the world and get the basin draining into it, then pull DEM, land cover, soil, rainfall, surface water, rivers and lakes for that basin -- clipped and masked to the polygon, not to its bounding box. No account is needed for any of it. Delineation is validated against published gauge areas on six continents, with a median area error below one percent.
+about=Click a point on any river in the world and get the basin draining into it, then pull DEM, land cover, soil, rainfall, surface water, rivers and lakes for that basin -- clipped and masked to the polygon, not to its bounding box. No account is needed for any of it. Delineation is validated blind against 2,550 gauges in 99 countries on six continents, whose catchment areas are published by the agencies that operate them, and the plugin reports which accuracy regime an answer falls in rather than quoting a single figure: 0.3 percent median area error above 100,000 square kilometres, 1.7 percent from 2,000 to 10,000. Below about 2,000 square kilometres the DEM backend is the right instrument, and the plugin says so at the moment it matters and switches to it where the evidence supports the switch.
     Other plugins delineate from a clicked point, and Sen Hydro does it well through the same public mghydro service this plugin can use. Three things here are different. The data: elevation, land cover, soil, rainfall, surface water, rivers and lakes come back as layers clipped to the polygon, not as a report. The morphometry: the full Horton-Strahler-Schumm set from one algorithm, with Strahler streams counted as streams rather than as the reaches a river dataset splits them into. And the offline path: the default backend walks the HydroBASINS level-12 graph from a cached local copy, so after the first download it needs no network at all. Every algorithm is a Processing algorithm, so batch mode, the Model Builder and qgis_process all work.
-    EXTERNAL DEPENDENCY: this plugin requires the Python package "basinkit", which QGIS does not ship. If it is missing the plugin will tell you the exact pip command for your QGIS Python installation. See the plugin homepage for details.
+    SETUP: this plugin runs on the Python package "basinkit", which is installed once with pip into the Python that QGIS itself uses. The plugin detects whether it is present and prints the exact command for your installation, so setup is a single copy and paste. See the plugin homepage for details.
 
 tracker=https://github.com/Praddy-GByte/basinkit/issues
 repository=https://github.com/Praddy-GByte/basinkit
@@ -21,16 +21,62 @@ experimental=False
 deprecated=False
 hasProcessingProvider=yes
 
-# The pip distribution this plugin needs. QGIS does not ship it, and there is
-# no mechanism to install it automatically, so the plugin detects it at load
+# The pip distribution this plugin runs on. QGIS installs plugins but not
+# their Python dependencies, so the plugin detects it at load
 # and hands the user a command that works. Declaring it here is what puts it in
 # the "External dependencies" field on plugins.qgis.org.
-external_deps=basinkit>=0.4
+external_deps=basinkit>=0.5
 server=False
 
 tags=hydrology,watershed,catchment,basin,delineation,dem,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
 
-changelog=0.4.0
+changelog=0.5.0
+    - Compatibility across the full supported QGIS range. The provider now
+      resolves the Processing source-type enum by asking the API for it, so it
+      loads identically on QGIS 3.28 through 4.x. QGIS 3.34, the current
+      long-term release, is covered by a continuous integration job that
+      installs QGIS and loads every algorithm.
+    - Accuracy is now reported by catchment size, from blind validation against
+      2,550 gauges in 99 countries whose catchment areas are published by the
+      agencies that operate them: 0.3 percent median error above
+      100,000 square kilometres, 1.3 percent from 10,000 to 100,000, 1.7
+      percent from 2,000 to 10,000. Below about 2,000 square kilometres the
+      'dem' backend is the better instrument, and the plugin now says so at the
+      moment it matters.
+    - Every answer is checked against the river network. When the basin exceeds
+      twice the area draining to the largest river within two kilometres of the
+      outlet, the plugin reports it: 85 percent of the outlets it flags need
+      attention, and it stays quiet on 97 percent of the ones that do not.
+      Precision runs from 75 percent in Europe to 93 percent in Africa.
+    - The 'auto' backend refines on the elevation model when the river network
+      and a 30 metre routing of the same point agree on a smaller catchment.
+      Across 300 gauges drawn after the method was fixed and used nowhere else
+      in its design, it improved 19 results, left 279 unchanged and reduced
+      none. Where it acts, the median error falls from 1,731 percent to 4.3
+      percent, at a median cost of 1.6 seconds.
+    - Refinement acts only when the river it is judging by lies within a
+      kilometre of the outlet. Beyond that distance the point is not on that
+      river, so the two sources stop being independent. Every refinement that
+      improved a result had its river within 0.91 kilometres.
+    - The plugin now names what kind of place the outlet is in. An endorheic
+      system, a coastal strip draining straight to the ocean, and an outlet
+      with nothing draining into it are each reported, the last being what a
+      lake surface and a sub-grid headwater have in common.
+    - Messages are matched to the cause and say what to do next: a coordinate
+      outside the network's coverage, one beyond the snap distance, and one on
+      a hillslope rather than in a channel each get their own guidance.
+    - The consistency line now compares the result against the river network
+      rather than against the source dataset's own upstream-area field, which
+      confirms the traversal rather than the choice of outlet.
+    - The river-network check is a checkbox, on by default, and is the only
+      thing that downloads the regional rivers file.
+    - Against pysheds and WhiteboxTools on identical 30 metre rasters across 59
+      catchments under 2,000 square kilometres, the 'dem' backend returned a
+      basin for every one, matched the agency figure within 20 percent on 68
+      percent of them against 56 and 51, and had the lowest median error.
+    - Requires basinkit 0.5 or newer.
+
+    0.4.0
     - New algorithm: Basin morphometry. The full Horton-Strahler-Schumm set
       from one run, with the per-order table showing Strahler streams and
       dataset reaches side by side, and the counts tested against what Strahler
@@ -38,10 +84,11 @@ changelog=0.4.0
       the basin's highest order are both impossible, and are now reported
       instead of being handed back as numbers to interpret. Until now
       morphometry was in the Python package but not reachable from QGIS.
-    - The plugin description no longer leads with "delineate". QGIS already has
+    - The plugin description leads with the data package rather than with
+      "delineate". QGIS already has
       several delineation plugins, and the old wording put this one in that
-      queue while never mentioning morphometry at all, so a reader had no
-      reason to look further.
+      queue while morphometry, which is the part with no equivalent elsewhere,
+      went unmentioned.
     - Requires basinkit 0.4 or newer.
 
     0.3.3
@@ -62,7 +109,7 @@ changelog=0.4.0
       stream of its highest order. Counts that break either are reported rather
       than returned as numbers.
     - The plugin description now says plainly what this does that a
-      delineate-from-a-click plugin does not, rather than leaving a reader to
+      delineate-from-a-click plugin offers, rather than leaving a reader to
       work it out.
 
     0.3.2

@@ -117,30 +117,58 @@ are opt-in and say so before the first byte moves.
 
 ## Does it work?
 
-Twelve reference gauges on six continents, checked against operating-agency
-figures rather than against HydroBASINS itself:
+Blind validation against **2,740 delineations at 2,550 gauges in 99 countries**
+on six continents, whose catchment areas are published by the national agencies
+that operate them. The samples were drawn by seed before any result was seen and
+nothing was dropped afterwards, failures included.
 
-| basin | basinkit | published | error |
+The answer depends almost entirely on catchment size, so it is reported that
+way rather than as one number:
+
+| catchment area | median error | within 20% | within 5% |
 |---|---:|---:|---:|
-| Danube @ Bratislava | 131,449 | 131,300 | 0.1% |
-| Amazon @ Óbidos | 4,671,504 | 4,680,000 | 0.2% |
-| Godavari @ Polavaram | 306,750 | 307,800 | 0.3% |
-| Mississippi @ Vicksburg | 2,979,823 | 2,964,000 | 0.5% |
-| Sapta Koshi @ Chatara | 54,497 | 54,100 | 0.7% |
-| Rhine @ Lobith | 159,776 | 160,800 | 0.6% |
+| above 100,000 km2 | 0.3% | 92% | 78% |
+| 10,000 to 100,000 | 1.3% | 92% | 86% |
+| 2,000 to 10,000 | 1.7% | 96% | 58% |
+| 500 to 2,000 | 8.9% | 78% | 35% |
+| 100 to 500 | 30% | 40% | 15% |
+| below 100 | 181% | 22% | 0% |
 
-**n = 12, median error 0.74%**, eight within 1% and nine within 3%. Twelve
-is a small sample of large, well-mapped rivers; they were chosen because their
-areas are published, which biases toward basins that have been studied. The
-three that diverge by more than 3% do so for a physical reason, not a
-delineation error, and the full write-up says which.
+The default backend walks HydroBASINS level-12 units, which average about
+130 km2, so that is the scale it resolves. Below it, an outlet falls inside a
+unit whose own outlet may be on the trunk river, and the polygon returned is
+the trunk's catchment. The geometry gives no sign of this by itself, since the
+traversal reproduces HydroBASINS' own upstream area on 95% of stations either
+way.
 
-The Amazon (4.67 million km², 35,625 sub-basins) takes 43 seconds. Rainfall,
-reflectance and radar are checked the same way: CHIRPS lands inside the
-published Koshi climatology, a Sentinel-2 July composite gives an NDVI median of
-0.82 over temperate farmland, Sentinel-1 RTC gives −9.3 dB over vegetated land.
+So basinkit confirms every answer against the river network. Where that check
+raises a question, **85% of those outlets need attention**, and it stays quiet
+on 97% of the ones that do not. Where the network and a 30 m elevation model
+agree on a smaller catchment, the answer is refined on the elevation model: on
+300 gauges drawn after all of this was designed and used nowhere else, that
+improved 19 results, left 279 unchanged, and **reduced none**.
 
-Full results, including the three basins that diverge and why, are in
+On 59 catchments under 2,000 km2 the DEM backend was compared against pysheds
+and WhiteboxTools on identical rasters. All three agree with each other to
+within 5% on three quarters of stations, which locates the small-catchment
+limit in the resolution of pre-computed sub-basins rather than in any one
+implementation. basinkit returned a basin for every station and had the lowest
+median error of the three.
+
+A quarter of the gauges sit outside what any of the four methods reproduces, at
+every snapping distance tried. Where four independent methods agree with each
+other and differ from the reference, the reference is the variable: a
+coordinate on a neighbouring tributary, or a published area measured at a
+different structure. About 75% is the ceiling this catalogue supports for any
+tool.
+
+The Amazon (4.67 million km2, 35,625 sub-basins) takes 43 seconds. Rainfall,
+reflectance and radar are checked separately: CHIRPS lands inside the published
+Koshi climatology, a Sentinel-2 July composite gives an NDVI median of 0.82 over
+temperate farmland, Sentinel-1 RTC gives -9.3 dB over vegetated land.
+
+Full results, including the twelve named rivers this check replaced as the
+headline, are in
 [Verification](https://praddy-gbyte.github.io/basinkit/verification/).
 
 ---

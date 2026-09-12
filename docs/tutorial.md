@@ -111,9 +111,10 @@ centred on your basin, not by summing degrees. `reported_up_area_km2` comes
 from HydroBASINS and is derived completely independently. If the two disagree
 by more than a few percent, something is wrong with the outlet.
 
-Against published gauge areas at twelve gauges on six continents, the median
-error is 0.74%. Where basinkit disagrees, the reason is written down; see
-[Verification](verification.md).
+Against published gauge areas at 2,550 gauges in 99 countries, the median error
+is 0.3% above 100,000 km2 and 181% below 100 km2. That spread is the whole
+finding, and it is why the answer comes back with a warning rather than a single
+accuracy figure; see [Verification](verification.md).
 
 ### Why the polygon matters
 

@@ -16,10 +16,13 @@ basin.download_all("koshi/")
 
 **Delineation.** Three global backends: HydroBASINS graph traversal (default,
 15 arc-sec base), MERIT-Hydro via a public service (3 arc-sec), and D8 routing
-on Copernicus DEM (1 arc-sec). Validated against published gauge areas on six
-continents: n = 12, median error 0.74%, eight within 1%. The three basins that
-diverge by more than 3% do so because their published figure includes large
-non-contributing area, and the write-up says so.
+on Copernicus DEM (1 arc-sec). Validated blind against agency-published
+catchment areas at 2,550 gauges in 99 countries on six continents, and the
+accuracy is reported by catchment size because it varies by three orders of
+magnitude across that range: 0.3% median error above 100,000 km2, 181% below
+100 km2. The default backend walks sub-basins of about 130 km2, so it cannot
+resolve anything smaller, and it now says so instead of returning a confident
+number.
 
 **Data.** Nineteen datasets fetchable today, every one of them anonymous:
 Copernicus DEM, NASADEM, SRTM, HydroBASINS/RIVERS/LAKES/ATLAS, ESA WorldCover,
