@@ -98,174 +98,56 @@ are opt-in and say so before the first byte moves.
 
 ## Does it work?
 
-Twelve reference gauges on six continents, checked against operating-agency
-figures rather than against HydroBASINS itself:
+Blind validation against **2,740 delineations at 2,550 gauges in 99 countries**
+on six continents, whose catchment areas are published by the national agencies
+that operate them. The samples were drawn by seed before any result was seen and
+nothing was dropped afterwards, failures included.
 
-| basin | basinkit | published | error |
+The answer depends almost entirely on catchment size, so it is reported that
+way rather than as one number:
+
+| catchment area | median error | within 20% | within 5% |
 |---|---:|---:|---:|
-| Danube @ Bratislava | 131,449 | 131,300 | 0.1% |
-| Amazon @ Óbidos | 4,671,504 | 4,680,000 | 0.2% |
-| Godavari @ Polavaram | 306,750 | 307,800 | 0.3% |
-| Mississippi @ Vicksburg | 2,979,823 | 2,964,000 | 0.5% |
-| Sapta Koshi @ Chatara | 54,497 | 54,100 | 0.7% |
-| Rhine @ Lobith | 159,776 | 160,800 | 0.6% |
+| above 100,000 km2 | 0.3% | 92% | 78% |
+| 10,000 to 100,000 | 1.3% | 92% | 86% |
+| 2,000 to 10,000 | 1.7% | 96% | 58% |
+| 500 to 2,000 | 8.9% | 78% | 35% |
+| 100 to 500 | 30% | 40% | 15% |
+| below 100 | 181% | 22% | 0% |
 
-**n = 12, median error 0.74%**, eight within 1% and nine within 3%. Twelve
-is a small sample of large, well-mapped rivers; they were chosen because their
-areas are published, which biases toward basins that have been studied. The
-three that diverge by more than 3% do so for a physical reason, not a
-delineation error, and the full write-up says which.
+The default backend walks HydroBASINS level-12 units, which average about
+130 km2, so that is the scale it resolves. Below it, an outlet falls inside a
+unit whose own outlet may be on the trunk river, and the polygon returned is
+the trunk's catchment. The geometry gives no sign of this by itself, since the
+traversal reproduces HydroBASINS' own upstream area on 95% of stations either
+way.
 
-The Amazon (4.67 million km², 35,625 sub-basins) takes 43 seconds. Rainfall,
-reflectance and radar are checked the same way: CHIRPS lands inside the
-published Koshi climatology, a Sentinel-2 July composite gives an NDVI median of
-0.82 over temperate farmland, Sentinel-1 RTC gives −9.3 dB over vegetated land.
+So basinkit confirms every answer against the river network. Where that check
+raises a question, **85% of those outlets need attention**, and it stays quiet
+on 97% of the ones that do not. Where the network and a 30 m elevation model
+agree on a smaller catchment, the answer is refined on the elevation model: on
+300 gauges drawn after all of this was designed and used nowhere else, that
+improved 19 results, left 279 unchanged, and **reduced none**.
 
-Full results, including the three basins that diverge and why, are in
-[Verification](https://praddy-gbyte.github.io/basinkit/verification/).
+On 59 catchments under 2,000 km2 the DEM backend was compared against pysheds
+and WhiteboxTools on identical rasters. All three agree with each other to
+within 5% on three quarters of stations, which locates the small-catchment
+limit in the resolution of pre-computed sub-basins rather than in any one
+implementation. basinkit returned a basin for every station and had the lowest
+median error of the three.
 
----
+A quarter of the gauges sit outside what any of the four methods reproduces, at
+every snapping distance tried. Where four independent methods agree with each
+other and differ from the reference, the reference is the variable: a
+coordinate on a neighbouring tributary, or a published area measured at a
+different structure. About 75% is the ceiling this catalogue supports for any
+tool.
 
-## Install
+The Amazon (4.67 million km2, 35,625 sub-basins) takes 43 seconds. Rainfall,
+reflectance and radar are checked separately: CHIRPS lands inside the published
+Koshi climatology, a Sentinel-2 July composite gives an NDVI median of 0.82 over
+temperate farmland, Sentinel-1 RTC gives -9.3 dB over vegetated land.
 
-```bash
-pip install basinkit              # core: delineation, DEM, land cover, soil, climate
-pip install "basinkit[all]"       # + STAC imagery, DEM routing, interactive maps
-```
+Full results, including the twelve named rivers this check replaced as the headline, are in
+[Verification](verification.md).
 
-Optional extras: `stac` (Sentinel/Landsat), `delineate` (D8 routing via
-pyflwdir), `climate` (NetCDF), `viz` (leafmap, matplotlib).
-
----
-
-## Delineation: three backends, because one is not enough
-
-| backend | how it works | best for | resolution floor |
-|---|---|---|---|
-| `hydrobasins` *(default)* | walks the `NEXT_DOWN` graph over HydroBASINS level-12 units | any size, offline once cached, CC BY 4.0 | ~130 km² unit |
-| `dem` | D8 routing with `pyflwdir` over a fresh Copernicus DEM window | small headwater catchments | one 30 m pixel |
-| `api` | the public Global Watersheds service | a quick first look, zero download | ~90 m |
-
-`backend="auto"` uses HydroBASINS, then falls back to DEM routing when the
-result sits at the level-12 resolution floor and the true divide is invisible
-to it.
-
-**Say the base grid out loud**, because it is the most load-bearing fact about
-any delineation tool and most of them bury it:
-
-| backend | grid | source | conditioned |
-|---|---|---|---|
-| `hydrobasins` *(default)* | 15 arc-sec, ~460 m | SRTM, February 2000 | HydroSHEDS |
-| `api` | 3 arc-sec, ~90 m | MERIT-Hydro | yes, error-removed |
-| `dem` | 1 arc-sec, ~30 m | Copernicus, 2011-2015 | routed on the fly |
-
-The default routes on a quarter-century-old 460 m grid. That is fine for a
-large basin and wrong for a small or heavily modified one, which is what the
-other two backends are for.
-
-Two failure modes are handled explicitly rather than silently:
-
-- **Outlet not on the channel.** A coordinate off the modelled stream by one
-  pixel routes a few hectares instead of a few hundred km². The DEM backend
-  snaps to the local maximum of upstream area and reports how far it moved.
-- **Basin larger than the DEM window.** If the delineated basin touches the
-  window edge the answer is wrong, so the window doubles and routing re-runs,
-  up to a bound.
-
-Whichever backend ran is recorded in `basin.provenance` and written into every
-export. A polygon always says where it came from.
-
----
-
-## What you can fetch
-
-| layer | dataset | resolution | account |
-|---|---|---|---|
-| `dem()` | Copernicus GLO-30 / GLO-90 / NASADEM / SRTM | 30-90 m | no |
-| `landcover()` | ESA WorldCover / ESRI annual LULC | 10 m | no |
-| `soil()` | SoilGrids 250 m, 13 properties, 6 depths | 250 m | no |
-| `available_water_capacity()` | derived: field capacity − wilting point | 250 m | no |
-| `precipitation()` | CHIRPS v3.0 / PERSIANN-CDR / TerraClimate | 0.05-0.25° | no |
-| `water_balance()` | TerraClimate P/AET/PET/Q/soil + closure residual | 4 km | no |
-| `surface_water()` | JRC Global Surface Water (37 years of Landsat) | 30 m | no |
-| `sentinel2()` | Sentinel-2 L2A via Earth Search | 10 m | no |
-| `landsat()` | Landsat C2 L2, 1982→ via Planetary Computer | 30 m | no |
-| `sentinel1()` | Sentinel-1 RTC, terrain-corrected, global | 10 m | no |
-| `rivers()` / `lakes()` | HydroRIVERS / HydroLAKES | vector | no |
-| `attributes()` | BasinATLAS: 281 pre-computed basin attributes | vector | no |
-
-**Documented but not fetchable** (`basinkit catalog` marks these `DOC`):
-ERA5-Land, GPM IMERG, GloFAS and GRACE need an account and a client basinkit
-does not ship; MERIT Hydro, FABDEM and GRDC are licence-gated or have no API at
-all. Asking for one returns instructions, not a stack trace.
-
-### The fast way to characterise a basin
-
-`attributes()` returns BasinATLAS's 281 pre-computed variables: climate,
-physiography, land cover, soil, geology, human footprint. Its `_u` columns are
-already aggregated over everything upstream, so one lookup describes the whole
-catchment without touching a raster:
-
-```python
-basin.attributes(prefixes=("pre", "tmp", "ele", "slp"))
-# {'precipitation [pre_mm_uyr]': 851,
-#  'air temperature (degC) [tmp_dc_uyr]': 5.0,
-#  'elevation [ele_mt_uav]': 3782,
-#  'slope (degrees) [slp_dg_uav]': 20.4}
-```
-
-Costs one 2.7 GB download, once. Note the decoded units: BasinATLAS stores
-several variables as scaled integers, and read raw the Koshi appears to average
-50 °C and a 204° slope.
-
----
-
-## Notes worth knowing
-
-A few things basinkit handles that trip up hand-rolled pipelines:
-
-- **Copernicus GLO-30 is not literally global.** Some national tiles are absent
-  from the public bucket. basinkit falls back per tile to GLO-90 and then the
-  OpenTopography mirror, and records which source filled each one.
-- **SoilGrids is in Interrupted Goode Homolosine.** A WCS request built from a
-  raw lon/lat bbox silently returns a coverage from the wrong place. basinkit
-  reprojects the request and the result.
-- **Basin means need cosine weighting.** On a geographic grid, pixel area
-  shrinks with latitude. Ignoring that biases a large basin's mean toward its
-  poleward end.
-- **Area in degrees is wrong.** `area_km2` reprojects to an equal-area
-  projection centred on the basin itself.
-- **CHIRPS v3.0 is wetter than v2.0** by construction. basinkit will not splice
-  the two into one series.
-- **Landsat from Earth Search is requester-pays**: anonymous users get a 403,
-  authenticated ones get a bill. basinkit takes Landsat from Planetary
-  Computer instead.
-- **BasinATLAS encodes extent in the middle of a column name**, not as a
-  suffix: `pre_mm_uyr` is upstream, `run_mm_syr` is the local sub-catchment.
-- **`ndarray.ptp()` was removed in NumPy 2.0**, and a test now scans the whole
-  package for that and every other removed API.
-
----
-
-## QGIS
-
-`qgis_plugin/` is a Processing provider with three algorithms: delineate a
-basin from a canvas click, fetch layers clipped to it, and basin statistics.
-Being Processing algorithms, they work in batch mode, in the Model Builder and
-under `qgis_process`.
-
-Install the zip through *Plugins → Manage and Install Plugins → Install from
-ZIP*. QGIS ships its own Python and there is still no official way for a plugin
-to declare a pip dependency, so `basinkit` itself is installed separately; the
-plugin prints the exact command for your installation.
-
-## Citation
-
-If basinkit is useful in published work, please cite it *and* the underlying
-datasets. `Basin.license_report()` prints the citations for the layers you
-actually used.
-
-## Licence
-
-MIT for the code. The data carries its own terms; see `LICENSE` and
-`basinkit catalog`.

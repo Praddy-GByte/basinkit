@@ -32,7 +32,7 @@ from .exceptions import (
 )
 from .river import Confluence, River
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 __all__ = [
     "Basin",

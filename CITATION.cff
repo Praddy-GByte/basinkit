@@ -15,14 +15,16 @@ abstract: >-
   tributaries that feed it; and the classical Horton-Strahler-Schumm
   morphometry, with streams counted as Strahler streams rather than as the
   reaches a river dataset splits them into. Nineteen datasets are reachable
-  without an account, login or credential. Delineation is validated against
-  published gauge areas on six continents.
+  without an account, login or credential. Delineation is validated blind
+  against agency-published catchment areas at 2,550 gauges in 99 countries on
+  six continents, with the accuracy reported by catchment size rather than as a
+  single figure.
 type: software
 authors:
   - given-names: Pradeepika
     family-names: Kaushik
     # orcid: "https://orcid.org/0000-0000-0000-0000"   # add yours
-version: 0.4.0
+version: 0.5.0
 doi: "10.5281/zenodo.22181934"
 identifiers:
   - type: doi

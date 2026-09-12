@@ -1,16 +1,20 @@
 """Small shims for API changes across the QGIS versions this plugin supports.
 
-Two renames matter here, and both would be silent breakages rather than clean
-errors:
+Three renames matter here. The first two would change behaviour silently rather
+than raise, so they are decided by version:
 
 * ``QgsField(name, QVariant.Type)`` was deprecated in QGIS 3.38 in favour of a
   ``QMetaType.Type`` argument -- and Qt6, which QGIS 4 is built on, removed the
   ``QVariant.Type`` enum outright.
 * ``QgsWkbTypes.Type`` became ``Qgis.WkbType`` in QGIS 3.30.
 
-Both are resolved by version, not by a try/except import: ``QMetaType`` exists
-under Qt5 too, so importing it successfully says nothing about whether
-``QgsField`` will accept it.
+Those two are resolved by version rather than by a try/except import, because
+``QMetaType`` exists under Qt5 as well: importing it successfully says nothing
+about whether ``QgsField`` accepts it.
+
+The third, ``QgsProcessing.SourceType`` becoming ``Qgis.ProcessingSourceType``
+in QGIS 3.36, is resolved by asking the API whether the enum is there. For an
+enum, presence is the whole question.
 """
 
 from __future__ import annotations
@@ -52,9 +56,17 @@ def make_field(name: str, kind):
     return QgsField(name, kind)
 
 
-if QGIS_VERSION >= 33000:
+# ``Qgis.ProcessingSourceType`` arrived in QGIS 3.36; before that the same enum
+# lives on ``QgsProcessing``. Every algorithm imports this module, so the branch
+# has to be right across the whole supported range, 3.28 to 4.x, which includes
+# the 3.34 long-term release.
+#
+# Unlike the ``QgsField`` case above, presence does imply usability for an enum,
+# so this asks the API directly. A version number is a proxy for the question;
+# ``hasattr`` is the question, and it stays correct through future renames.
+if hasattr(Qgis, "ProcessingSourceType"):        # QGIS 3.36 and newer
     SOURCE_POLYGON = Qgis.ProcessingSourceType.VectorPolygon
-else:
+else:                                            # QGIS 3.28 - 3.34
     from qgis.core import QgsProcessing
 
     SOURCE_POLYGON = QgsProcessing.SourceType.TypeVectorPolygon

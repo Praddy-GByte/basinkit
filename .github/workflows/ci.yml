@@ -25,3 +25,29 @@ jobs:
       - run: ruff check basinkit tests
       - name: Offline tests
         run: pytest -q -m "not network" --cov=basinkit --cov-report=term-missing
+
+  # The plugin's API usage against a real QGIS. Enum names move between QGIS
+  # releases, and a name that resolves on one version can be absent on another,
+  # which only shows when an algorithm is imported. Reading metadata.txt, which
+  # is what the other plugin tests do, does not exercise that.
+  #
+  # Ubuntu ships QGIS 3.34, a long-term release and the one most institutions
+  # run, so it is the version worth testing against.
+  # setup-python is deliberately absent: the QGIS bindings are compiled for the
+  # system interpreter and are invisible to any other one.
+  qgis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install QGIS Python bindings
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq python3-qgis
+      - name: Report which QGIS this is
+        run: python3 -c "from qgis.core import Qgis; print(Qgis.QGIS_VERSION)"
+      - name: Plugin API tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python3 -m pip install --break-system-packages pytest
+          python3 -m pytest tests/test_qgis_api.py -q

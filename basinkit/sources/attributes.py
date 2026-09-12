@@ -165,7 +165,7 @@ SCALING = {
 CATEGORICAL = {"clz", "cls", "glc", "pnv", "wet", "lit", "gad", "tbi", "tec", "fmh"}
 
 
-def describe(row, extent: str = "u") -> dict:
+def describe(row, extent: str = "u", *, progress: bool = True) -> dict:
     """Turn one BasinATLAS row into a readable summary.
 
     Parameters

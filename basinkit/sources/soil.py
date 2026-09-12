@@ -1,6 +1,6 @@
 """SoilGrids 250 m via the ISRIC Web Coverage Service.
 
-The classic SoilGrids bug is the CRS. Its native grid is Interrupted Goode
+The point to watch with SoilGrids is the CRS. Its native grid is Interrupted Goode
 Homolosine, not lon/lat, so a WCS request built from a raw lon/lat bbox
 silently returns a coverage from somewhere else entirely. basinkit reprojects
 the request extent into the Homolosine metres the service expects, then
@@ -49,8 +49,14 @@ def soilgrids(
     stat: str = "mean",
     *,
     clip: bool = True,
+    progress: bool = True,
 ):
-    """Fetch one SoilGrids property/depth, clipped to the basin."""
+    """Fetch one SoilGrids property/depth, clipped to the basin.
+
+    ``progress`` is accepted so that every source in the package takes the same
+    argument. A script that passes ``progress=False`` to one of them should not
+    have to know which ones support it.
+    """
     if prop not in PROPERTIES:
         raise ValueError(
             f"Unknown property {prop!r}. Available: {', '.join(PROPERTIES)}"
@@ -76,7 +82,8 @@ def soilgrids(
     )
 
     path = download(
-        url, namespace="soilgrids", timeout=300, expected_min_bytes=512, progress=False
+        url, namespace="soilgrids", timeout=300, expected_min_bytes=512,
+        progress=progress
     )
 
     import rioxarray  # noqa: F401
@@ -126,15 +133,16 @@ def soil_profile(lat: float, lon: float, properties: list[str] | None = None) ->
         raise DataSourceError(f"SoilGrids point query failed: {exc}") from exc
 
 
-def available_water_capacity(geometry, depth: str = "0-5cm"):
+def available_water_capacity(geometry, depth: str = "0-5cm", *,
+                             progress: bool = True):
     """Plant-available water capacity: field capacity minus wilting point.
 
     Returned in volumetric percent. This is the single most useful soil input
     to a conceptual rainfall-runoff model, and it is not distributed directly --
     it has to be differenced from the two water-retention layers.
     """
-    fc = soilgrids(geometry, "wv0033", depth)
-    wp = soilgrids(geometry, "wv1500", depth)
+    fc = soilgrids(geometry, "wv0033", depth, progress=progress)
+    wp = soilgrids(geometry, "wv1500", depth, progress=progress)
     awc = (fc - wp) / 10.0
     # Field capacity below wilting point is physically impossible; where it
     # happens it is prediction noise in one of the two layers, usually on a

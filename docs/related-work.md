@@ -174,8 +174,8 @@ showed that Horton's laws hold for essentially any branching network, random
 ones included, so bifurcation ratios carry far less geomorphic information
 than the literature built on them assumes. That weakens the case for
 *interpreting* Rb. It strengthens the case for *screening* it: if the ratio is
-near-inevitable, a value below the floor is not an unusual basin, it is a
-broken calculation.
+near-inevitable, a value below the floor points to the arithmetic rather than
+to an unusual basin.
 
 ## The attack, and the honest answer
 

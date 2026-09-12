@@ -1,5 +1,120 @@
 # Changelog
 
+## 0.5.0 (2026-09-09)
+
+### Compatibility across the whole supported QGIS range
+
+`Qgis.ProcessingSourceType` arrived in QGIS 3.36; before that the same enum
+lives on `QgsProcessing`. The plugin now resolves it by asking the API, so it
+loads identically on 3.28 through 4.x, including the 3.34 long-term release.
+`tests/test_qgis_api.py` loads every algorithm against a real QGIS, and a CI job
+runs it on Ubuntu's QGIS 3.34.
+
+### Accuracy reported by catchment size
+
+Blind validation against agency-published catchment areas at 2,550 gauges in
+99 countries on six continents, 2,740 delineations in all:
+
+| catchment area | median error | within 20% |
+|---|---:|---:|
+| above 100,000 km2 | 0.3% | 92% |
+| 10,000 to 100,000 | 1.3% | 92% |
+| 2,000 to 10,000 | 1.7% | 96% |
+| 500 to 2,000 | 8.9% | 78% |
+| 100 to 500 | 30% | 40% |
+| below 100 | 181% | 22% |
+
+HydroBASINS level-12 units average about 130 km2, which sets the scale the
+default backend resolves. Below roughly 2,000 km2 the DEM backend is the right
+instrument, and the package now says so at the point where it matters.
+
+### Added: `basinkit.verify`
+
+`check_outlet` confirms a delineated basin against HydroRIVERS. When the basin
+exceeds twice the area draining to the largest river within 2 km of the outlet,
+it reports it: 85% of the outlets it flags need attention, and it stays quiet on
+97% of the ones that do not, with precision from 75% in Europe to 93% in Africa.
+A second condition covers an outlet with no mapped river within 2 km and a basin
+between 100 and 1,000 km2, at 87% precision and 1.2% false alarms, measured
+separately on two samples.
+
+The radius is 2 km for a measured reason: at 1 km the refinement step acted on a
+Mekong gauge whose only nearby reach drained 5.9 km2. Two kilometres finds the
+river a gauge is actually on.
+
+### Changed: `auto` covers both ends of the resolution range
+
+The existing route re-ran on the DEM when the sub-basin result came back at the
+grid's floor. The complementary case is an outlet on a small stream inside a
+unit belonging to the trunk river.
+
+`auto` now refines on the DEM when two independent sources agree on a smaller
+catchment: the river network shows the point draining far less than the polygon
+covers, **and** a DEM delineation lands within a factor of two of that river's
+upstream area. Across 300 gauges drawn after this was designed and used nowhere
+else in it: **19 improved, 279 unchanged, 0 reduced**, with the median error
+where it acted falling from 1,731% to 4.3%. Where the DEM does not corroborate,
+the sub-basin polygon stands and the question is reported.
+
+Refinement acts only when the river it judges by lies within 1 km of the outlet.
+Beyond that the point is not on that river, and a DEM delineation of the same
+point describes the same local drain, so the two sources stop being independent.
+Every refinement that improved a result had its river within 0.91 km.
+
+Median cost is +1.6 s. The check runs when the river network is already cached;
+pass `verify="download"` to fetch it, or `verify=False` to skip it.
+
+### Added: the package names what kind of place the outlet is in
+
+An endorheic system, a coastal strip draining straight to the ocean, and an
+outlet with nothing draining into it are each reported in provenance and in the
+plugin. The last is what a lake surface and a sub-grid headwater have in common,
+and naming it turns a surprising number into a described situation.
+
+### Changed: the consistency line compares against an independent source
+
+The plugin's consistency line now reports the result against the river network.
+The outlet unit's own upstream-area field agrees with the assembled area to
+within 1% almost everywhere, so it confirms the traversal rather than the choice
+of outlet.
+
+### Changed: messages are matched to their cause
+
+A coordinate outside the network's coverage, one beyond the snap distance, and
+one on a hillslope rather than in a channel each get their own guidance and
+their own remedy.
+
+### Fixed: `progress` is accepted by every source
+
+`soilgrids`, `available_water_capacity`, `persiann`, `terraclimate`,
+`water_balance` and `describe` now take the argument that `dem` and `landcover`
+already did, so a script can pass it uniformly. A test asserts every source
+accepts it.
+
+### Added: `verify/run_outputs.py` and `verify/run_bad_clicks.py`
+
+The first checks the layers rather than the polygon: that the raster is masked
+to the divide, by rasterising the polygon independently and comparing; that the
+area agrees with a geodesic area from pyproj; that the morphometric identities
+hold; and that rainfall and elevation land inside published figures. On the
+Sapta Koshi and the Danube every check passes, `Rc x Cc^2` comes to 1.0000, and
+basin rainfall lands at 1,333 and 1,044 mm/yr against published ranges of
+1,200-1,900 and 600-1,200.
+
+The second covers outlets that are not on rivers: oceans, cities, lake surfaces,
+deserts, the poles, and swapped coordinates.
+
+A complete package for a 54,497 km2 basin takes 26 seconds once cached.
+
+### Also
+
+- The twelve named rivers are a demonstration rather than the headline
+  validation, and are labelled as such in all eight places they appeared.
+- Against pysheds and WhiteboxTools on identical 30 m rasters across 59
+  catchments under 2,000 km2, the DEM backend returned a basin for every
+  station, matched the agency figure within 20% on 68% of them against 56% and
+  51%, and had the lowest median error.
+
 ## 0.4.0 (2026-09-04)
 
 ### Added: `River`, the river above a point

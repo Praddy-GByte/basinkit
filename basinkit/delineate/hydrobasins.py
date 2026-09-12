@@ -94,6 +94,33 @@ def fetch_region(region: str, level: int = 12, *, progress: bool = True) -> Path
 _ADVISORY_KM = 20.0
 
 
+def _place(seed) -> dict:
+    """What HydroBASINS already knows about the outlet's own sub-basin.
+
+    Two of its fields describe the setting rather than the geometry, and both
+    are worth passing on because they change how a result should be read.
+
+    ``ENDO`` marks a unit inside an endorheic system, which drains to an inland
+    sink rather than to the sea. ``COAST`` marks a coastal strip draining
+    directly to the ocean without joining a river.
+
+    A unit whose upstream area equals its own area has nothing draining into
+    it. That is the signature of a headwater, a lake surface or a closed
+    depression, and it means the polygon returned is that single sub-basin
+    rather than an assembled catchment.
+    """
+    up = float(seed.get("UP_AREA", 0) or 0)
+    sub = float(seed.get("SUB_AREA", 0) or 0)
+    out: dict = {}
+    if int(seed.get("ENDO", 0) or 0):
+        out["endorheic"] = True
+    if int(seed.get("COAST", 0) or 0):
+        out["coastal"] = True
+    if sub > 0 and abs(up - sub) < 0.51:
+        out["nothing_upstream"] = True
+    return out
+
+
 def _find_outlet_unit(shp: Path, lat: float, lon: float, snap_km: float,
                       river_snap_km: float, river_snap_ratio: float):
     """Find the level-12 unit the outlet belongs to.
@@ -130,7 +157,8 @@ def _find_outlet_unit(shp: Path, lat: float, lon: float, snap_km: float,
     gdf = gpd.read_file(
         shp,
         bbox=(lon - pad, lat - pad, lon + pad, lat + pad),
-        columns=["HYBAS_ID", "NEXT_DOWN", "UP_AREA", "SUB_AREA", "ORDER"],
+        columns=["HYBAS_ID", "NEXT_DOWN", "UP_AREA", "SUB_AREA", "ORDER",
+                 "ENDO", "COAST"],
     )
     if len(gdf) == 0:
         return None, {}
@@ -332,6 +360,7 @@ def delineate_hydrobasins(
             "outlet": (lat, lon),
             "outlet_hybas_id": int(seed["HYBAS_ID"]),
             "reported_up_area_km2": float(seed.get("UP_AREA", 0) or 0),
+            **_place(seed),
             **snap_info,
             "area_km2": round(basin_area_km2(geom), 2),
             "license": "CC BY 4.0",
