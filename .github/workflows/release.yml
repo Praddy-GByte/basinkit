@@ -16,3 +16,5 @@ jobs:
         with: { python-version: "3.12" }
       - run: pip install build && python -m build
       - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
