@@ -1251,3 +1251,56 @@ def test_the_corrective_switch_is_gated_on_distance():
     assert "largest_distance_km" in source, (
         "the gate must test how far the corroborating river is"
     )
+
+
+def test_a_refusal_buried_in_the_chain_is_still_an_upstream_outage():
+    """The weekly run must stay readable when a helper replaces the exception.
+
+    HydroSHEDS answers 403 to datacenter addresses. Where that download sits
+    inside a ``pytest.warns`` block, pytest reports ``DID NOT WARN`` and the
+    refusal survives only as ``__context__``. Reading the outermost exception
+    alone painted the weekly source check red three runs in a row for a reason
+    that had nothing to do with this package.
+    """
+    import conftest
+
+    refusal = DataSourceError(
+        "Access denied (403) for https://data.hydrosheds.org/file/x.zip"
+    )
+    try:
+        try:
+            raise refusal
+        except DataSourceError:
+            # Implicit chaining is the whole point: this is what pytest.warns
+            # does, so `from` would destroy the case under test.
+            raise AssertionError("DID NOT WARN")  # noqa: B904
+    except AssertionError as exc:
+        assert conftest._upstream_refusal(exc) is refusal, (
+            "a refusal in the exception chain must still read as an outage"
+        )
+
+    assert conftest._upstream_refusal(refusal) is refusal
+    assert conftest._upstream_refusal(
+        DataSourceError("returned 12 km2 at Lobith, published area 158,835")
+    ) is None, "a wrong number must stay a failure"
+
+
+def test_the_stac_catalogue_speaks_in_data_source_errors():
+    """A catalogue that cannot be opened must not surface as a library error.
+
+    ``Client.open`` performs a network request, so it raises pystac's own
+    exception type. Callers catch ``DataSourceError``; anything else reaches
+    the user as a traceback instead of a sentence.
+    """
+    import basinkit.sources.stac as stac_mod
+
+    def refuse(_url):
+        raise RuntimeError("APIError: 503 Service Unavailable")
+
+    original = stac_mod._client
+    stac_mod._client = refuse
+    try:
+        with pytest.raises(DataSourceError, match=r"\(503\)"):
+            stac_mod.stac_search("esri_lulc", bbox=(0.0, 0.0, 0.1, 0.1))
+    finally:
+        stac_mod._client = original
