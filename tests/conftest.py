@@ -35,11 +35,26 @@ _UPSTREAM_REFUSALS = (
 )
 
 
-def _is_upstream_outage(exc: BaseException) -> bool:
-    if not isinstance(exc, DataSourceError):
-        return False
-    text = str(exc).lower()
-    return any(marker in text for marker in _UPSTREAM_REFUSALS)
+def _upstream_refusal(exc: BaseException) -> BaseException | None:
+    """The refusal in this exception's chain, if there is one.
+
+    The refusal is not always the exception pytest ends up reporting. A test
+    that wraps its call in ``pytest.warns`` gets ``Failed: DID NOT WARN``
+    instead, with the original ``DataSourceError`` demoted to ``__context__``.
+    Reading only the outermost exception turned the weekly source check red
+    three runs running, for a 403 that HydroSHEDS serves to every datacenter
+    address and to no laptop.
+    """
+    seen: set[int] = set()
+    current: BaseException | None = exc
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        if isinstance(current, DataSourceError):
+            text = str(current).lower()
+            if any(marker in text for marker in _UPSTREAM_REFUSALS):
+                return current
+        current = current.__cause__ or current.__context__
+    return None
 
 
 @pytest.hookimpl(hookwrapper=True)
@@ -51,7 +66,10 @@ def pytest_runtest_makereport(item, call):
         return
     if "network" not in item.keywords:
         return
-    if call.excinfo is None or not _is_upstream_outage(call.excinfo.value):
+    if call.excinfo is None:
+        return
+    refusal = _upstream_refusal(call.excinfo.value)
+    if refusal is None:
         return
 
     # pytest renders a skip from a (path, lineno, reason) triple; a bare string
@@ -61,5 +79,5 @@ def pytest_runtest_makereport(item, call):
     report.longrepr = (
         relpath,
         (lineno or 0) + 1,
-        f"upstream unavailable, not a basinkit failure: {call.excinfo.value}",
+        f"upstream unavailable, not a basinkit failure: {refusal}",
     )

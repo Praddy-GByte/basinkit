@@ -17,6 +17,7 @@ a 403, and a user with them gets a bill.
 
 from __future__ import annotations
 
+import re
 import warnings
 
 from ..exceptions import DataSourceError, MissingDependency
@@ -121,6 +122,30 @@ def _client(url: str):
     return Client.open(url)
 
 
+def _catalogue_unreachable(url: str, exc: Exception) -> str:
+    """Phrase a catalogue failure the way every other source phrases one.
+
+    ``Client.open`` reads the catalogue over the network, so it raises the
+    library's own error type. Left as it is, a user sees a pystac traceback
+    rather than a sentence, and tests/conftest.py cannot tell an upstream
+    refusal from a basinkit defect.
+    """
+    status = getattr(getattr(exc, "response", None), "status_code", None)
+    if status is None:
+        match = re.search(r"\b([45]\d\d)\b", str(exc))
+        status = int(match.group(1)) if match else None
+
+    if status in (401, 403):
+        opening = f"Access denied ({status})"
+    elif status == 404:
+        opening = f"Not found ({status})"
+    elif status is not None:
+        opening = f"The catalogue refused the request ({status})"
+    else:
+        opening = "The catalogue is unreachable"
+    return f"{opening} for the STAC catalogue at {url}: {exc}"
+
+
 def stac_search(
     collection: str,
     geometry=None,
@@ -143,7 +168,12 @@ def stac_search(
             f"Unknown collection {collection!r}. Available: {', '.join(COLLECTIONS)}"
         )
     url, cid, _ = COLLECTIONS[collection]
-    client = _client(url)
+    try:
+        client = _client(url)
+    except (MissingDependency, DataSourceError):
+        raise
+    except Exception as exc:
+        raise DataSourceError(_catalogue_unreachable(url, exc)) from exc
 
     kwargs: dict = {"collections": [cid]}
     if geometry is not None:
