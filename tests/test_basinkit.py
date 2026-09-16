@@ -1304,3 +1304,45 @@ def test_the_stac_catalogue_speaks_in_data_source_errors():
             stac_mod.stac_search("esri_lulc", bbox=(0.0, 0.0, 0.1, 0.1))
     finally:
         stac_mod._client = original
+
+
+def test_rivers_consult_every_candidate_region(monkeypatch):
+    """A basin on a seam must not come back with an empty river network.
+
+    HydroSHEDS regional extents overlap. The lower Magdalena sits inside the
+    North American extent as well as the South American one, and the North
+    American file carries none of its reaches, so stopping at the first
+    candidate returned zero rivers for a basin that has tens of thousands.
+    """
+    import geopandas as gpd
+    from shapely.geometry import box
+
+    from basinkit.delineate.hydrobasins import candidate_regions
+    from basinkit.sources import vectors
+
+    assert candidate_regions(10.25, -74.92)[0] == "na", (
+        "this test is only meaningful while the first candidate is the wrong one"
+    )
+
+    geom = box(-75.2, 10.0, -74.6, 10.5)
+    consulted: list[str] = []
+
+    monkeypatch.setattr(vectors, "_unpack",
+                        lambda url, name, namespace, progress=True: name)
+
+    def fake_read_file(path, bbox=None):
+        consulted.append(path)
+        if path.endswith("_na"):
+            return gpd.GeoDataFrame({"ORD_STRA": []}, geometry=[], crs="EPSG:4326")
+        return gpd.GeoDataFrame({"ORD_STRA": [6]}, geometry=[geom], crs="EPSG:4326")
+
+    monkeypatch.setattr(gpd, "read_file", fake_read_file)
+
+    out = vectors.hydrorivers(geom, progress=False)
+
+    assert any(p.endswith("_na") for p in consulted), "the first candidate was skipped"
+    assert any(p.endswith("_sa") for p in consulted), (
+        "the second candidate must be consulted when the first yields nothing"
+    )
+    assert len(out) == 1, "the reaches from the second region were dropped"
+    assert out.attrs["basinkit_regions"] == ["sa"]
