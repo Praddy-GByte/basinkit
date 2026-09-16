@@ -70,11 +70,12 @@ than basinkit within their own scope.
 
 ### Three things it does that the alternatives do not
 
-**It clips to the polygon, not the box.** A dendritic basin can occupy under a
-quarter of its own bounding box. Every `Basin` exposes `bbox_efficiency` so you
-can see this for yourself. A bbox download of such a basin throws away three
-quarters of what it transferred, and every "basin average" computed from it is
-contaminated with a neighbour's pixels.
+**It clips to the polygon, not the box.** Measured on sixteen major basins
+spanning 54,000 km2 to the Amazon's 4.67 million, a catchment fills between
+42% and 62% of its own bounding box, median 54%. Every `Basin` exposes
+`bbox_efficiency`, so the figure for yours is one attribute away. Roughly half
+of what a bounding-box download transfers is therefore somebody else's
+catchment, and those pixels sit inside every "basin average" computed from it.
 
 **It needs no account.** Not for the DEM, not for Sentinel-2, not for Landsat,
 not for terrain-corrected radar. Nineteen of the twenty-six catalogued datasets
