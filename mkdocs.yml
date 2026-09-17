@@ -6,6 +6,7 @@ edit_uri: edit/main/docs/
 
 theme:
   name: material
+  custom_dir: overrides
   logo: assets/logo.svg
   favicon: assets/logo-32.png
   features:
@@ -22,6 +23,9 @@ theme:
       scheme: slate
       primary: teal
       toggle: { icon: material/weather-sunny, name: Light mode }
+
+extra_css:
+  - assets/byline.css
 
 plugins:
   - search
