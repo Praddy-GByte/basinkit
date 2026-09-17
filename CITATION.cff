@@ -1,9 +1,9 @@
 # Citation metadata. GitHub renders this as a "Cite this repository" button on
 # the repo page, and Zenodo reads it when minting the DOI.
 #
-# doi is the version DOI for v0.1.0; the concept DOI under identifiers always
-# resolves to the newest release. Cite the version in a paper, the concept when
-# you mean the software in general.
+# doi is the version DOI for the release named in version; the concept DOI
+# under identifiers always resolves to the newest release. Cite the version in
+# a paper, the concept when you mean the software in general.
 cff-version: 1.2.0
 message: "If you use basinkit in published work, please cite it as below, and cite the underlying datasets. Basin.license_report() prints those."
 title: "basinkit: basin-scale acquisition of open Earth observation data"
@@ -25,12 +25,12 @@ authors:
     family-names: Kaushik
     # orcid: "https://orcid.org/0000-0000-0000-0000"   # add yours
 version: 0.5.0
-doi: "10.5281/zenodo.22181934"
+doi: "10.5281/zenodo.22778428"
 identifiers:
   - type: doi
     value: "10.5281/zenodo.22181933"
     description: "Concept DOI -- always resolves to the latest version"
-date-released: 2026-09-04
+date-released: 2026-09-15
 license: MIT
 repository-code: "https://github.com/Praddy-GByte/basinkit"
 url: "https://github.com/Praddy-GByte/basinkit"
