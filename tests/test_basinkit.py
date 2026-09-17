@@ -1346,3 +1346,36 @@ def test_rivers_consult_every_candidate_region(monkeypatch):
     )
     assert len(out) == 1, "the reaches from the second region were dropped"
     assert out.attrs["basinkit_regions"] == ["sa"]
+
+
+def test_importing_basinkit_does_not_need_the_dataframe_stack():
+    """``import basinkit`` must work where pandas and geopandas are absent.
+
+    tests/conftest.py imports the package, so every pytest run imports it,
+    including the QGIS job, whose system interpreter carries the QGIS bindings
+    and nothing else. A module-level ``from pandas import ...`` in one source
+    file was enough to turn that job into a collection error, and the failure
+    named pytest rather than the import that caused it. Every heavy dependency
+    is imported inside the function that needs it; this keeps it that way.
+    """
+    import subprocess
+    import sys
+
+    script = (
+        "import sys\n"
+        "BLOCK = {'pandas', 'geopandas'}\n"
+        "class Blocker:\n"
+        "    def find_spec(self, name, path=None, target=None):\n"
+        "        if name.split('.')[0] in BLOCK:\n"
+        "            raise ImportError(name)\n"
+        "        return None\n"
+        "sys.meta_path.insert(0, Blocker())\n"
+        "import basinkit\n"
+        "from basinkit.exceptions import DataSourceError\n"
+        "print('ok')\n"
+    )
+    done = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True)
+    assert done.returncode == 0, (
+        "importing basinkit reached pandas or geopandas at module level:\n"
+        + done.stderr[-1500:]
+    )
