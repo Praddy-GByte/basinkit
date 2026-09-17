@@ -1,0 +1,31 @@
+/* The site-wide byline bar rendered by overrides/main.html. */
+.bk-byline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.35rem 0.9rem;
+  padding: 0.35rem 1rem;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.bk-byline__name { font-weight: 700; }
+
+.bk-byline__role { opacity: 0.82; }
+
+.bk-byline__links { display: flex; gap: 0.9rem; }
+
+.bk-byline__links a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+.bk-byline__links a:hover { opacity: 0.75; }
+
+@media screen and (max-width: 44.9em) {
+  .bk-byline { gap: 0.2rem 0.7rem; font-size: 0.68rem; }
+  .bk-byline__role { width: 100%; text-align: center; }
+}
