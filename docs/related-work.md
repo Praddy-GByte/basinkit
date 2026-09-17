@@ -20,8 +20,8 @@ tool. Drop any of them and the claim is false.
 
 | clause | what it excludes |
 |---|---|
-| *software package* | mghydro Global Watersheds: global, account-free, multi-dataset, but a web app |
-| *any global outlet coordinate* | watershed-workflow, HyRiver, StreamStats, Model My Watershed, all US-only |
+| *software package* | mghydro Global Watersheds and Model My Watershed: both global, both account-free to delineate, both web apps |
+| *any global outlet coordinate* | watershed-workflow, HyRiver, StreamStats, all US-only |
 | *no account for any default source* | rabpro (Earth Engine + MERIT-Hydro logins), Caravan (Earth Engine), eodag (per-provider credentials) |
 | *polygon-masked gridded arrays* | delineator (geometry only), mghydro and rabpro (zonal statistics), hydromt (extent-based clipping) |
 
@@ -89,6 +89,33 @@ library?"*, and the answer is: because a report is not an input to a model.
 never the default, it is recorded in provenance, and its MERIT-Hydro lineage
 makes it non-commercial, but a reviewer will find it, so say it first.
 
+### Model My Watershed: no longer the US tool it was
+
+[Model My Watershed](https://modelmywatershed.org/) (Stroud Water Research
+Center with Penn State, LimnoTech and Element 84). An earlier version of this
+page listed it among the US-only tools. That is now wrong, and the correction
+matters more than the original entry did.
+
+Version 1.36.0 added *"Global Rapid Watershed Delineation from TDX-Hydro
+streamreach basin polygons"* using a Modified Nested Set Index algorithm, and
+the project's own FAQ describes the app as global since 2025. Delineation and
+analysis need no account; an account is needed only to save and share a
+project. What comes back is a polygon plus land cover, soil, terrain, stream
+and climate summaries, runoff and water-quality model runs, and the area of
+interest as Shapefile or GeoJSON.
+
+It is excluded by the first clause rather than the second: it is a web
+application, and what it returns is analysis and vector geometry rather than
+gridded arrays a model can read. But it is now the most capable account-free
+global delineator with a data story attached, and it belongs beside mghydro
+rather than beside StreamStats.
+
+Its base data is the sharper point. TDX-Hydro is derived from TanDEM-X at
+**12 m**, against the 15 arc-second (about 460 m) SRTM grid that HydroBASINS
+level-12 rests on and basinkit uses by default. That difference is the whole
+explanation for basinkit's small-catchment error band, and it names the work
+worth doing next.
+
 ## Also worth naming
 
 **Caravan** (Kratzert et al., *Sci. Data* 2023; GRDC-Caravan, *ESSD* 2025) is
@@ -112,13 +139,20 @@ attributes into one repository with a toolkit. Neither returns polygon-masked
 rasters for a point you choose. They are the closest published statements of
 the concept and belong in any introduction that claims it is unaddressed.
 
-**Sen Hydro - Watershed Delineation** (QGIS plugin 5713): the neighbour of
-basinkit's *plugin*, not of the library. It delineates from a clicked point
-using the same mghydro Global Watersheds API that backs basinkit's `api`
-backend, and adds river styling and a Senegal boundary layer. Anyone comparing
-the two QGIS plugins will see the delineation overlap immediately, so the
-plugin description has to lead with what Sen Hydro does not do: no EO layers,
-no morphometry, no offline backend.
+**Sen Hydro - Watershed Delineation** (QGIS plugin 5713, MIT, July 2026): the
+neighbour of basinkit's *plugin*, not of the library, and the closest one there
+is. It delineates from a clicked point using the same mghydro Global Watersheds
+API that backs basinkit's `api` backend, and adds river styling and a Senegal
+boundary layer. It returns the polygon with area, perimeter and river length.
+
+Of the ninety-odd hydrology plugins in the QGIS repository, only five delineate
+from a click without a user-supplied DEM, and only two of those are global:
+Sen Hydro and basinkit. Sen Hydro had more downloads than basinkit when this
+was last checked. Anyone comparing the two will see the delineation overlap
+immediately, so the plugin description has to lead with what Sen Hydro does not
+do: no Earth observation layers, no morphometry, no offline backend, and no
+route that survives its one upstream API, which mghydro itself labels
+experimental and subject to change.
 
 ## Morphometry has its own neighbourhood, and it is older
 
