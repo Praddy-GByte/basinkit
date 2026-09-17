@@ -5,8 +5,6 @@ from __future__ import annotations
 import warnings as _warnings
 import zipfile
 
-from pandas import concat as pd_concat
-
 from ..cache import download, subdir
 from ..exceptions import DataSourceError
 
@@ -50,6 +48,7 @@ def hydrorivers(geometry, region: str | None = None, *, min_order: int = 0,
     crosses a seam is assembled from both sides.
     """
     import geopandas as gpd
+    import pandas as pd
 
     from ..delineate.hydrobasins import REGIONS, candidate_regions
 
@@ -92,7 +91,7 @@ def hydrorivers(geometry, region: str | None = None, *, min_order: int = 0,
 
     if frames:
         gdf = frames[0] if len(frames) == 1 else gpd.GeoDataFrame(
-            pd_concat(frames), crs=frames[0].crs
+            pd.concat(frames), crs=frames[0].crs
         )
     else:
         gdf = _read(codes[0])
