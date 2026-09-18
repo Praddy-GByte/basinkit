@@ -1379,3 +1379,161 @@ def test_importing_basinkit_does_not_need_the_dataframe_stack():
         "importing basinkit reached pandas or geopandas at module level:\n"
         + done.stderr[-1500:]
     )
+
+
+def _synthetic_dem(*, slope_m_per_m=0.1, centre_lat=0.0, n=51, deg=0.001):
+    """A plane tilting down to the east, on a geographic grid at a chosen band."""
+    import numpy as np
+    import rioxarray  # noqa: F401  (registers the .rio accessor)
+    import xarray as xr
+
+    x = np.arange(n) * deg
+    y = centre_lat + (np.arange(n) - n // 2) * deg
+    metres_east = x * 111_320.0 * math.cos(math.radians(centre_lat))
+    field = np.repeat((1000.0 - slope_m_per_m * metres_east)[None, :], n, axis=0)
+    da = xr.DataArray(field, coords={"y": y[::-1], "x": x}, dims=("y", "x"))
+    return da.rio.write_crs("EPSG:4326")
+
+
+def test_slope_recovers_the_gradient_of_a_known_plane():
+    """A plane of known steepness must come back at that steepness."""
+    from basinkit.terrain import slope
+
+    dem = _synthetic_dem(slope_m_per_m=0.1)
+    middle = slope(dem).values[10:-10, 10:-10]
+    expected = math.degrees(math.atan(0.1))
+    assert abs(float(middle.mean()) - expected) < 0.05, (
+        f"a 10 percent plane should read {expected:.2f} degrees, "
+        f"got {float(middle.mean()):.2f}"
+    )
+
+
+def test_slope_accounts_for_the_shrinking_degree_of_longitude():
+    """The same grid of degrees is a smaller grid of metres near the poles.
+
+    A cell 0.001 degrees wide spans about 111 m at the equator and 56 m at 60
+    degrees north. Dividing the same height difference by the same assumed
+    width would report a high-latitude basin as roughly twice as steep as it
+    is, which then propagates into every ruggedness and relief-ratio figure.
+    """
+    from basinkit.terrain import slope
+
+    equator = _synthetic_dem(slope_m_per_m=0.1, centre_lat=0.0)
+    high = _synthetic_dem(slope_m_per_m=0.1, centre_lat=60.0)
+
+    a = float(slope(equator).values[10:-10, 10:-10].mean())
+    b = float(slope(high).values[10:-10, 10:-10].mean())
+    assert abs(a - b) < 0.1, (
+        "the same physical plane read differently at two latitudes: "
+        f"{a:.2f} vs {b:.2f} degrees"
+    )
+
+
+def test_aspect_points_down_the_slope_and_leaves_flat_ground_undecided():
+    """Aspect is a compass bearing; flat ground has none and must not read north."""
+    import numpy as np
+
+    from basinkit.terrain import aspect
+
+    dem = _synthetic_dem(slope_m_per_m=0.1)          # falls towards the east
+    facing = aspect(dem).values[10:-10, 10:-10]
+    assert abs(float(np.nanmean(facing)) - 90.0) < 1.0, (
+        f"a plane falling east should face 90 degrees, got {float(np.nanmean(facing)):.1f}"
+    )
+
+    flat = aspect(_synthetic_dem(slope_m_per_m=0.0)).values
+    assert np.isnan(flat).all(), "flat ground must be undecided, not north-facing"
+
+
+def test_hillshade_stays_inside_its_range():
+    import numpy as np
+
+    from basinkit.terrain import hillshade
+
+    shaded = hillshade(_synthetic_dem(slope_m_per_m=0.3)).values
+    assert np.nanmin(shaded) >= 0.0 and np.nanmax(shaded) <= 1.0
+
+
+def test_terrain_layers_keep_their_georeferencing():
+    """A derived layer that loses its CRS cannot be written or overlaid."""
+    from basinkit.terrain import aspect, hillshade, slope
+
+    dem = _synthetic_dem()
+    for fn in (slope, aspect, hillshade):
+        out = fn(dem)
+        assert out.rio.crs == dem.rio.crs, f"{fn.__name__} dropped the CRS"
+        assert out.shape == dem.shape, f"{fn.__name__} changed the shape"
+        assert out.attrs.get("units"), f"{fn.__name__} declared no units"
+
+
+def test_subbasins_refuses_a_backend_it_cannot_serve():
+    """The units exist only for the traversal backend; say so, do not guess."""
+    from shapely.geometry import box
+
+    from basinkit.basin import Basin
+
+    basin = Basin(box(0, 0, 1, 1), {"backend": "dem"})
+    with pytest.raises(ValueError, match="hydrobasins"):
+        basin.subbasins()
+
+
+@pytest.mark.network
+def test_subbasins_return_a_closed_routing_graph():
+    """The pieces must tile the basin and point at each other correctly.
+
+    ``NEXT_DOWN`` is the routing graph. If it is sound, exactly one unit in an
+    upstream set drains to something outside that set, and that one is the
+    outlet. More than one means the traversal collected a neighbouring
+    catchment as well, which is the failure this guards.
+    """
+    basin = bk.Basin.from_point(26.87, 87.15, progress=False)
+    units = basin.subbasins(progress=False)
+
+    assert len(units) > 1, "a 54,000 km2 basin is not one level-12 unit"
+    for column in ("HYBAS_ID", "NEXT_DOWN", "SUB_AREA"):
+        assert column in units.columns, f"{column} is what makes these routable"
+
+    leaving = units[~units["NEXT_DOWN"].isin(units["HYBAS_ID"])]
+    assert len(leaving) == 1, (
+        f"{len(leaving)} units drain outside the set; a single catchment has one outlet"
+    )
+
+    declared = float(units["SUB_AREA"].sum())
+    assert abs(declared - basin.area_km2) / basin.area_km2 < 0.02, (
+        f"the units sum to {declared:,.0f} km2 but the basin measures "
+        f"{basin.area_km2:,.0f} km2"
+    )
+
+
+@pytest.mark.network
+def test_flow_accumulation_drains_the_basin_and_nothing_else():
+    """Every cell in a catchment drains to its outlet, and no cell outside does.
+
+    Routing over a rectangular window fills the corners with ground that
+    belongs to neighbouring catchments. Left as elevation, that ground becomes
+    a ridge draining inwards and the accumulation exceeds the number of cells
+    in the basin, which then inflates every wetness index computed from it.
+    """
+    import numpy as np
+
+    basin = bk.Basin.from_point(26.87, 87.15, progress=False)
+    dem = basin.dem(max_pixels=2_000_000)
+    inside = int(np.isfinite(np.asarray(dem.values)).sum())
+
+    accumulated = np.asarray(basin.flow_accumulation(dem=dem).values)
+    largest = float(np.nanmax(accumulated))
+
+    assert largest <= inside, (
+        f"the outlet accumulates {largest:,.0f} cells from a basin of {inside:,}"
+    )
+    assert largest > 0.5 * inside, (
+        f"the outlet accumulates only {largest:,.0f} of {inside:,} cells, so the "
+        "network is draining somewhere other than the outlet"
+    )
+
+    wetness = np.asarray(basin.twi(dem=dem).values)
+    finite = wetness[np.isfinite(wetness)]
+    assert 0 < float(np.median(finite)) < 20, (
+        f"a median wetness index of {float(np.median(finite)):.1f} is outside "
+        "every published range"
+    )

@@ -280,6 +280,47 @@ def _upstream_ids(shp: Path, seed_id: int) -> set[int]:
     return seen
 
 
+def _read_units(shp, id_list, columns):
+    """Read the named units back out of the regional file.
+
+    For a large basin this is tens of thousands of polygons, so the SQL IN
+    clause is chunked: OGR refuses a single statement carrying 200,000
+    literals.
+    """
+    import geopandas as gpd
+    import pandas as pd
+
+    frames = []
+    for i in range(0, len(id_list), 2000):
+        chunk = id_list[i : i + 2000]
+        where = "HYBAS_ID IN (" + ",".join(str(x) for x in chunk) + ")"
+        frames.append(
+            gpd.read_file(shp, where=where, columns=columns, engine="pyogrio")
+        )
+    if not frames:
+        return gpd.GeoDataFrame(columns=[*columns, "geometry"], crs="EPSG:4326")
+    return gpd.GeoDataFrame(pd.concat(frames, ignore_index=True), crs=frames[0].crs)
+
+
+def upstream_units(region: str, hybas_id: int, level: int = 12, *,
+                   progress: bool = True, columns: list[str] | None = None):
+    """The level-``level`` units that drain into ``hybas_id``, undissolved.
+
+    ``delineate_hydrobasins`` merges these into one polygon, which is what a
+    basin is. The pieces are worth having on their own: every distributed
+    hydrological model wants sub-catchments and the links between them, and
+    ``NEXT_DOWN`` is the routing graph already, so nothing has to be inferred
+    from geometry.
+    """
+    shp = fetch_region(region, level, progress=progress)
+    ids = sorted(_upstream_ids(shp, int(hybas_id)))
+    wanted = columns or ["HYBAS_ID", "NEXT_DOWN", "SUB_AREA", "UP_AREA", "ENDO", "COAST"]
+    units = _read_units(shp, ids, wanted)
+    units.attrs["license"] = "CC BY 4.0"
+    units.attrs["basinkit_product"] = f"HydroBASINS v1c level {level} ({REGION_NAMES[region]})"
+    return units
+
+
 def delineate_hydrobasins(
     lat: float,
     lon: float,
@@ -306,8 +347,6 @@ def delineate_hydrobasins(
         the unit containing the point, snap to it and warn. Set
         ``river_snap_ratio=None`` to always take the containing unit.
     """
-    import geopandas as gpd
-
     errors = []
     for region in candidate_regions(lat, lon):
         shp = fetch_region(region, level, progress=progress)
@@ -324,18 +363,7 @@ def delineate_hydrobasins(
         # Read back only the geometries we need. For a large basin this is
         # still tens of thousands of polygons, so chunk the SQL IN clause --
         # OGR will refuse a single statement with 200k literals.
-        frames = []
-        for i in range(0, len(id_list), 2000):
-            chunk = id_list[i : i + 2000]
-            where = "HYBAS_ID IN (" + ",".join(str(x) for x in chunk) + ")"
-            frames.append(
-                gpd.read_file(
-                    shp, where=where, columns=["HYBAS_ID", "SUB_AREA"], engine="pyogrio"
-                )
-            )
-        units = gpd.GeoDataFrame(
-            __import__("pandas").concat(frames, ignore_index=True), crs=frames[0].crs
-        )
+        units = _read_units(shp, id_list, ["HYBAS_ID", "SUB_AREA"])
 
         geom = units.union_all()
         # Dissolving thousands of adjacent polygons leaves hairline slivers on
