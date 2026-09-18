@@ -264,6 +264,74 @@ class Basin:
         return reduce_time(ds, composite) if composite else ds
 
     # -- summaries ---------------------------------------------------------
+    # -- terrain surfaces -------------------------------------------------
+    #
+    # Each of these is computed from the elevation array, so passing ``dem=``
+    # lets one download serve all of them.
+
+    def slope(self, *, dem=None, degrees: bool = True, **kwargs):
+        """Steepest descent at every cell, in degrees by default."""
+        from .terrain import slope
+
+        return slope(self.dem(**kwargs) if dem is None else dem, degrees=degrees)
+
+    def aspect(self, *, dem=None, **kwargs):
+        """Which way each slope faces, clockwise from north. Flat is NaN."""
+        from .terrain import aspect
+
+        return aspect(self.dem(**kwargs) if dem is None else dem)
+
+    def hillshade(self, *, dem=None, azimuth: float = 315.0,
+                  altitude: float = 45.0, z_factor: float = 1.0, **kwargs):
+        """Shaded relief, 0 to 1, for a figure that reads as terrain."""
+        from .terrain import hillshade
+
+        return hillshade(self.dem(**kwargs) if dem is None else dem,
+                         azimuth=azimuth, altitude=altitude, z_factor=z_factor)
+
+    def curvature(self, *, dem=None, **kwargs):
+        """Profile curvature: positive where the ground sheds, negative where
+        it collects."""
+        from .terrain import curvature
+
+        return curvature(self.dem(**kwargs) if dem is None else dem)
+
+    def flow_accumulation(self, *, dem=None, **kwargs):
+        """Cells draining through each cell, routed over this basin's own DEM."""
+        from .terrain import flow_accumulation
+
+        return flow_accumulation(self.dem(**kwargs) if dem is None else dem)
+
+    def twi(self, *, dem=None, **kwargs):
+        """Topographic wetness index: where water gathers and ground saturates."""
+        from .terrain import twi
+
+        return twi(self.dem(**kwargs) if dem is None else dem)
+
+    def subbasins(self, **kwargs):
+        """The sub-catchments this basin is assembled from, with their routing.
+
+        ``delineate`` dissolves the HydroBASINS units it walked into a single
+        polygon. This hands back the pieces instead, each with ``NEXT_DOWN``,
+        which is the routing graph itself: every distributed model wants
+        sub-catchments and the links between them, and nothing here has to be
+        inferred from geometry afterwards.
+
+        Available for the ``hydrobasins`` backend, which is the default.
+        """
+        from .delineate.hydrobasins import upstream_units
+
+        prov = self.provenance
+        if prov.get("backend") != "hydrobasins":
+            raise ValueError(
+                "subbasins() reads the units the HydroBASINS traversal walked, "
+                f"and this basin came from the {prov.get('backend', 'unknown')!r} "
+                "backend. Delineate with backend='hydrobasins' to get them."
+            )
+        return upstream_units(
+            prov["region"], prov["outlet_hybas_id"], prov.get("level", 12), **kwargs
+        )
+
     def terrain_stats(self) -> dict:
         """Elevation, relief and mean slope: the standard morphometry."""
         import numpy as np
