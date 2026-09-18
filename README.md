@@ -214,7 +214,7 @@ pyflwdir), `climate` (NetCDF), `viz` (leafmap, matplotlib).
 
 ---
 
-## Delineation: three backends, because one is not enough
+## Delineation: four backends, because one is not enough
 
 | backend | how it works | best for | resolution floor |
 |---|---|---|---|
@@ -350,10 +350,12 @@ A few things basinkit handles that trip up hand-rolled pipelines:
 
 ## QGIS
 
-`qgis_plugin/` is a Processing provider with three algorithms: delineate a
-basin from a canvas click, fetch layers clipped to it, and basin statistics.
-Being Processing algorithms, they work in batch mode, in the Model Builder and
-under `qgis_process`.
+`qgis_plugin/` is a Processing provider with eight algorithms: delineate a
+basin from a canvas click, hand back the sub-catchments it was assembled from
+with their routing, fetch layers clipped to it, compute the terrain surfaces,
+grade whether the elevation model can carry them, basin statistics, the full
+morphometry, and the eight-page PDF report. Being Processing algorithms, they
+all work in batch mode, in the Model Builder and under `qgis_process`.
 
 Install the zip through *Plugins → Manage and Install Plugins → Install from
 ZIP*. QGIS ships its own Python and there is still no official way for a plugin

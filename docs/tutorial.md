@@ -377,17 +377,24 @@ ramp collapses into one flat tone and the drainage network disappears.
 ## Step 4: Without writing any Python
 
 Install the QGIS plugin (`Plugins → Manage and Install Plugins → Install from
-ZIP`), then open the Processing Toolbox. Three algorithms appear under
+ZIP`), then open the Processing Toolbox. Eight algorithms appear under
 **basinkit**:
 
 | Algorithm | What it does |
 |---|---|
 | **Delineate river basin** | Point in, basin polygon out |
+| **Sub-catchments and their routing** | Point in, the pieces out, each with `NEXT_DOWN` |
 | **Fetch basin data layers** | Basin polygon in, clipped rasters out |
+| **Terrain surfaces** | Slope, aspect, curvature, position, wetness, HAND, from one download |
+| **Elevation data suitability** | HIGH, MODERATE or LIMITED, with the measurements and a support raster |
 | **Basin statistics** | Area, relief, mean slope, land cover fractions as HTML |
+| **Basin morphometry** | The Horton-Strahler-Schumm set, with its consistency checks |
+| **Basin report (PDF)** | Eight A4 pages, ready for a thesis or a manuscript |
 
 The normal sequence is to run the first, check the polygon on the canvas, then
-feed it to the second. The plugin needs the `basinkit` Python package; if it is
+feed it to the others. Run **Elevation data suitability** before quoting any
+terrain number: it says whether the elevation model can carry it in this
+basin. The plugin needs the `basinkit` Python package; if it is
 missing, it prints the exact `pip` command for QGIS's own Python, which is not
 the same Python as your terminal.
 
