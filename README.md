@@ -97,7 +97,7 @@ of what a bounding-box download transfers is therefore somebody else's
 catchment, and those pixels sit inside every "basin average" computed from it.
 
 **It needs no account.** Not for the DEM, not for Sentinel-2, not for Landsat,
-not for terrain-corrected radar. Nineteen of the twenty-six catalogued datasets
+not for terrain-corrected radar. Twenty of the twenty-seven catalogued datasets
 are fetchable today, and every one of those is anonymous.
 Compare: MERIT Hydro is behind a Google Form and an emailed Dropbox password;
 the OpenTopography API allows fifty calls a day on a non-academic key; Earth
@@ -193,6 +193,7 @@ pyflwdir), `climate` (NetCDF), `viz` (leafmap, matplotlib).
 | `hydrobasins` *(default)* | walks the `NEXT_DOWN` graph over HydroBASINS level-12 units | any size, offline once cached, CC BY 4.0 | ~130 km² unit |
 | `dem` | D8 routing with `pyflwdir` over a fresh Copernicus DEM window | small headwater catchments | one 30 m pixel |
 | `api` | the public Global Watersheds service | a quick first look, zero download | ~90 m |
+| `tdx` *(opt-in)* | walks the reach graph over TDX-Hydro unit catchments | small catchments, where it cuts the error by three quarters | one reach |
 
 `backend="auto"` uses HydroBASINS, then falls back to DEM routing when the
 result sits at the level-12 resolution floor and the true divide is invisible
@@ -206,10 +207,30 @@ any delineation tool and most of them bury it:
 | `hydrobasins` *(default)* | 15 arc-sec, ~460 m | SRTM, February 2000 | HydroSHEDS |
 | `api` | 3 arc-sec, ~90 m | MERIT-Hydro | yes, error-removed |
 | `dem` | 1 arc-sec, ~30 m | Copernicus, 2011-2015 | routed on the fly |
+| `tdx` *(opt-in)* | 12 m | TanDEM-X, via GEOGLOWS v2 | yes, TauDEM |
 
 The default routes on a quarter-century-old 460 m grid. That is fine for a
 large basin and wrong for a small or heavily modified one, which is what the
-other two backends are for.
+other backends are for.
+
+`backend="tdx"` is the answer to the small-catchment band. TDX-Hydro is derived
+from TanDEM-X at 12 m and carries one catchment polygon per stream reach, so a
+basin of a few hundred square kilometres is described by its own ground rather
+than by the 130 km² cell that happens to contain its outlet. Measured against
+published gauge areas on sixty catchments between 100 and 500 km², thirty in
+Europe and thirty in North America, drawn by seed before any result was seen:
+
+| backend | median error | within 20% |
+|---|---:|---:|
+| `hydrobasins` | 43% | 32% |
+| `tdx` | 12% | 57% |
+
+It is opt-in and `auto` never reaches for it, for one reason: TDX-Hydro is
+CC BY-SA 4.0. Every other default here is CC BY 4.0 or more permissive, and
+ShareAlike travels into anything derived from it and redistributed. That is a
+term to accept deliberately. It also needs `pip install "basinkit[tdx]"` for
+the Parquet reader, and GEOGLOWS omits twelve of NGA's sixty-two regions,
+Greenland and much of Arctic North America among them.
 
 Two failure modes are handled explicitly rather than silently:
 

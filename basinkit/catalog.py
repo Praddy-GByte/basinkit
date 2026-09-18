@@ -161,6 +161,23 @@ _reg(Dataset(
     citation="Lehner, B. & Grill, G. (2013). Hydrological Processes 27(15).",
 ))
 _reg(Dataset(
+    key="tdx_hydro", name="TDX-Hydro (TanDEM-X 12 m), via GEOGLOWS v2",
+    category="hydrography", resolution="vector, one catchment per reach, 12 m source",
+    temporal="2023", coverage="Global ex-Antarctica; GEOGLOWS omits 12 of NGA's 62 "
+             "regions, including Greenland and much of Arctic North America",
+    license="CC BY-SA 4.0", auth="none",
+    route="https://geoglows-v2.s3.us-west-2.amazonaws.com/ (anonymous, range-capable)",
+    commercial_ok=True, redistributable=True,
+    notes="An order of detail below HydroBASINS level 12 and the answer to the "
+          "small-catchment error band, which is why backend='tdx' exists. The "
+          "licence is the reason it is not the default: ShareAlike travels into "
+          "anything derived from it and redistributed, while every other default "
+          "layer here is CC BY 4.0 or more permissive. Choose it deliberately.",
+    citation="TDX-Hydro, National Geospatial-Intelligence Agency, 2023 (CC BY-SA 4.0); "
+             "Carlson et al. (2024), doi:10.22541/essoar.171629686.65893579/v1.",
+    extras=("sharealike", "opt-in"),
+))
+_reg(Dataset(
     key="hydrorivers", name="HydroRIVERS v1.0", category="hydrography",
     resolution="vector, 8.5M reaches", temporal="static", coverage="Global",
     license="CC BY 4.0", auth="none",

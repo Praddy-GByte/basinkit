@@ -92,12 +92,19 @@ basin = bk.Basin.from_point(26.87, 87.15, backend="dem")
 | `hydrobasins` | 15 arc-sec (~460 m) | SRTM, Feb 2000 | large basins; fast at any size |
 | `api` | 3 arc-sec (~90 m) | MERIT-Hydro | mid-size basins, error-corrected |
 | `dem` | 1 arc-sec (~30 m) | Copernicus DEM | small headwater catchments |
+| `tdx` *(opt-in)* | 12 m | TanDEM-X, via GEOGLOWS v2 | small catchments, 100-500 km2 |
 | `auto` | - | picks for you | the default; start here |
 
 `hydrobasins` walks a pre-computed upstream graph, so it is fast whether the
 basin is 50 km² or 5,000,000 km². `dem` routes flow on the fly, which is slower
 but resolves small catchments the coarse grid cannot see. **If your basin is
 smaller than about 100 km², use `backend="dem"`.**
+
+Between 100 and 500 km² the sharpest answer is `backend="tdx"`, which walks a
+reach-level graph built from TanDEM-X at 12 m and cut the median area error on
+sixty gauges in that band from 43% to 12%. It is opt-in rather than automatic
+because TDX-Hydro is CC BY-SA 4.0 and ShareAlike travels into anything derived
+from it and redistributed. Install it with `pip install "basinkit[tdx]"`.
 
 ### Check the answer before you trust it
 
@@ -331,6 +338,7 @@ redistribution are blocked at the API rather than described in a footnote:
 | Basin is absurdly small | Outlet was off the channel, or on the bank | Move the point onto the river; check `provenance["snap_km"]` |
 | Basin is in the wrong place entirely | Lat and lon swapped | Latitude first |
 | Small headwater returns nothing sensible | Basin below the coarse grid's resolution | `backend="dem"` |
+| Area is far off on a 100-500 km2 catchment | Level-12 units are too coarse for that band | `backend="tdx"`, after `pip install "basinkit[tdx]"` |
 | `attributes()` raises | BasinATLAS needs a HydroBASINS id | `backend="hydrobasins"` |
 | Raster looks like a grey rectangle in QGIS | Older export without declared nodata | Re-export with current version |
 | Very slow on a continental basin | Pixel budget is coarsening a huge mosaic | Expected; check `basinkit_coarsen_factor` |
@@ -355,6 +363,6 @@ For the modelling step, feed its output to wflow, SWAT, Raven or HBV.
 
 - [Quickstart notebook](notebooks/01_quickstart.ipynb): the same material, runnable
 - [Delineation](delineation.md): how each backend works and where each fails
-- [Data catalogue](catalogue.md): all 26 datasets, what is implemented, what each is licensed under
+- [Data catalogue](catalogue.md): all 27 datasets, what is implemented, what each is licensed under
 - [Verification](verification.md): the twelve-gauge test and the disagreements
 - [Related work](related-work.md): what else exists and where basinkit differs

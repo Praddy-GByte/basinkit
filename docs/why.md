@@ -49,9 +49,11 @@ the polygon everywhere, including in the zonal statistics.
 
 ### No account, by construction
 
-Twenty of the twenty-six catalogued datasets are reachable with no credentials
-at all, and those twenty are the default stack. That is not a coincidence; it
-is the selection criterion. Where a well-known route requires an account,
+Twenty of the twenty-seven catalogued datasets are reachable with no
+credentials at all. Nineteen of those are the default stack; the twentieth,
+TDX-Hydro, is just as anonymous but stays opt-in because it is CC BY-SA and
+every default layer here is CC BY 4.0 or more permissive. That is not a
+coincidence; it is the selection criterion. Where a well-known route requires an account,
 basinkit finds the anonymous mirror of the same data:
 
 | the obvious route | its cost | what basinkit uses |

@@ -1,6 +1,6 @@
 # Delineation
 
-## Three backends
+## Four backends
 
 ```python
 bk.Basin.from_point(lat, lon, backend="auto")   # default
@@ -11,6 +11,7 @@ bk.Basin.from_point(lat, lon, backend="auto")   # default
 | `hydrobasins` | walks the `NEXT_DOWN` graph over level-12 units | any size | ~130 km² | one 80 MB regional file, cached forever |
 | `dem` | D8 routing with `pyflwdir` on a Copernicus DEM window | headwaters | one 30 m pixel | tiles for the window |
 | `api` | Global Watersheds web service | a first look | ~90 m | nothing |
+| `tdx` *(opt-in)* | walks the reach graph over TDX-Hydro unit catchments | small catchments | one reach | one regional Parquet, 37-533 MB |
 
 ## Why graph traversal is the default
 
@@ -24,6 +25,33 @@ not the area.
 The price is a resolution floor. A level-12 unit has a median area near 130 km²,
 so a 20 km² headwater catchment cannot be resolved: you get the whole unit.
 `backend="auto"` detects that case and re-runs on the DEM.
+
+## The twelve-metre backend
+
+`backend="tdx"` walks the same kind of graph over TDX-Hydro, which NGA derived
+from TanDEM-X at 12 m and which carries one catchment polygon per stream reach
+rather than one per ~130 km² unit. That is the whole of the default backend's
+weakness below 500 km², so this is where it pays. On sixty gauges between 100
+and 500 km², thirty in Europe and thirty in North America, drawn by seed before
+any result was seen:
+
+| backend | median area error | within 20% |
+|---|---:|---:|
+| `hydrobasins` | 43% | 32% |
+| `tdx` | 12% | 57% |
+
+Three things to know before choosing it:
+
+- **The licence.** TDX-Hydro is CC BY-SA 4.0. ShareAlike travels into anything
+  derived from it and redistributed, and every other default in basinkit is
+  CC BY 4.0 or more permissive. `auto` will never reach for this backend on
+  your behalf; you have to name it.
+- **The dependency.** `pip install "basinkit[tdx]"` installs the Parquet reader
+  it needs. Without it, the backend raises and says so by name.
+- **The coverage.** basinkit reads the GEOGLOWS v2 republication on AWS Open
+  Data, because NGA's own download serves whole GeoPackages and no byte ranges.
+  That republication omits twelve of NGA's sixty-two regions, Greenland and
+  much of Arctic North America among them.
 
 ## Two failure modes, handled explicitly
 

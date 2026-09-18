@@ -48,6 +48,7 @@ backend          grid               source              conditioned
 from .api import delineate_api
 from .dem import delineate_dem
 from .hydrobasins import delineate_hydrobasins
+from .tdx import delineate_tdx
 
 __all__ = ["delineate_api", "delineate_dem", "delineate_hydrobasins", "delineate"]
 
@@ -55,7 +56,15 @@ _BACKENDS = {
     "hydrobasins": delineate_hydrobasins,
     "dem": delineate_dem,
     "api": delineate_api,
+    "tdx": delineate_tdx,
 }
+
+#: Backends that ``auto`` will never reach for on its own. TDX-Hydro is
+#: CC BY-SA: a derivative redistributed from it inherits the ShareAlike
+#: obligation, and every other default here is CC BY 4.0 or more permissive.
+#: Inheriting a copyleft term is a decision to take deliberately, not one to
+#: discover in a licence report afterwards.
+_OPT_IN = ("tdx",)
 
 
 def delineate(lat: float, lon: float, backend: str = "auto", **kwargs):

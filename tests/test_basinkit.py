@@ -1733,3 +1733,54 @@ def test_land_cover_change_accounts_for_the_whole_basin():
         "most of a basin does not change land cover in six years; "
         "more change than stability means the two years are misaligned"
     )
+
+
+def test_the_twelve_metre_backend_is_never_chosen_for_you():
+    """A ShareAlike dataset must be asked for, not arrived at.
+
+    Every other default in this package is CC BY 4.0 or more permissive.
+    TDX-Hydro is CC BY-SA, which travels into anything derived from it and
+    redistributed. A user who never named it cannot inherit a copyleft term
+    from a backend the package picked on their behalf.
+    """
+    import inspect
+
+    from basinkit.delineate import _OPT_IN, _auto
+
+    assert "tdx" in _OPT_IN, "the ShareAlike backend must be marked opt-in"
+    source = inspect.getsource(_auto)
+    assert "tdx" not in source, (
+        "backend='auto' reaches for the ShareAlike dataset; it must not"
+    )
+
+
+def test_the_catalogue_states_the_sharealike_obligation():
+    """A licence field that says only 'open' is the failure this guards."""
+    from basinkit import catalog
+
+    entry = catalog.DATASETS["tdx_hydro"]
+    assert entry.license == "CC BY-SA 4.0"
+    assert entry.auth == "none", "the route is anonymous and should say so"
+    assert "sharealike" in entry.extras
+    assert "ShareAlike" in entry.notes, (
+        "the obligation has to be in the note a user actually reads"
+    )
+
+
+def test_the_twelve_metre_backend_asks_for_pyarrow_by_name(monkeypatch):
+    """A missing optional dependency must name itself and its extra."""
+    import builtins
+
+    from basinkit.delineate import tdx
+    from basinkit.exceptions import MissingDependency
+
+    real_import = builtins.__import__
+
+    def refuse(name, *args, **kwargs):
+        if name == "pyarrow":
+            raise ImportError("no pyarrow here")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", refuse)
+    with pytest.raises(MissingDependency, match="pyarrow"):
+        tdx._parquet_reader()

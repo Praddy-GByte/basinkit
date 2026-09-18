@@ -3,7 +3,7 @@
 Generated from `basinkit/catalog.py`, the same table the fetchers read.
 Run `basinkit catalog` for the live version.
 
-**19 of 26 datasets can be fetched today**; 19 need no account.
+**20 of 27 datasets can be fetched today**; 20 need no account.
 
 Entries marked **documented only** are ones basinkit knows about but cannot download -- asking for one raises an error carrying the access route and licence, rather than pretending to be a feature.
 
@@ -147,6 +147,23 @@ basinkit's default delineation backend: the NEXT_DOWN field makes upstream aggre
 | Redistribution | yes |
 
 Carries discharge and stream order attributes per reach.
+
+### `tdx_hydro` -- TDX-Hydro (TanDEM-X 12 m), via GEOGLOWS v2
+
+| | |
+|---|---|
+| Resolution | vector, one catchment per reach, 12 m source |
+| Temporal | 2023 |
+| Coverage | Global ex-Antarctica; GEOGLOWS omits 12 of NGA's 62 regions, including Greenland and much of Arctic North America |
+| Licence | CC BY-SA 4.0 |
+| Access | https://geoglows-v2.s3.us-west-2.amazonaws.com/ (anonymous, range-capable) |
+| Fetchable by basinkit | yes, with `pip install "basinkit[tdx]"` |
+| Commercial use | yes |
+| Redistribution | yes, under ShareAlike |
+
+An order of detail below HydroBASINS level 12 and the answer to the small-catchment error band, which is why `backend="tdx"` exists. The licence is the reason it is not the default: ShareAlike travels into anything derived from it and redistributed, while every other default layer here is CC BY 4.0 or more permissive. Choose it deliberately.
+
+*Cite:* TDX-Hydro, National Geospatial-Intelligence Agency, 2023 (CC BY-SA 4.0); Carlson et al. (2024), doi:10.22541/essoar.171629686.65893579/v1.
 
 
 ## Hydrology
