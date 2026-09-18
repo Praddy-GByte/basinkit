@@ -4,6 +4,8 @@
 
 ::: basinkit.delineate
 
+::: basinkit.suitability
+
 ::: basinkit.clip
 
 ::: basinkit.mosaic

@@ -1784,3 +1784,137 @@ def test_the_twelve_metre_backend_asks_for_pyarrow_by_name(monkeypatch):
     monkeypatch.setattr(builtins, "__import__", refuse)
     with pytest.raises(MissingDependency, match="pyarrow"):
         tdx._parquet_reader()
+
+
+# --- Does the elevation model support the question? ------------------------
+
+
+def _scene(*, slope_m_per_m=0.35, n=140, noise=1.2, lake=None, holes=0.0,
+           centre_lat=20.0, seed=5, product="cop30"):
+    """A georeferenced 30 m scene: a tilted, noisy plane with optional faults.
+
+    The noise matters. A noiseless plane is smooth at the 3x3 scale whatever
+    its gradient, and the water test would call the whole scene a lake, which
+    is a thing real terrain never does.
+    """
+    import numpy as np
+    import rioxarray  # noqa: F401  (registers the .rio accessor)
+    import xarray as xr
+
+    rng = np.random.default_rng(seed)
+    deg = 1 / 3600  # one arc-second, about 30 m
+    x = np.arange(n) * deg
+    y = centre_lat + (np.arange(n) - n // 2) * deg
+    metres_east = x * 111_320.0 * math.cos(math.radians(centre_lat))
+    field = np.repeat((2000.0 - slope_m_per_m * metres_east)[None, :], n, axis=0)
+    field = field + rng.normal(0.0, noise, size=(n, n))
+
+    if lake is not None:
+        rows, cols = lake
+        field[rows, cols] = float(field[rows, cols].min())
+    if holes:
+        mask = rng.random((n, n)) < holes
+        field[mask] = np.nan
+
+    da = xr.DataArray(field, coords={"y": y[::-1], "x": x}, dims=("y", "x"))
+    da = da.rio.write_crs("EPSG:4326")
+    da.attrs["basinkit_product"] = product
+    return da
+
+
+def test_steep_clean_terrain_grades_high():
+    """Every test passing must actually be reachable, or the grade is theatre."""
+    from basinkit.suitability import suitability
+
+    out = suitability(_scene())
+    assert out["grade"] == "HIGH", (
+        f"graded {out['grade']}: "
+        + "; ".join(f"{t['test']}={t['measured']}" for t in out["tests"]
+                    if t["verdict"] != "pass")
+    )
+    assert out["unmet"] == [] and out["advisory"] == []
+    assert len(out["tests"]) == 5
+
+
+def test_a_gentle_plain_is_graded_limited_with_its_reasons():
+    """Below the noise floor the numbers are the model's error, and it says so."""
+    from basinkit.suitability import suitability
+
+    out = suitability(_scene(slope_m_per_m=0.02))
+    assert out["grade"] == "LIMITED"
+    assert "slope" in out["unmet"], out["unmet"]
+    slope_test = next(t for t in out["tests"] if t["test"] == "slope")
+    assert slope_test["measured"] > 60.0
+    assert slope_test["noise_floor_deg"] > 0
+    # 81 m of relief against a 4 m error is a ratio of 20: past the advisory
+    # line, just short of the unmet one, which is exactly the sort of case the
+    # two-level grade exists to describe rather than round away.
+    relief = next(t for t in out["tests"] if t["test"] == "relief")
+    assert relief["verdict"] in ("advisory", "unmet"), relief
+    assert relief["measured"] < 100.0
+    assert out["statement"].startswith("This basin sits at or past")
+
+
+def test_a_reservoir_is_measured_and_scoped_to_the_terrain_products():
+    """The water finding must not be turned into a claim about the boundary."""
+    from basinkit.suitability import suitability
+
+    out = suitability(_scene(lake=(slice(40, 100), slice(40, 100))))
+    water = next(t for t in out["tests"] if t["test"] == "water")
+    assert water["verdict"] == "unmet", water
+    # Judged as a share of the basin: the same lake is most of a headwater and
+    # a rounding error in the Koshi, and one absolute threshold cannot be both.
+    assert water["measured"] >= 5.0, f"only {water['measured']}% of the basin"
+    assert water["surface_km2"] >= 2.0, water["surface_km2"]
+    assert water["surface_elev_m"] is not None
+    # Reservoir bridging was measured against real gauges and rejected, so the
+    # statement must describe the terrain products and explicitly leave the
+    # basin boundary alone.
+    assert "boundary" in water["statement"], water["statement"]
+
+
+def test_missing_elevation_inside_the_basin_is_reported():
+    """A withheld tile biases every statistic computed over the basin."""
+    from basinkit.suitability import suitability
+
+    out = suitability(_scene(holes=0.03))
+    coverage = next(t for t in out["tests"] if t["test"] == "coverage")
+    assert coverage["verdict"] == "unmet"
+    assert 2.0 < coverage["measured"] < 4.0, coverage["measured"]
+    assert coverage["measured_inside"] == "whole raster"
+
+
+def test_every_test_states_the_threshold_it_was_judged_against():
+    """A grade without its thresholds is an opinion."""
+    from basinkit.suitability import suitability
+
+    out = suitability(_scene())
+    for t in out["tests"]:
+        assert t["advisory_at"] is not None and t["unmet_at"] is not None, t
+        assert t["verdict"] in ("pass", "advisory", "unmet")
+        assert t["statement"]
+    assert out["vertical_error_m"] == 4.0
+    assert out["cell_size_m"] > 0
+
+
+def test_an_unknown_product_is_assumed_to_be_the_worst_of_them():
+    """Assuming better than is known would turn a bad grade into a good one."""
+    from basinkit.suitability import DEFAULT_VERTICAL_ERROR_M, suitability
+
+    out = suitability(_scene(product="somebody-elses-raster"))
+    assert out["vertical_error_m"] == DEFAULT_VERTICAL_ERROR_M
+
+
+def test_the_support_map_marks_the_cells_the_model_cannot_carry():
+    """Per-cell, not just per-basin: which ground the answer rests on."""
+    import numpy as np
+
+    from basinkit.suitability import suitability
+
+    out = suitability(_scene(holes=0.02), support_map=True)
+    support = np.asarray(out["support"].values)
+    assert support.shape == (140, 140)
+    assert np.isnan(support).any(), "cells with no elevation must stay nodata"
+    finite = support[np.isfinite(support)]
+    assert set(np.unique(finite)) <= {0.0, 1.0}
+    assert 0.0 <= out["support_fraction"] <= 1.0
