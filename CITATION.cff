@@ -24,7 +24,7 @@ authors:
   - given-names: Pradeepika
     family-names: Kaushik
     # orcid: "https://orcid.org/0000-0000-0000-0000"   # add yours
-version: 0.5.0
+version: 0.6.0
 doi: "10.5281/zenodo.22778428"
 identifiers:
   - type: doi

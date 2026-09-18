@@ -114,8 +114,17 @@ class QgsProcessingParameterEnum(_Parameter):
 
 
 class QgsProcessingParameterNumber(_Parameter):
+    # QGIS 3.36 moved these onto nested enums and kept the flat names as
+    # deprecated aliases. The plugin uses the nested spelling, so the stub has
+    # to carry both or it cannot check the code that actually ships.
     Integer, Double = 0, 1
     FlagAdvanced = 1 << 2
+
+    class Type:
+        Integer, Double = 0, 1
+
+    class Flag:
+        FlagAdvanced = 1 << 2
 
 
 class QgsProcessingParameterBoolean(_Parameter):
@@ -139,6 +148,10 @@ class QgsProcessingParameterFolderDestination(_Parameter):
 
 
 class QgsProcessingParameterFileDestination(_Parameter):
+    pass
+
+
+class QgsProcessingParameterString(_Parameter):
     pass
 
 

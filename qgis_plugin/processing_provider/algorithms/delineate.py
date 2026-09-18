@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from qgis.core import (
     QgsCoordinateReferenceSystem,
-    QgsProcessingParameterBoolean,
     QgsFeature,
     QgsFeatureSink,
     QgsFields,
     QgsGeometry,
     QgsProcessingException,
+    QgsProcessingParameterBoolean,
     QgsProcessingParameterEnum,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterNumber,
@@ -27,7 +27,7 @@ from .base import BasinkitAlgorithm
 
 WGS84 = "EPSG:4326"
 
-BACKENDS = ["auto", "hydrobasins", "dem", "api"]
+BACKENDS = ["auto", "hydrobasins", "dem", "api", "tdx"]
 
 BACKEND_HELP = """\
 <b>auto</b> (recommended) uses HydroBASINS, then checks the answer against the \
@@ -47,7 +47,17 @@ raster. Its working range reaches about 10,000 km2, above which the \
 sub-basin route is both faster and more accurate.<br>
 <b>api</b> queries a public web service. No download at all, so it is the \
 quickest first look, but it is one research group's server and its output \
-derives from a non-commercial dataset."""
+derives from a non-commercial dataset.<br>
+<b>tdx</b> walks a reach-level graph built from TanDEM-X at 12 m, one \
+catchment polygon per stream reach instead of one per 130 km&sup2; unit. On \
+360 gauges between 100 and 500 km2 it cut the median area error from 32.5 \
+percent to 10.5 percent and was the better answer on two thirds of them. It \
+is never chosen automatically, for one reason: TDX-Hydro is CC BY-SA 4.0, and \
+ShareAlike travels into anything derived from it and redistributed, while \
+every other layer here is CC BY 4.0 or more permissive. Needs \
+<code>pip install "basinkit[tdx]"</code>, and the republication it reads \
+omits twelve of the sixty-two regions, Greenland and much of Arctic North \
+America among them."""
 
 
 class DelineateBasinAlgorithm(BasinkitAlgorithm):

@@ -2,8 +2,8 @@
 name=basinkit
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
-description=Click a river anywhere on Earth and get an analysis-ready basin package: elevation, land cover, soil, rainfall, surface water, rivers, and full Horton-Strahler morphometry, clipped to the basin.
-version=0.5.0
+description=Click a river anywhere on Earth and get an analysis-ready basin package: elevation, terrain surfaces, land cover, soil, rainfall, surface water, rivers, full Horton-Strahler morphometry, a grade for whether the elevation model can carry any of it, and an eight-page report.
+version=0.6.0
 author=Pradeepika Kaushik
 email=pradeepika.kaushik@gmail.com
 
@@ -25,12 +25,43 @@ hasProcessingProvider=yes
 # their Python dependencies, so the plugin detects it at load
 # and hands the user a command that works. Declaring it here is what puts it in
 # the "External dependencies" field on plugins.qgis.org.
-external_deps=basinkit>=0.5
+external_deps=basinkit>=0.6
 server=False
 
-tags=hydrology,watershed,catchment,basin,delineation,dem,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
+tags=hydrology,watershed,catchment,basin,delineation,dem,terrain,slope,hand,morphometry,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
 
-changelog=0.5.0
+changelog=0.6.0
+    - Four new Processing algorithms. 'Terrain surfaces' computes slope,
+      aspect, hillshade, curvature, topographic position, ruggedness, local
+      relief, slope-position classes, flow accumulation, the channel network,
+      the wetness index and height above nearest drainage, all from one
+      elevation download rather than one per surface. 'Sub-catchments and their
+      routing' returns the pieces a basin is assembled from, each carrying
+      NEXT_DOWN, which is the routing graph a distributed model needs without
+      inferring anything from geometry. 'Elevation data suitability' grades
+      whether the elevation model can carry the terrain analysis at all.
+      'Basin report' writes eight A4 pages ready for a thesis or a manuscript.
+    - The elevation data suitability grade is the one worth reading first.
+      Five measurements against stated thresholds -- how much surface
+      depression filling invented, how many slopes fall below the angle at
+      which a gradient is only the model's own error, relief against that
+      error, the largest level surface, and cells with no elevation -- combined
+      into HIGH, MODERATE or LIMITED with a per-cell map of which ground the
+      answer rests on. Tested on 133 gauges against an independently produced
+      elevation model: where it says HIGH the two models agree about the slope
+      field at r = 0.94, where it says LIMITED at r = 0.76.
+    - A twelve-metre delineation backend. 'tdx' walks a reach-level graph built
+      from TanDEM-X, one catchment per stream reach instead of one per 130
+      square kilometre unit. On 360 gauges between 100 and 500 square
+      kilometres it cut the median area error from 32.5 percent to 10.5 percent
+      and was the better answer on two thirds of them. It is never chosen
+      automatically because TDX-Hydro is CC BY-SA, and ShareAlike travels into
+      anything derived from it and redistributed.
+    - Cell size is taken per row from that row's latitude everywhere in the
+      terrain code. Dividing by one assumed width reports a basin at 60 degrees
+      north as about twice as steep as it is.
+
+    0.5.0
     - Compatibility across the full supported QGIS range. The provider now
       resolves the Processing source-type enum by asking the API for it, so it
       loads identically on QGIS 3.28 through 4.x. QGIS 3.34, the current

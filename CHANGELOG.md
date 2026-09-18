@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.0 -- 2026-09-18
 
 ### Two measurements widened enough to carry their claims
 

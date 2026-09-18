@@ -8,16 +8,40 @@ box, and without an account anywhere.
 
 ## What you get
 
-Four algorithms in the Processing Toolbox, under **basinkit → River basins**:
+Eight algorithms in the Processing Toolbox, under **basinkit → River basins**:
 
 **Delineate river basin**: click an outlet on the map canvas, get the upstream
 basin as a polygon. Works anywhere on Earth. The output carries its own
 provenance: which method ran, which dataset version, the licence, and how far
 the outlet had to be moved.
 
+**Sub-catchments and their routing**: the pieces a basin is assembled from,
+each carrying `NEXT_DOWN`, the id of the sub-catchment it drains into. That is
+the routing graph itself, which is what a distributed rainfall-runoff model
+wants and what otherwise has to be inferred from geometry afterwards. Exactly
+one sub-catchment drains out of the set, and the algorithm says so or warns
+that more than one does.
+
 **Fetch basin data layers**: takes a basin polygon and downloads elevation,
 land cover, soil, surface water, rivers, lakes and rainfall for it. Everything
 outside the polygon is nodata, so the layers drop straight onto a map.
+
+**Terrain surfaces**: slope, aspect, hillshade, curvature, topographic position
+index, terrain ruggedness index, local relief, slope-position classes, flow
+accumulation, the channel network, the topographic wetness index and height
+above nearest drainage. All of them come from one elevation download rather
+than one per surface, so asking for ten costs the same fetch as asking for one.
+Cell size is taken per row from that row's latitude: a cell 0.001 degrees wide
+spans 111 m at the equator and 56 m at 60 degrees north, and dividing by one
+assumed width reports a high-latitude basin as about twice as steep as it is.
+
+**Elevation data suitability**: whether the elevation model can carry any of
+the above in this particular basin. Five measurements against stated
+thresholds, combined into HIGH, MODERATE or LIMITED, plus a per-cell raster of
+which ground the answer rests on. Tested on 133 gauges against an
+independently produced elevation model: where it says HIGH the two models
+agree about the slope field at r = 0.94, where it says LIMITED at r = 0.76.
+Read this one before quoting any terrain number.
 
 **Basin morphometry**: the classical Horton-Strahler-Schumm set from one run.
 Streams, lengths and bifurcation ratios per Strahler order; drainage density,
@@ -32,6 +56,15 @@ Counts that break either are reported rather than returned as numbers.
 
 **Basin statistics**: area on an equal-area projection, elevation range,
 relief, mean slope, land cover fractions, and an HTML report.
+
+**Basin report (PDF)**: eight A4 pages a thesis chapter or a manuscript
+appendix can use directly. Cover with the suitability grade, elevation and
+hypsometry, slope and aspect with an aspect rose, the shape of the ground, the
+channel network against Horton's laws, the full morphometric table with every
+parameter's symbol and original reference, what the answer rests on, and a
+methods page with software versions, licences and citations. Pages five and six
+need the river network; without it they say which parameters are missing and
+why, rather than printing a partial table that reads like a complete one.
 
 ## How this differs from the other basin plugins
 
