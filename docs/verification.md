@@ -201,7 +201,7 @@ the measurement has.
 Two qualifications that belong with the headline. It is the better answer in
 seven of the eight regions and not in the eighth, region 706, where the default
 is better at the median. And the two backends fail in opposite directions: the
-default's median signed error is +30% and its quartiles are +7% to +87%, so it
+default's median signed error is +31% and its quartiles are +7% to +87%, so it
 returns too much; `tdx` sits at -1% but its lower quartile is -67%, so it
 occasionally snaps to a tributary and returns far too little. A `tdx` answer
 that looks small should be checked against `provenance["snap_km"]`.
