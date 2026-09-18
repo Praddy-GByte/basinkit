@@ -2,6 +2,40 @@
 
 ## Unreleased
 
+### The elevation model has to earn the terrain analysis
+
+`Basin.dem_suitability()` grades whether this basin's elevation raster can
+carry the terrain products computed from it. Five measurements, each against a
+stated threshold: how much of the surface depression filling had to invent;
+how many slopes fall below `arctan(vertical error / cell size)`, the angle at
+which a gradient is the model's own error; relief against that vertical error;
+the largest level surface, as a share of the basin; and cells inside the basin
+with no elevation at all. The result is HIGH, MODERATE or LIMITED with the
+numbers that produced it, a plain-language statement, and `support_map=True`
+for a per-cell raster of which ground the answer actually rests on.
+
+This is the per-basin half of an accuracy claim. The published tables say what
+error to expect across thousands of gauges at a given catchment size, which is
+a statement about the population. It cannot say whether the basin in front of
+you is one of the good cases. Three worked examples, each on Copernicus
+GLO-30:
+
+| basin | grade | what decided it |
+|---|---|---|
+| Koshi at Chatara, 54,497 km2 | HIGH | every test passed; 90% of cells supported |
+| Koyna Dam, 903 km2 | LIMITED | the Shivsagar reservoir is 8.6% of the basin |
+| Hillsborough, Florida, 436 km2 | LIMITED | filling raised 53% of cells, 94% of slopes sit below the noise floor, 4% of cells supported |
+
+The Florida basin is the one to read twice. It is also the station where the
+DEM backend's own area error is +99%, so the grade names the case before the
+number misleads anyone.
+
+It grades the terrain products, not the basin boundary. Delineation accuracy
+is a separate question, measured separately in the verification page. An
+unknown product is assumed to be the least accurate of the four, because
+assuming better than is known would turn an unsupported answer into a passing
+grade.
+
 ### A twelve-metre backend for small catchments
 
 `backend="tdx"` delineates over TDX-Hydro, the reach-level hydrography NGA

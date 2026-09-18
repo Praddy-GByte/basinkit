@@ -315,6 +315,19 @@ class Basin:
         return hand(self.dem(**kwargs) if dem is None else dem,
                     min_area_km2=min_area_km2)
 
+    def dem_suitability(self, *, dem=None, support_map: bool = False, **kwargs):
+        """Whether the elevation model supports terrain analysis in this basin.
+
+        Five measured tests -- depression filling, the slope noise floor,
+        relief against the model's vertical error, level water surfaces and
+        missing coverage -- combined into ``HIGH``, ``MODERATE`` or
+        ``LIMITED``. It grades the terrain products, not the basin boundary.
+        """
+        from .suitability import suitability
+
+        return suitability(self, dem=self.dem(**kwargs) if dem is None else dem,
+                           support_map=support_map)
+
     def streams(self, *, dem=None, min_area_km2: float = 1.0, **kwargs):
         """The channel network routed from this basin's own elevation."""
         from .terrain import streams

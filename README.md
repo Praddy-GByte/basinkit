@@ -135,6 +135,27 @@ way rather than as one number:
 | 100 to 500 | 30% | 40% | 15% |
 | below 100 | 181% | 22% | 0% |
 
+**And that table is about the population, not about your basin.** It says what
+error to expect across thousands of gauges at a given catchment size. It cannot
+say whether the one in front of you is a case it was kind to.
+`Basin.dem_suitability()` answers the second half by measuring the basin
+itself: how much of the surface depression filling had to invent, how many
+slopes fall below the angle at which a gradient is only the model's vertical
+error, relief against that error, the largest level surface as a share of the
+basin, and cells with no elevation at all. Each against a stated threshold,
+combined into HIGH, MODERATE or LIMITED, with a per-cell raster of which ground
+the answer rests on.
+
+| basin | grade | what decided it |
+|---|---|---|
+| Koshi at Chatara, 54,497 km2 | HIGH | every test passed; 90% of cells supported |
+| Koyna Dam, 903 km2 | LIMITED | the Shivsagar reservoir is 8.6% of the basin |
+| Hillsborough, Florida, 436 km2 | LIMITED | 53% of cells raised by filling, 94% of slopes below the noise floor, 4% supported |
+
+Florida is the one to read twice: it is also the station where the DEM
+backend's own area error is +99%, so the grade names the case before the
+number misleads anyone.
+
 The default backend walks HydroBASINS level-12 units, which average about
 130 km2, so that is the scale it resolves. Below it, an outlet falls inside a
 unit whose own outlet may be on the trunk river, and the polygon returned is

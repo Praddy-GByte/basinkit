@@ -123,6 +123,40 @@ is 0.3% above 100,000 km2 and 181% below 100 km2. That spread is the whole
 finding, and it is why the answer comes back with a warning rather than a single
 accuracy figure; see [Verification](verification.md).
 
+### Ask whether the elevation model can answer at all
+
+```python
+s = basin.dem_suitability()
+print(s["grade"])                 # HIGH | MODERATE | LIMITED
+print(s["statement"])
+for t in s["tests"]:
+    print(f"{t['test']:9s} {t['verdict']:8s} {t['measured']} {t['unit']}")
+```
+
+Five measurements, each against a stated threshold: how much of the surface
+depression filling had to invent, how many slopes fall below the angle at
+which a gradient is just the model's vertical error, relief against that
+error, the largest level surface as a share of the basin, and cells with no
+elevation at all.
+
+| basin | grade | what decided it |
+|---|---|---|
+| Koshi at Chatara, 54,497 km2 | HIGH | every test passed; 90% of cells supported |
+| Koyna Dam, 903 km2 | LIMITED | the Shivsagar reservoir is 8.6% of the basin |
+| Hillsborough, Florida, 436 km2 | LIMITED | 53% of cells raised by filling, 94% of slopes below the noise floor, 4% of cells supported |
+
+The accuracy table above is a statement about thousands of gauges. This is a
+statement about yours. Use both: the table says what to expect at this
+catchment size, the grade says whether this particular basin is one of the
+cases the table was kind to.
+
+`support_map=True` adds `support`, a raster marking every cell that was
+neither raised by filling nor below the noise floor, so you can see which part
+of the basin the answer rests on rather than only how much of it.
+
+The grade is about the terrain products, not the basin boundary. Delineation
+accuracy is measured separately, in [Verification](verification.md).
+
 ### Why the polygon matters
 
 ```python
