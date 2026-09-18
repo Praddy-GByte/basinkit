@@ -31,14 +31,28 @@ so a 20 km² headwater catchment cannot be resolved: you get the whole unit.
 `backend="tdx"` walks the same kind of graph over TDX-Hydro, which NGA derived
 from TanDEM-X at 12 m and which carries one catchment polygon per stream reach
 rather than one per ~130 km² unit. That is the whole of the default backend's
-weakness below 500 km², so this is where it pays. On sixty gauges between 100
-and 500 km², thirty in Europe and thirty in North America, drawn by seed before
+weakness below 500 km², so this is where it pays. On 360 gauges between 100 and
+500 km², across eight GEOGLOWS regions on four continents, drawn by seed before
 any result was seen:
 
 | backend | median area error | within 20% |
 |---|---:|---:|
-| `hydrobasins` | 43% | 32% |
-| `tdx` | 12% | 57% |
+| `hydrobasins` | 32.5% | 38% |
+| `tdx` | 10.5% | 58% |
+
+| catchment size | `hydrobasins` | `tdx` | tdx better |
+|---|---:|---:|---:|
+| 100-200 km² | 60.6% | 10.6% | 78% |
+| 200-350 km² | 27.5% | 6.9% | 60% |
+| 350-500 km² | 19.4% | 17.9% | 55% |
+
+The gain closes as the basin grows past a level-12 unit, which is the
+mechanism this backend exists for behaving exactly as claimed. Two honest
+qualifications: it is better in seven of the eight regions and not in the
+eighth, and while its median signed error is -1%, its lower quartile is -67%.
+The default's failure is to return too much; this one's is to occasionally
+snap to a tributary and return far too little. Check
+`provenance["snap_km"]` when the answer looks small.
 
 Three things to know before choosing it:
 

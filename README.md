@@ -245,13 +245,17 @@ other backends are for.
 from TanDEM-X at 12 m and carries one catchment polygon per stream reach, so a
 basin of a few hundred square kilometres is described by its own ground rather
 than by the 130 km² cell that happens to contain its outlet. Measured against
-published gauge areas on sixty catchments between 100 and 500 km², thirty in
-Europe and thirty in North America, drawn by seed before any result was seen:
+published gauge areas on 360 catchments between 100 and 500 km², across eight
+GEOGLOWS regions on four continents, drawn by seed before any result was seen:
 
 | backend | median error | within 20% |
 |---|---:|---:|
-| `hydrobasins` | 43% | 32% |
-| `tdx` | 12% | 57% |
+| `hydrobasins` | 32.5% | 38% |
+| `tdx` | 10.5% | 58% |
+
+It is better on 66% of them, and the gain is where it should be: on catchments
+of 100-200 km² the median error falls from 61% to 11%, and by 350-500 km², as
+the basin grows past a level-12 unit, the two converge.
 
 It is opt-in and `auto` never reaches for it, for one reason: TDX-Hydro is
 CC BY-SA 4.0. Every other default here is CC BY 4.0 or more permissive, and

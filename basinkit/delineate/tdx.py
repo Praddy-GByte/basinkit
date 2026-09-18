@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import math
 from collections import defaultdict, deque
+from functools import lru_cache
 
 from ..cache import download
 from ..exceptions import DelineationError, MissingDependency, OutletSnapError
@@ -63,18 +64,31 @@ def _parquet_reader():
     return pd
 
 
-def _index(progress: bool = True):
-    """Every reach's id, unit and location, as four numpy arrays."""
-    _parquet_reader()
+@lru_cache(maxsize=1)
+def _index_cached(path: str):
+    """Decode the reach index once per process.
+
+    Six point eight million rows over four columns. Decoding takes a second or
+    so, which is nothing on one delineation and most of the wall clock on a
+    hundred, so the decoded arrays are kept rather than only the file. About
+    200 MB held, which is the right trade for anything that delineates more
+    than once.
+    """
     import pyarrow.parquet as pq
 
-    path = download(INDEX, namespace="tdx", progress=progress, timeout=900,
-                    expected_min_bytes=1 << 20)
     table = pq.read_table(path, columns=["LINKNO", "VPUCode", "lat", "lon"])
     return (table["LINKNO"].to_numpy(),
             table["VPUCode"].to_numpy(),
             table["lat"].to_numpy().astype("float64"),
             table["lon"].to_numpy().astype("float64"))
+
+
+def _index(progress: bool = True):
+    """Every reach's id, unit and location, as four numpy arrays."""
+    _parquet_reader()
+    path = download(INDEX, namespace="tdx", progress=progress, timeout=900,
+                    expected_min_bytes=1 << 20)
+    return _index_cached(str(path))
 
 
 def _nearest_reach(lat: float, lon: float, snap_km: float, progress: bool):
