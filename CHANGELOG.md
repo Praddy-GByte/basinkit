@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+### A twelve-metre backend for small catchments
+
+`backend="tdx"` delineates over TDX-Hydro, the reach-level hydrography NGA
+derived from TanDEM-X at 12 m. One catchment polygon per stream reach replaces
+the ~130 km2 HydroBASINS unit, which is the whole of the default backend's
+weakness below 500 km2. On sixty gauges between 100 and 500 km2, thirty in
+Europe and thirty in North America, drawn by seed before any result was seen,
+median area error fell from 43% to 12% and the share within 20% of the
+published area rose from 32% to 57%.
+
+It is opt-in and `auto` will not reach for it. TDX-Hydro is CC BY-SA 4.0, and
+ShareAlike travels into anything derived from it and redistributed; every other
+default in the catalogue is CC BY 4.0 or more permissive. The catalogue entry
+says so, and the backend is reachable only by naming it.
+
+Reads the GEOGLOWS v2 republication on AWS Open Data, which serves byte ranges
+where NGA's own download does not. That republication omits twelve of NGA's
+sixty-two regions, Greenland and much of Arctic North America among them.
+Needs `pip install "basinkit[tdx]"` for the Parquet reader; the catchment file
+for a region is read in batches, so peak memory stays near 2 GB rather than
+loading a half-gigabyte table whole.
+
 ### Terrain surfaces from the elevation already fetched
 
 `basinkit.terrain` adds slope, aspect, hillshade, curvature, flow accumulation,

@@ -38,7 +38,7 @@ basinkit fetch --lat 26.87 --lon 87.15 --out koshi/
 
 Or without a terminal either: there is a **QGIS plugin** in `qgis_plugin/`.
 Click an outlet on the map canvas and the basin and its data land in your
-project. See [its README](qgis_plugin/README.md).
+project. See [its README](https://github.com/Praddy-GByte/basinkit/tree/main/qgis_plugin).
 
 > **Not affiliated with [EPA BASINS](https://www.epa.gov/hydrowq/better-assessment-science-integrating-point-and-non-point-sources-basins)
 > or [BasinMaker](https://github.com/dustming/basinmaker).** BASINS is a US
@@ -65,7 +65,7 @@ again from scratch on the data side, because `eodag`, `earthaccess`,
 basinkit is that missing join, for the whole planet.
 
 The precise claim, and the four packages that make it non-obvious, are in
-[Related work](docs/related-work.md), including the two that do this better
+[Related work](related-work.md), including the two that do this better
 than basinkit within their own scope.
 
 ### Three things it does that the alternatives do not
@@ -78,7 +78,7 @@ of what a bounding-box download transfers is therefore somebody else's
 catchment, and those pixels sit inside every "basin average" computed from it.
 
 **It needs no account.** Not for the DEM, not for Sentinel-2, not for Landsat,
-not for terrain-corrected radar. Nineteen of the twenty-six catalogued datasets
+not for terrain-corrected radar. Twenty of the twenty-seven catalogued datasets
 are fetchable today, and every one of those is anonymous.
 Compare: MERIT Hydro is behind a Google Form and an emailed Dropbox password;
 the OpenTopography API allows fifty calls a day on a non-academic key; Earth
@@ -122,6 +122,26 @@ unit whose own outlet may be on the trunk river, and the polygon returned is
 the trunk's catchment. The geometry gives no sign of this by itself, since the
 traversal reproduces HydroBASINS' own upstream area on 95% of stations either
 way.
+
+`backend="tdx"` answers that band directly. TDX-Hydro carries one catchment
+polygon per stream reach, derived from TanDEM-X at 12 m, so a basin of a few
+hundred square kilometres is described by its own ground instead of by the
+130 km2 unit that happens to contain its outlet. On sixty catchments between
+100 and 500 km2, thirty in Europe and thirty in North America, drawn by seed
+before any result was seen:
+
+| backend | median error | within 20% |
+|---|---:|---:|
+| `hydrobasins` | 43% | 32% |
+| `tdx` | 12% | 57% |
+
+It stays opt-in and `auto` never reaches for it, for one reason: TDX-Hydro is
+CC BY-SA 4.0, where every other default in this catalogue is CC BY 4.0 or more
+permissive, and ShareAlike travels into anything derived from it and
+redistributed. That is a term to accept deliberately rather than to inherit by
+default. It also needs `pip install "basinkit[tdx]"` for the Parquet reader,
+and the GEOGLOWS v2 republication it reads omits twelve of NGA's sixty-two
+regions, Greenland and much of Arctic North America among them.
 
 So basinkit confirms every answer against the river network. Where that check
 raises a question, **85% of those outlets need attention**, and it stays quiet
