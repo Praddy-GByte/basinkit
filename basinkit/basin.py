@@ -308,6 +308,100 @@ class Basin:
 
         return twi(self.dem(**kwargs) if dem is None else dem)
 
+    def hand(self, *, dem=None, min_area_km2: float = 1.0, **kwargs):
+        """Height above the nearest drainage: the terrain layer flood work wants."""
+        from .terrain import hand
+
+        return hand(self.dem(**kwargs) if dem is None else dem,
+                    min_area_km2=min_area_km2)
+
+    def streams(self, *, dem=None, min_area_km2: float = 1.0, **kwargs):
+        """The channel network routed from this basin's own elevation."""
+        from .terrain import streams
+
+        return streams(self.dem(**kwargs) if dem is None else dem,
+                       min_area_km2=min_area_km2)
+
+    def zonal(self, values, zones=None, *, bins=None, labels=None, **kwargs):
+        """Summarise one layer inside the classes of another.
+
+        ``basin.zonal(basin.precipitation_grid, basin.landcover())`` answers
+        how much rain falls on each land-cover class; passing ``bins`` cuts a
+        continuous layer such as elevation into bands instead. Area is summed
+        from the true size of every cell, so a basin spanning several degrees
+        of latitude is not weighted towards its southern edge.
+        """
+        from .zonal import zonal
+
+        if zones is None:
+            zones = self.landcover(**kwargs)
+        return zonal(values, zones, labels=labels, bins=bins)
+
+    def landcover_change(self, start: int, end: int, *, source: str = "esri",
+                         **kwargs):
+        """What became what, between two years, in square kilometres.
+
+        Only the ESRI annual series carries a year for every year, so that is
+        the default here even though ``landcover()`` defaults to WorldCover.
+        The diagonal is the ground that did not change; everything off it is a
+        transition, and the table is the honest form of a deforestation or
+        urban-growth figure because it shows what the loss became.
+        """
+        import numpy as np
+        import pandas as pd
+
+        from .sources.landcover import _declared_classes
+        from .terrain import cell_area_km2
+
+        first = self.landcover(year=start, source=source, **kwargs)
+        second = self.landcover(year=end, source=source, **kwargs)
+        if first.shape != second.shape:
+            second = second.rio.reproject_match(first)
+
+        legend = _declared_classes(first) or {}
+        a = np.asarray(first.values, dtype="float64")
+        b = np.asarray(second.values, dtype="float64")
+        areas = cell_area_km2(first)
+        usable = np.isfinite(a) & np.isfinite(b) & (a > 0) & (b > 0)
+
+        rows = []
+        for code_from in np.unique(a[usable]):
+            for code_to in np.unique(b[usable]):
+                picked = usable & (a == code_from) & (b == code_to)
+                if not picked.any():
+                    continue
+                rows.append({
+                    "from": legend.get(int(code_from), int(code_from)),
+                    "to": legend.get(int(code_to), int(code_to)),
+                    "area_km2": round(float(areas[picked].sum()), 3),
+                    "changed": bool(code_from != code_to),
+                })
+        frame = pd.DataFrame(rows).sort_values("area_km2", ascending=False)
+        frame.attrs["years"] = (start, end)
+        return frame.reset_index(drop=True)
+
+    def precipitation_trend(self, *, start: int = 1985, end: int | None = None,
+                            alpha: float = 0.05, **kwargs):
+        """Is rainfall over this basin trending, and by how much a year."""
+        from .climate import trend
+
+        series = self.precipitation(start=start, end=end, **kwargs)
+        s = series.to_series() if hasattr(series, "to_series") else series
+        yearly = s.groupby(s.index.year).sum()
+        yearly.index = __import__("pandas").to_datetime(
+            [f"{int(y)}-01-01" for y in yearly.index]
+        )
+        return trend(yearly, alpha=alpha)
+
+    def spi(self, *, scale: int = 3, start: int = 1985, end: int | None = None,
+            **kwargs):
+        """Standardized Precipitation Index over this basin, month by month."""
+        from .climate import spi
+
+        series = self.precipitation(start=start, end=end, **kwargs)
+        s = series.to_series() if hasattr(series, "to_series") else series
+        return spi(s, scale=scale)
+
     def subbasins(self, **kwargs):
         """The sub-catchments this basin is assembled from, with their routing.
 

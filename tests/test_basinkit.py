@@ -1537,3 +1537,199 @@ def test_flow_accumulation_drains_the_basin_and_nothing_else():
         f"a median wetness index of {float(np.median(finite)):.1f} is outside "
         "every published range"
     )
+
+
+def test_zonal_weights_by_area_not_by_cell_count():
+    """A cell is not the same size everywhere, and a count pretends it is.
+
+    On a geographic grid a cell at 60 degrees north covers half the ground of
+    one at the equator. Summing cells rather than their areas reports the two
+    halves of a north-south basin as equal, which is wrong by a factor of two
+    at the ends of the range.
+    """
+    import numpy as np
+
+    from basinkit.zonal import zonal
+
+    dem = _synthetic_dem(slope_m_per_m=0.0, centre_lat=45.0, n=41, deg=0.01)
+    split = np.broadcast_to(np.where(np.arange(41)[:, None] < 20, 1.0, 2.0), (41, 41))
+    zones = dem.copy(data=split.copy())
+    values = dem.copy(data=np.ones((41, 41)))
+
+    table = zonal(values, zones, labels={1: "north", 2: "south"})
+    north = table.loc[table["zone"] == "north"].iloc[0]
+    south = table.loc[table["zone"] == "south"].iloc[0]
+
+    assert north["cells"] < south["cells"], "the halves were split unevenly by design"
+    # The northern half has fewer rows but its cells are the smaller ones, so
+    # counting cells and measuring ground must not give the same ranking.
+    per_cell_north = north["area_km2"] / north["cells"]
+    per_cell_south = south["area_km2"] / south["cells"]
+    assert per_cell_north < per_cell_south, (
+        "cells further north must measure smaller: "
+        f"{per_cell_north:.4f} against {per_cell_south:.4f} km2"
+    )
+
+
+def test_zonal_reports_the_statistics_it_promises():
+    import numpy as np
+
+    from basinkit.zonal import zonal
+
+    dem = _synthetic_dem(slope_m_per_m=0.0, n=21, deg=0.01)
+    split = np.broadcast_to(np.where(np.arange(21)[None, :] < 10, 1.0, 2.0), (21, 21))
+    zones = dem.copy(data=split.copy())
+    field = np.where(np.arange(21)[None, :] < 10, 5.0, 25.0)
+    values = dem.copy(data=np.broadcast_to(field, (21, 21)).copy())
+
+    table = zonal(values, zones, labels={1: "left", 2: "right"})
+    assert set(table["zone"]) == {"left", "right"}
+    assert float(table.loc[table["zone"] == "left", "mean"].iloc[0]) == 5.0
+    assert float(table.loc[table["zone"] == "right", "mean"].iloc[0]) == 25.0
+    assert abs(float(table["share"].sum()) - 1.0) < 1e-6, "shares must cover the basin"
+    for column in ("p10", "p50", "p90", "std", "min", "max"):
+        assert column in table.columns
+
+
+def test_the_trend_test_finds_a_planted_trend_and_leaves_noise_alone():
+    """A rank test that cannot find a real trend, or invents one, is worthless."""
+    import numpy as np
+    import pandas as pd
+
+    from basinkit.climate import trend
+
+    index = pd.date_range("1980-01-01", periods=480, freq="MS")
+    noise = np.random.default_rng(7).normal(0, 5, 480)
+
+    rising = trend(pd.Series(100 + np.arange(480) * 0.05 + noise, index=index))
+    assert rising["significant"] and rising["direction"] == "increasing"
+    assert abs(rising["slope"] - 0.6) < 0.1, (
+        f"a planted 0.6 per year came back as {rising['slope']:.3f}"
+    )
+
+    flat = trend(pd.Series(100 + noise, index=index))
+    assert not flat["significant"], (
+        f"noise alone was called a trend at p={flat['p_value']}"
+    )
+
+
+def test_the_trend_test_refuses_a_sample_too_small_to_mean_anything():
+    import pandas as pd
+
+    from basinkit.climate import trend
+
+    with pytest.raises(ValueError, match="at least ten"):
+        trend(pd.Series([1.0, 2.0, 3.0]))
+
+
+def test_spi_is_standardised_and_says_where_its_ceiling_is():
+    """SPI is a z-score, so it must centre on zero and sit near unit spread."""
+    import numpy as np
+    import pandas as pd
+
+    from basinkit.climate import spi
+
+    index = pd.date_range("1985-01-01", periods=480, freq="MS")
+    seasonal = 50 + 40 * np.sin(2 * np.pi * (index.month - 6) / 12)
+    rainfall = pd.Series(
+        np.clip(seasonal + np.random.default_rng(3).normal(0, 12, 480), 0, None),
+        index=index,
+    )
+
+    z = spi(rainfall, scale=3).dropna()
+    assert abs(float(z.mean())) < 0.05, f"SPI centred on {float(z.mean()):.3f}"
+    assert 0.8 < float(z.std()) < 1.1, f"SPI spread {float(z.std()):.3f}"
+    # Forty years behind each calendar month bounds the extreme; the docstring
+    # says so, and the number has to match the claim.
+    assert float(z.abs().max()) < 2.1, (
+        "a ranked index cannot exceed the ceiling its record length sets"
+    )
+
+
+def test_comparing_basins_records_a_failure_instead_of_losing_the_run(monkeypatch):
+    """One bad coordinate must not discard the basins that worked."""
+    from basinkit.basin import Basin
+    from basinkit.compare import compare
+    from basinkit.exceptions import DelineationError
+
+    calls = []
+
+    def fake_from_point(lat, lon, **kwargs):
+        calls.append((lat, lon))
+        if lon == 0.0:
+            raise DelineationError("nothing here but ocean")
+        from shapely.geometry import box
+
+        return Basin(box(lon, lat, lon + 0.1, lat + 0.1),
+                     {"backend": "hydrobasins", "region": "as"})
+
+    monkeypatch.setattr(Basin, "from_point", staticmethod(fake_from_point))
+
+    table = compare(
+        [(10.0, 20.0), (0.0, 0.0), (30.0, 40.0)],
+        labels=["first", "ocean", "third"], layers=(),
+    )
+
+    assert len(table) == 3, "every input point must get a row"
+    assert len(calls) == 3, "a failure must not stop the ones after it"
+    import pandas as pd
+
+    assert table.loc[table["label"] == "ocean", "error"].iloc[0]
+    assert pd.isna(table.loc[table["label"] == "first", "error"].iloc[0]), (
+        "a basin that worked must carry no error"
+    )
+    assert float(table.loc[table["label"] == "third", "area_km2"].iloc[0]) > 0
+
+
+def test_comparing_refuses_labels_that_do_not_line_up():
+    from basinkit.compare import compare
+
+    with pytest.raises(ValueError, match="they must match"):
+        compare([(1.0, 2.0), (3.0, 4.0)], labels=["only one"])
+
+
+@pytest.mark.network
+def test_height_above_drainage_is_never_negative():
+    """Nothing can sit below the channel it drains into.
+
+    Routing fills depressions; measuring against the raw elevation afterwards
+    puts every filled pit below its own outlet and returns negative heights,
+    which then read as the most flood-prone ground in the basin. Routing and
+    measuring have to happen on the same surface.
+    """
+    import numpy as np
+
+    basin = bk.Basin.from_point(26.87, 87.15, progress=False)
+    heights = np.asarray(basin.hand(dem=basin.dem(max_pixels=2_000_000)).values)
+    finite = heights[np.isfinite(heights)]
+
+    assert finite.min() >= -1e-6, (
+        f"{int((finite < -1e-6).sum()):,} cells came back below their own channel, "
+        f"the lowest at {finite.min():,.1f} m"
+    )
+    assert finite.max() > 100, (
+        "a Himalayan basin has ground far above its rivers; "
+        f"the highest here is {finite.max():.1f} m"
+    )
+
+
+@pytest.mark.network
+def test_land_cover_change_accounts_for_the_whole_basin():
+    """Every square kilometre ends up somewhere in the transition table."""
+    basin = bk.Basin.from_point(26.87, 87.15, progress=False)
+    from basinkit.sources.landcover import esri_years
+
+    years = esri_years(basin.geometry)
+    table = basin.landcover_change(min(years), max(years), max_pixels=3_000_000)
+
+    assert {"from", "to", "area_km2", "changed"} <= set(table.columns)
+    total = float(table["area_km2"].sum())
+    assert abs(total - basin.area_km2) / basin.area_km2 < 0.02, (
+        f"the transitions sum to {total:,.0f} km2 against a basin of "
+        f"{basin.area_km2:,.0f}"
+    )
+    assert bool(table.loc[~table["changed"], "area_km2"].sum()
+                > table.loc[table["changed"], "area_km2"].sum()), (
+        "most of a basin does not change land cover in six years; "
+        "more change than stability means the two years are misaligned"
+    )

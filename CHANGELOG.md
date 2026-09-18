@@ -1,5 +1,62 @@
 # Changelog
 
+## Unreleased
+
+### Terrain surfaces from the elevation already fetched
+
+`basinkit.terrain` adds slope, aspect, hillshade, curvature, flow accumulation,
+the channel network, the topographic wetness index and height above nearest
+drainage, all reachable as `Basin` methods. Every one is computed from the
+array `dem()` already returns, so passing `dem=` lets a single download serve
+all of them.
+
+Cell spacing is taken per row from that row's latitude. A cell 0.001 degrees
+wide spans 111 m at the equator and 56 m at 60 degrees north, and dividing by
+one assumed width reported a high-latitude basin as twice as steep as it is.
+
+Flow accumulation treats ground outside the polygon as nodata rather than
+filling it with elevation. Filled, every neighbouring catchment became a ridge
+draining inwards: on the Koshi the outlet accumulated 1.85 million cells from
+a basin of 1.01 million. It now accumulates exactly the basin.
+
+Height above nearest drainage is measured on the same depression-filled
+surface the routing used. Measured against raw elevation instead, every filled
+pit came back below its own outlet, and the most flood-prone ground in the
+basin read as negative.
+
+### Sub-catchments, with their routing
+
+`Basin.subbasins()` returns the HydroBASINS units the traversal walked rather
+than only their union, each carrying `NEXT_DOWN`. That is the routing graph
+itself, so a distributed model gets its sub-catchments and their links without
+inferring anything from geometry. On the Koshi: 423 units summing to 54,580
+km2 against a measured 54,497, with exactly one draining out of the set.
+
+### Summaries inside classes
+
+`Basin.zonal()` summarises any layer inside the classes of another, or inside
+bands cut from a continuous one. Area is summed from the true size of every
+cell, so a basin spanning several degrees of latitude is not weighted towards
+its southern edge.
+
+`Basin.landcover_change()` returns what became what between two years of the
+ESRI annual series, in square kilometres, with the diagonal left in so that a
+deforestation figure shows what the loss became.
+
+### Trends and drought
+
+`Basin.precipitation_trend()` runs Mann-Kendall with tie correction and Sen's
+slope; `Basin.spi()` returns the Standardized Precipitation Index by ranking
+each calendar month against its own history. Neither imports scipy, which this
+package does not declare.
+
+### More than one basin
+
+`basinkit.compare()` delineates a list of coordinates into one table, one row
+per point. A coordinate that fails gets a row with the reason in it rather
+than ending the run, so an afternoon of downloads is not lost to a single bad
+point.
+
 ## 0.5.0 (2026-09-09)
 
 ### Compatibility across the whole supported QGIS range
