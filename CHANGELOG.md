@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+### Two measurements widened enough to carry their claims
+
+The twelve-metre backend was measured on 60 gauges in two regions. It is now
+measured on 360 between 100 and 500 km2 across eight GEOGLOWS regions on four
+continents, drawn by seed before any result was seen. The claim holds: median
+area error 32.5% against 10.5%, within 20% of the published figure on 38%
+against 58%, and the better answer on 66% of them. The gain is largest at
+100-200 km2 and closes by 350-500 km2, which is the mechanism behaving as
+claimed rather than a number that happened to come out well.
+
+The suitability grade is now tested against something it was not fitted to.
+Computing the grade from Copernicus GLO-30 and then asking NASADEM to describe
+the same ground, the correlation between the two slope fields runs 0.935 at
+HIGH and 0.756 at LIMITED across 133 gauges (Mann-Whitney z = -4.84,
+p = 1.3e-06). The grade predicts whether two independently produced elevation
+models agree about the terrain.
+
+It also does not predict catchment area error, and the verification page now
+says so with the numbers, because the two questions are separate and the grade
+was only ever about the first.
+
+Both samples and both scripts are in `verify/`, so the numbers on the
+verification page can be recomputed rather than taken on trust.
+
+### The reach index is decoded once, not once per call
+
+`backend="tdx"` re-read and re-decoded the 6.8 million row reach index on every
+delineation. One delineation never noticed; a hundred spent most of their wall
+clock on it. The decoded arrays are now held for the life of the process.
+
 ### An eight-page report, ready for a thesis
 
 `Basin.report("basin.pdf")` writes everything basinkit computes about a basin
@@ -88,10 +118,10 @@ grade.
 `backend="tdx"` delineates over TDX-Hydro, the reach-level hydrography NGA
 derived from TanDEM-X at 12 m. One catchment polygon per stream reach replaces
 the ~130 km2 HydroBASINS unit, which is the whole of the default backend's
-weakness below 500 km2. On sixty gauges between 100 and 500 km2, thirty in
-Europe and thirty in North America, drawn by seed before any result was seen,
-median area error fell from 43% to 12% and the share within 20% of the
-published area rose from 32% to 57%.
+weakness below 500 km2. On 360 gauges between 100 and 500 km2, across eight
+GEOGLOWS regions on four continents, drawn by seed before any result was seen,
+median area error fell from 32.5% to 10.5% and the share within 20% of the
+published area rose from 38% to 58%. It is the better answer on 66% of them.
 
 It is opt-in and `auto` will not reach for it. TDX-Hydro is CC BY-SA 4.0, and
 ShareAlike travels into anything derived from it and redistributed; every other

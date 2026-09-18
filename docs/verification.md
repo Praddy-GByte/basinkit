@@ -175,6 +175,93 @@ cells to 9,248.
 snapping distances tried. That is the ceiling this catalogue supports, rather
 than a property of the tools.
 
+### The twelve-metre backend, on 360 gauges
+
+The first measurement of `backend="tdx"` was 60 gauges in two regions. Widened
+to 360 between 100 and 500 km2 across eight GEOGLOWS regions on four
+continents, drawn by seed before any result was seen:
+
+| backend | median error | within 20% | better on |
+|---|---:|---:|---:|
+| `hydrobasins` | 32.5% | 38% | 34% |
+| `tdx` | **10.5%** | **58%** | **66%** |
+
+Broken down by size, the gain behaves exactly as the mechanism predicts:
+
+| catchment size | n | `hydrobasins` | `tdx` | tdx better |
+|---|---:|---:|---:|---:|
+| 100-200 km2 | 142 | 60.6% | 10.6% | 78% |
+| 200-350 km2 | 129 | 27.5% | 6.9% | 60% |
+| 350-500 km2 | 89 | 19.4% | 17.9% | 55% |
+
+The advantage is largest where a catchment is a fraction of a level-12 unit and
+closes as the catchment grows past one. That is the claim, and it is the shape
+the measurement has.
+
+Two qualifications that belong with the headline. It is the better answer in
+seven of the eight regions and not in the eighth, region 706, where the default
+is better at the median. And the two backends fail in opposite directions: the
+default's median signed error is +30% and its quartiles are +7% to +87%, so it
+returns too much; `tdx` sits at -1% but its lower quartile is -67%, so it
+occasionally snaps to a tributary and returns far too little. A `tdx` answer
+that looks small should be checked against `provenance["snap_km"]`.
+
+### Does the suitability grade mean anything?
+
+A grade is worth nothing until it predicts something it was not fitted to. The
+test: compute the grade from Copernicus GLO-30, then ask a second, independently
+produced elevation model to describe the same ground. NASADEM comes from the
+Shuttle Radar Topography Mission of February 2000, separately reprocessed;
+Copernicus comes from TanDEM-X flown 2011-2015. Different sensors, different
+decades, different processing chains, so their disagreement is not a shared
+artefact. Where a basin's terrain is above what either can resolve, the two
+slope fields should describe the same hillsides. Where it is below, both are
+returning their own noise.
+
+160 gauges drawn by seed from the blind validation set before any result was
+seen; 133 carried both models. The measure is the correlation between the two
+slope fields:
+
+| grade | n | median Pearson r | p25 | p75 |
+|---|---:|---:|---:|---:|
+| HIGH | 17 | **0.935** | 0.928 | 0.949 |
+| MODERATE | 38 | 0.934 | 0.903 | 0.965 |
+| LIMITED | 78 | **0.756** | 0.602 | 0.878 |
+
+HIGH against LIMITED, Mann-Whitney: z = -4.84, p = 1.3e-06. The grade predicts
+whether two independent elevation models agree about the terrain, which is
+what it claims to be about.
+
+Each test carries its own weight in the same direction. Where the slope test is
+unmet, median r is 0.748 against 0.935 elsewhere; where the filling test is
+unmet, 0.671 against 0.898; the two basins where the relief test is unmet sit
+at 0.415.
+
+**The measure had to be a correlation, not a difference.** Disagreement in
+degrees runs the other way: HIGH basins differ by 1.89 degrees at the median
+and LIMITED basins by 1.02. That is not the models agreeing on flat ground, it
+is flat ground having less gradient to disagree about. A measure of resolvability
+that rewards a basin for being flat is measuring the wrong thing, and any
+absolute threshold on slope disagreement would have inverted this result.
+
+**The grade does not predict catchment area error, and must not be read that
+way.** On the same sample the HIGH basins have a median area error of 73% and
+the LIMITED basins 9%. That is a size confound, not a finding: the HIGH basins
+here have a median area of 397 km2 and the LIMITED ones 1,207 km2, and area
+error is governed by catchment size. This is the separation the grade's own
+documentation states, holding up under test: it describes the terrain products
+computed from the raster, and the accuracy of the boundary is a different
+question measured elsewhere on this page.
+
+One number worth sitting with: **78 of 133 gauged catchments graded LIMITED**.
+On a 30 m global elevation model, most gauged catchments are not well enough
+resolved for the terrain products usually computed over them, and until now
+nothing said so.
+
+27 of the 160 dropped out, 24 because the benchmark's own cache eviction
+removed a tile mid-run and 3 on a read error. The eviction fired on a timer
+under disk pressure, so the loss is unrelated to any property of the basins.
+
 ### Reservoir bridging: measured, then rejected
 
 D8 flow direction is undefined on a level surface, so a reservoir can fragment

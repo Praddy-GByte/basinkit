@@ -102,7 +102,7 @@ smaller than about 100 km², use `backend="dem"`.**
 
 Between 100 and 500 km² the sharpest answer is `backend="tdx"`, which walks a
 reach-level graph built from TanDEM-X at 12 m and cut the median area error on
-sixty gauges in that band from 43% to 12%. It is opt-in rather than automatic
+360 gauges in that band from 32% to 11%. It is opt-in rather than automatic
 because TDX-Hydro is CC BY-SA 4.0 and ShareAlike travels into anything derived
 from it and redistributed. Install it with `pip install "basinkit[tdx]"`.
 
