@@ -106,6 +106,9 @@ and nowhere else. The figures here use `area.meta`, which is km2 throughout.
 
 ### By catchment size
 
+![Median catchment area error by size band, on a log scale. It falls from 181 percent below 100 km2 to 0.3 percent above 100,000 km2.](assets/figures/error-by-catchment-size-light.svg#only-light)
+![Median catchment area error by size band, on a log scale. It falls from 181 percent below 100 km2 to 0.3 percent above 100,000 km2.](assets/figures/error-by-catchment-size-dark.svg#only-dark)
+
 | catchment area | median error | within 20% | out by >100% |
 |---|---:|---:|---:|
 | above 100,000 km2 | 0.3% | 92% | 0% |
@@ -151,6 +154,9 @@ agency areas by 2.0% at the median, which is the reference's own floor.
 
 ### Against other implementations
 
+![Median area error for four D8 implementations on the same 59 rasters: basinkit 4.6 percent, WhiteboxTools 8.6 percent answering 76 percent of them, pysheds 17.6 percent, HydroBASINS 41.6 percent.](assets/figures/implementations-light.svg#only-light)
+![Median area error for four D8 implementations on the same 59 rasters: basinkit 4.6 percent, WhiteboxTools 8.6 percent answering 76 percent of them, pysheds 17.6 percent, HydroBASINS 41.6 percent.](assets/figures/implementations-dark.svg#only-dark)
+
 59 catchments under 2,000 km2, one Copernicus 30 m window per station, three D8
 implementations on the identical raster:
 
@@ -176,6 +182,9 @@ snapping distances tried. That is the ceiling this catalogue supports, rather
 than a property of the tools.
 
 ### The twelve-metre backend, on 360 gauges
+
+![Median area error by size band for the default backend against the twelve-metre one. The gap is widest at 100 to 200 km2 and closes by 350 to 500 km2.](assets/figures/tdx-by-catchment-size-light.svg#only-light)
+![Median area error by size band for the default backend against the twelve-metre one. The gap is widest at 100 to 200 km2 and closes by 350 to 500 km2.](assets/figures/tdx-by-catchment-size-dark.svg#only-dark)
 
 The first measurement of `backend="tdx"` was 60 gauges in two regions. Widened
 to 360 between 100 and 500 km2 across eight GEOGLOWS regions on four
@@ -207,6 +216,9 @@ occasionally snaps to a tributary and returns far too little. A `tdx` answer
 that looks small should be checked against `provenance["snap_km"]`.
 
 ### Does the suitability grade mean anything?
+
+![Left: agreement between two independent elevation models falls from 0.94 at HIGH to 0.76 at LIMITED. Right: the same basins measured in degrees of slope disagreement, where the order reverses.](assets/figures/grade-validation-light.svg#only-light)
+![Left: agreement between two independent elevation models falls from 0.94 at HIGH to 0.76 at LIMITED. Right: the same basins measured in degrees of slope disagreement, where the order reverses.](assets/figures/grade-validation-dark.svg#only-dark)
 
 A grade is worth nothing until it predicts something it was not fitted to. The
 test: compute the grade from Copernicus GLO-30, then ask a second, independently
@@ -518,3 +530,25 @@ in as the expected answer.
 Linux only so far. The CI matrix claims three operating systems and three
 Python versions; two of the three Pythons are now real, the two other operating
 systems are still a claim.
+
+## Reproducing this page
+
+The benchmark samples behind the figures are in `verify/benchmarks/`, and the
+scripts that produced and read them are in `verify/`:
+
+```bash
+python verify/run_tdx_wide.py            # the 360-gauge sample
+python verify/run_grade_validation.py    # the 133-gauge grade test
+python verify/analyse_tdx_wide.py        # the tables above, recomputed
+python verify/analyse_grade_validation.py
+python verify/make_figures.py            # every figure, light and dark
+```
+
+One table is not reproducible from this repository, and it is the biggest one.
+The blind validation of 2,740 delineations is built on GSIM station records,
+and shipping the identified set would be redistributing that dataset rather
+than this package's own results. What is shipped is the result as the table
+above reports it, in `verify/benchmarks/accuracy_by_size.csv`, which is what
+the first figure is drawn from -- so the chart and the table cannot drift
+apart, but neither can be recomputed here from scratch. The gauge list is
+GSIM's, and anyone with it can repeat the run.
