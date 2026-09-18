@@ -285,3 +285,290 @@ def twi(dem, *, accumulation=None):
     values = np.log(specific / tan_beta)
     values = np.where(np.isfinite(elevation), values, np.nan)
     return _wrap(dem, values, "twi", "1", "topographic wetness index")
+
+
+def _box_sum(values, size: int):
+    """Sum over every ``size`` x ``size`` window, by summed-area table.
+
+    One pass whatever the window, which is what makes an 11-cell window as
+    cheap as a 3-cell one. Cells off the edge count as absent rather than as
+    zero, so a border window averages the cells it actually has.
+    """
+    import numpy as np
+
+    pad = size // 2
+    padded = np.pad(values, pad, mode="constant", constant_values=0.0)
+    integral = padded.cumsum(axis=0).cumsum(axis=1)
+    integral = np.pad(integral, ((1, 0), (1, 0)), mode="constant", constant_values=0.0)
+    rows, cols = values.shape
+    return (integral[size:size + rows, size:size + cols]
+            - integral[0:rows, size:size + cols]
+            - integral[size:size + rows, 0:cols]
+            + integral[0:rows, 0:cols])
+
+
+def _window_mean(values, size: int):
+    """Mean over a square window, with nodata left out of both sums."""
+    import numpy as np
+
+    finite = np.isfinite(values)
+    total = _box_sum(np.where(finite, values, 0.0), size)
+    count = _box_sum(finite.astype("float64"), size)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        mean = total / count
+    return np.where(count > 0, mean, np.nan)
+
+
+def _neighbours(values):
+    """The eight neighbours of every cell, stacked, edges replicated."""
+    import numpy as np
+
+    padded = np.pad(values, 1, mode="edge")
+    rows, cols = values.shape
+    return np.stack([
+        padded[a:a + rows, b:b + cols]
+        for a in range(3) for b in range(3)
+        if not (a == 1 and b == 1)
+    ])
+
+
+def tpi(dem, *, window: int = 11):
+    """Topographic position index: height above the surrounding ground.
+
+    A cell's elevation minus the mean of the window around it. Positive on
+    ridges and spurs, negative in valleys, near zero on a uniform slope and on
+    a plain alike -- which is why the landform classes below need slope as
+    well, to tell a flat valley floor from a flat hilltop.
+
+    After Weiss (2001), ESRI User Conference.
+
+    Parameters
+    ----------
+    window
+        Width of the neighbourhood in cells. The scale of landform it
+        responds to: 11 cells on a 30 m grid is roughly a 300 m hillslope.
+    """
+    import numpy as np
+
+    if window < 3 or window % 2 == 0:
+        raise ValueError(f"window must be an odd number of cells, 3 or more, not {window}")
+    values = _as_array(dem)
+    out = values - _window_mean(values, window)
+    out = np.where(np.isfinite(values), out, np.nan)
+    return _wrap(dem, out, "tpi", "m",
+                 f"topographic position index over {window} cells")
+
+
+def tri(dem):
+    """Terrain ruggedness index: how far a cell sits from its neighbours.
+
+    The root of the summed squared elevation difference to all eight adjacent
+    cells.
+
+    Worth knowing before quoting it. On a smooth uniform slope this is largely
+    a restatement of gradient, because a plane's neighbours differ from its
+    centre in proportion to its steepness: a 30 percent plane with no
+    variation in it at all scores about 82 m on a 110 m grid. It separates
+    rough ground from smooth ground *at a given gradient*; it does not
+    separate rough ground from steep ground. Where the two need telling apart,
+    read it beside :func:`slope` rather than instead of it.
+
+    After Riley et al. (1999), Intermountain Journal of Sciences 5, 23-27.
+    """
+    import numpy as np
+
+    values = _as_array(dem)
+    diff = _neighbours(values) - values[None, :, :]
+    with np.errstate(invalid="ignore"):
+        out = np.sqrt(np.nansum(diff ** 2, axis=0))
+    out = np.where(np.isfinite(values), out, np.nan)
+    return _wrap(dem, out, "tri", "m", "terrain ruggedness index")
+
+
+def roughness(dem):
+    """Local relief: the elevation range within a cell's 3x3 neighbourhood.
+
+    The plainest of the three, and the one to reach for when the number has to
+    mean something to a reader without a definition to hand.
+
+    After Wilson et al. (2007), Marine Geodesy 30, 3-35.
+    """
+    import numpy as np
+
+    values = _as_array(dem)
+    stack = np.concatenate([_neighbours(values), values[None, :, :]])
+    with np.errstate(invalid="ignore"):
+        out = np.nanmax(stack, axis=0) - np.nanmin(stack, axis=0)
+    out = np.where(np.isfinite(values), out, np.nan)
+    return _wrap(dem, out, "roughness", "m", "local relief over 3x3 cells")
+
+
+#: The six slope-position classes, in the order their codes run.
+LANDFORM_CLASSES = ("valley", "lower slope", "flat", "mid slope",
+                    "upper slope", "ridge")
+
+
+def landform(dem, *, window: int = 11, flat_deg: float = 5.0):
+    """Six slope-position classes, from the position index and the gradient.
+
+    Codes 0 to 5: valley, lower slope, flat, mid slope, upper slope, ridge,
+    as :data:`LANDFORM_CLASSES` names them. The cuts are at half and one
+    standard deviation of the position index over this basin, so the classes
+    are relative to the terrain in front of you and are not comparable between
+    basins without saying so.
+
+    After Weiss (2001). The flat and mid-slope classes share a band of the
+    position index and are separated by gradient, which is the only way to
+    tell a valley floor from a bench on a hillside.
+    """
+    import numpy as np
+
+    position = _as_array(tpi(dem, window=window))
+    gradient = _as_array(slope(dem))
+    spread = float(np.nanstd(position))
+    if not np.isfinite(spread) or spread == 0:
+        raise ValueError(
+            "The position index has no spread in this basin, so there are no "
+            "slope positions to separate. That is a perfectly level surface, "
+            "or a window larger than the basin."
+        )
+
+    out = np.full(position.shape, np.nan)
+    middle = (position > -spread / 2) & (position < spread / 2)
+    out = np.where(position <= -spread, 0.0, out)
+    out = np.where((position > -spread) & (position <= -spread / 2), 1.0, out)
+    out = np.where(middle & (gradient <= flat_deg), 2.0, out)
+    out = np.where(middle & (gradient > flat_deg), 3.0, out)
+    out = np.where((position >= spread / 2) & (position < spread), 4.0, out)
+    out = np.where(position >= spread, 5.0, out)
+    out = np.where(np.isfinite(position), out, np.nan)
+
+    wrapped = _wrap(dem, out, "landform", "class",
+                    "slope position: " + ", ".join(
+                        f"{i}={name}" for i, name in enumerate(LANDFORM_CLASSES)))
+    try:
+        wrapped.attrs["basinkit_classes"] = list(LANDFORM_CLASSES)
+        wrapped.attrs["basinkit_tpi_sd_m"] = round(spread, 4)
+    except AttributeError:
+        pass
+    return wrapped
+
+
+def initiation_threshold_km2(dem, *, slope_deg=None) -> tuple[float, str]:
+    """A channel-initiation threshold scaled to how steep the basin is.
+
+    Critical source area falls as gradient rises, so steep ground starts
+    channels at a much smaller contributing area than a plain does. Using one
+    threshold everywhere makes drainage density incomparable between the two.
+
+    After Montgomery and Dietrich (1988), Nature 336, 232-234.
+
+    Returns
+    -------
+    tuple
+        The threshold in square kilometres and the reason it was chosen, so
+        that the reason can be printed beside the number.
+    """
+    import numpy as np
+
+    values = _as_array(slope(dem) if slope_deg is None else slope_deg)
+    median = float(np.nanmedian(values))
+    if median >= 15.0:
+        return 0.05, f"steep terrain, median slope {median:.1f} degrees"
+    if median >= 5.0:
+        return 0.25, f"moderate terrain, median slope {median:.1f} degrees"
+    return 1.00, f"low-relief terrain, median slope {median:.1f} degrees"
+
+
+def drainage_density(dem, *, thresholds=None, chosen_km2: float | None = None):
+    """Drainage density across the range of defensible thresholds.
+
+    Drainage density is the most quoted number in basin morphometry and the
+    least comparable. It is not a property of a basin: it is a function of
+    where you decide a channel begins, and it moves by a large factor across
+    thresholds that are all defensible. Reporting the curve, and printing the
+    threshold used, turns a quotable number into a comparable one.
+
+    Parameters
+    ----------
+    thresholds
+        Channel-initiation areas in square kilometres. The default runs an
+        order of magnitude either side of the slope-scaled choice, which is
+        about as far as a threshold can be defended in either direction.
+        Widening it further inflates the range factor with choices nobody
+        would make.
+    chosen_km2
+        The threshold to mark as chosen. Defaults to
+        :func:`initiation_threshold_km2`.
+
+    Returns
+    -------
+    dict
+        ``curve`` is one row per threshold with the channel length and the
+        density it implies; ``chosen`` is the marked row; ``range_factor`` is
+        how far the density moves across the span, which is the figure that
+        says whether a quoted density means anything on its own.
+    """
+    import numpy as np
+
+    flw, values, _ = _flwdir(dem)
+    inside = np.isfinite(values)
+    basin_cells = int(inside.sum())
+    if not basin_cells:
+        raise ValueError("The elevation array is entirely nodata.")
+
+    per_cell_km2 = _as_array(cell_area_km2(dem))
+    basin_km2 = float(np.nansum(np.where(inside, per_cell_km2, 0.0)))
+    drained_km2 = flw.upstream_area(unit="cell") * per_cell_km2
+
+    # The distance from each cell to the one it drains into, which is the
+    # segment that cell contributes to the network's length.
+    dy_m, dx_m = _spacing(dem, values)
+    rows, cols = values.shape
+    index = np.arange(values.size).reshape(values.shape)
+    downstream = np.asarray(flw.idxs_ds).reshape(values.shape)
+    drow = downstream // cols - index // cols
+    dcol = downstream % cols - index % cols
+    step_m = np.hypot(drow * dy_m, dcol * dx_m[:, None])
+    # A pit drains to itself, so it contributes no length.
+    step_m = np.where(downstream == index, 0.0, step_m)
+
+    if chosen_km2 is None:
+        chosen_km2, reason = initiation_threshold_km2(dem)
+    else:
+        reason = "supplied by the caller"
+
+    if thresholds is None:
+        thresholds = [chosen_km2 * f for f in
+                      (0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0)]
+    thresholds = sorted(float(t) for t in thresholds if float(t) > 0)
+
+    curve = []
+    for threshold in thresholds:
+        channel = inside & (drained_km2 >= threshold)
+        length_km = float(np.nansum(np.where(channel, step_m, 0.0))) / 1000.0
+        curve.append({
+            "threshold_km2": round(threshold, 6),
+            "channel_length_km": round(length_km, 3),
+            "drainage_density_km_per_km2": round(length_km / basin_km2, 5),
+            "channel_cells": int(channel.sum()),
+        })
+
+    densities = [row["drainage_density_km_per_km2"] for row in curve
+                 if row["drainage_density_km_per_km2"] > 0]
+    factor = (max(densities) / min(densities)) if len(densities) > 1 else 1.0
+    marked = min(curve, key=lambda row: abs(row["threshold_km2"] - chosen_km2))
+
+    return {
+        "basin_km2": round(basin_km2, 4),
+        "span": [round(thresholds[0], 6), round(thresholds[-1], 6)],
+        "chosen_threshold_km2": round(float(chosen_km2), 6),
+        "chosen_because": reason,
+        "chosen": marked,
+        "curve": curve,
+        "range_factor": round(float(factor), 2),
+        "note": "Drainage density is a function of the channel-initiation "
+                "threshold, not a property of the basin. Quote the threshold "
+                "with the number, or the number cannot be compared with "
+                "anyone else's.",
+    }

@@ -157,6 +157,57 @@ of the basin the answer rests on rather than only how much of it.
 The grade is about the terrain products, not the basin boundary. Delineation
 accuracy is measured separately, in [Verification](verification.md).
 
+### One command for the whole analysis
+
+```python
+basin.report("koyna.pdf", title="Koyna Dam Catchment")
+```
+
+Eight A4 pages, with the suitability grade on the cover rather than in a
+footnote:
+
+1. Cover: where, how big, which backend, and the grade
+2. Elevation, hillshade, the hypsometric curve and the elevation distribution
+3. Slope and aspect, with slope classes and an aspect rose
+4. Curvature, slope position, ruggedness and the landform classes
+5. The channel network and Horton's laws
+6. The morphometric parameters, each with its symbol, unit and original reference
+7. What the answer rests on: the suitability scorecard, the per-cell support
+   map and the drainage-density curve
+8. Methods: sources, licences, software versions and what to cite
+
+Pages 5 and 6 need the river network. Without it they are replaced by a page
+naming the parameters that are missing and why, rather than by a partial table
+that reads like a complete one.
+
+Needs `pip install "basinkit[viz]"` for the drawing.
+
+### Drainage density is a curve, not a number
+
+```python
+d = basin.drainage_density()
+print(d["chosen"]["drainage_density_km_per_km2"], "at",
+      d["chosen_threshold_km2"], "km2 --", d["chosen_because"])
+print(d["range_factor"], "times across the span")
+```
+
+Drainage density is the most quoted parameter in basin morphometry and the
+least comparable. It is not a property of a basin: it is a function of where
+you decide a channel begins. On the Koyna it moves by a **factor of eleven**
+across an order of magnitude either side of a defensible threshold.
+
+The default threshold is scaled to the basin's median slope, after Montgomery
+and Dietrich (1988), because steep ground starts channels at a much smaller
+contributing area than a plain does. The curve, the chosen threshold and the
+reason for it all come back together, so the figure can be compared with
+someone else's rather than merely quoted.
+
+One thing to keep straight: this is measured on the channels routed from the
+elevation raster. `morphometry()` reports a drainage density too, measured on
+the mapped HydroRIVERS network. On the Koyna those are 1.38 and 0.37 km/km2.
+Two different networks, so two different figures. Neither is wrong; quoting
+one as the other is.
+
 ### Why the polygon matters
 
 ```python

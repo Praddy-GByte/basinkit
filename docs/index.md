@@ -137,6 +137,13 @@ Florida is the one to read twice: it is also the station where the DEM
 backend's own area error is +99%, so the grade names the case before the
 number misleads anyone.
 
+And one command writes the lot to paper: `basin.report("basin.pdf")` produces
+eight A4 pages with the suitability grade on the cover, every morphometric
+parameter carrying its symbol and original reference, the channel network
+against Horton's laws, the per-cell support map, and a methods page with the
+software versions and licences. It is the thing a thesis chapter or a
+manuscript appendix actually needs, and it takes about a minute.
+
 The default backend walks HydroBASINS level-12 units, which average about
 130 km2, so that is the scale it resolves. Below it, an outlet falls inside a
 unit whose own outlet may be on the trunk river, and the polygon returned is

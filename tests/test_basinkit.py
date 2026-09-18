@@ -1918,3 +1918,220 @@ def test_the_support_map_marks_the_cells_the_model_cannot_carry():
     finite = support[np.isfinite(support)]
     assert set(np.unique(finite)) <= {0.0, 1.0}
     assert 0.0 <= out["support_fraction"] <= 1.0
+
+
+# --- Terrain position, ruggedness and slope classes -------------------------
+
+
+def test_the_position_index_is_zero_on_a_uniform_slope():
+    """A plane has no slope position, however steep it is."""
+    import numpy as np
+
+    from basinkit.terrain import tpi
+
+    dem = _synthetic_dem(slope_m_per_m=0.2, n=61)
+    middle = np.asarray(tpi(dem, window=11).values)[15:-15, 15:-15]
+    assert abs(float(np.nanmean(middle))) < 0.05, float(np.nanmean(middle))
+    assert float(np.nanmax(np.abs(middle))) < 1.0, "a plane has no ridges"
+
+
+def test_the_position_index_finds_a_ridge_and_a_valley():
+    """Positive on the high ground, negative in the cut."""
+    import numpy as np
+
+    from basinkit.terrain import tpi
+
+    dem = _synthetic_dem(slope_m_per_m=0.0, n=61)
+    field = np.asarray(dem.values).copy()
+    field[30, :] += 50.0      # a ridge along one row
+    field[10, :] -= 50.0      # and a trench along another
+    raised = dem.copy(data=field)
+    position = np.asarray(tpi(raised, window=11).values)
+    assert float(np.nanmean(position[30, 10:-10])) > 30.0
+    assert float(np.nanmean(position[10, 10:-10])) < -30.0
+
+
+def test_ruggedness_separates_rough_from_smooth_at_one_gradient():
+    """What the index is for: variation, with the gradient held still."""
+    import numpy as np
+
+    from basinkit.terrain import tri
+
+    level = _synthetic_dem(slope_m_per_m=0.0, n=61)
+    rng = np.random.default_rng(2)
+    rough = level.copy(data=np.asarray(level.values) + rng.normal(0, 8.0, (61, 61)))
+
+    level_tri = float(np.nanmean(np.asarray(tri(level).values)[5:-5, 5:-5]))
+    rough_tri = float(np.nanmean(np.asarray(tri(rough).values)[5:-5, 5:-5]))
+    assert level_tri < 0.01, f"a level surface should score zero, got {level_tri}"
+    assert rough_tri > 20.0, rough_tri
+
+
+def test_ruggedness_also_answers_to_gradient_alone():
+    """The caveat, pinned down: a noiseless plane still scores high.
+
+    Riley's index is not a residual after removing the local trend, so on a
+    uniform slope it largely restates the gradient. Anyone quoting it as
+    'roughness independent of steepness' is quoting it wrongly, and the
+    docstring says so because this test says so.
+    """
+    import numpy as np
+
+    from basinkit.terrain import tri
+
+    plane = _synthetic_dem(slope_m_per_m=0.3, n=61)
+    scored = float(np.nanmean(np.asarray(tri(plane).values)[5:-5, 5:-5]))
+    assert scored > 50.0, (
+        f"a perfectly smooth 30 percent plane scores {scored:.1f} m, which is "
+        "the correlation with slope this index carries"
+    )
+
+
+def test_roughness_is_the_local_relief_it_claims_to_be():
+    """A 3x3 range has an arithmetic answer, so check it against one."""
+    import numpy as np
+
+    from basinkit.terrain import roughness
+
+    dem = _synthetic_dem(slope_m_per_m=0.1, n=41)
+    values = np.asarray(dem.values)
+    out = np.asarray(roughness(dem).values)
+    row, col = 20, 20
+    window = values[row - 1:row + 2, col - 1:col + 2]
+    assert abs(out[row, col] - (window.max() - window.min())) < 1e-9
+
+
+def test_landform_classes_cover_the_basin_and_are_named():
+    """Six codes, every cell assigned, and the names carried with them."""
+    import numpy as np
+
+    from basinkit.terrain import LANDFORM_CLASSES, landform
+
+    dem = _synthetic_dem(slope_m_per_m=0.0, n=61)
+    field = np.asarray(dem.values).copy()
+    rng = np.random.default_rng(4)
+    field = field + rng.normal(0, 20.0, (61, 61))
+    field[30, :] += 120.0
+    out = landform(dem.copy(data=field))
+    codes = np.asarray(out.values)
+
+    assert np.isfinite(codes).all(), "every cell must get a class"
+    assert set(np.unique(codes)) <= set(range(6))
+    assert 5.0 in np.unique(codes), "the ridge row should be classed as ridge"
+    assert out.attrs["basinkit_classes"] == list(LANDFORM_CLASSES)
+
+
+def test_landform_refuses_a_perfectly_level_surface():
+    """No spread in the position index means no slope positions to find."""
+    import numpy as np
+
+    from basinkit.terrain import landform
+
+    dem = _synthetic_dem(slope_m_per_m=0.0, n=41)
+    flat = dem.copy(data=np.full((41, 41), 500.0))
+    with pytest.raises(ValueError, match="no spread"):
+        landform(flat)
+
+
+# --- Drainage density is a curve, not a number -----------------------------
+
+
+def test_the_initiation_threshold_follows_the_gradient():
+    """Steep ground starts channels at a smaller contributing area."""
+    from basinkit.terrain import initiation_threshold_km2
+
+    steep, why_steep = initiation_threshold_km2(_synthetic_dem(slope_m_per_m=0.4))
+    gentle, why_gentle = initiation_threshold_km2(_synthetic_dem(slope_m_per_m=0.01))
+    assert steep < gentle, (steep, gentle)
+    assert "steep" in why_steep and "low-relief" in why_gentle
+
+
+def test_drainage_density_falls_as_the_threshold_rises():
+    """The curve is the point: one number is not comparable, the span says why."""
+    import numpy as np
+
+    pytest.importorskip("pyflwdir")
+    from basinkit.terrain import drainage_density
+
+    rng = np.random.default_rng(1)
+    dem = _synthetic_dem(slope_m_per_m=0.08, n=140, deg=1 / 3600, centre_lat=20.0)
+    dem = dem.copy(data=np.asarray(dem.values) + rng.normal(0, 3.0, (140, 140)))
+
+    out = drainage_density(dem)
+    densities = [row["drainage_density_km_per_km2"] for row in out["curve"]]
+    assert densities == sorted(densities, reverse=True), densities
+    assert out["range_factor"] > 3.0, (
+        f"only {out['range_factor']}x across an order of magnitude either side; "
+        "the whole reason for reporting a curve is that this figure is large"
+    )
+    assert out["chosen"] in out["curve"]
+    assert out["span"][0] < out["chosen_threshold_km2"] < out["span"][1]
+    assert out["chosen_because"]
+
+
+# --- The report -------------------------------------------------------------
+
+
+class _StandInBasin:
+    """Enough of a Basin for the report, without a network round trip."""
+
+    def __init__(self, dem, geometry, area_km2):
+        self._dem = dem
+        self.geometry = geometry
+        self.area_km2 = area_km2
+        self.provenance = {"backend": "dem", "source_dataset": "test fixture",
+                           "license": "test"}
+
+    @property
+    def centroid(self):
+        return (float(self.geometry.centroid.y), float(self.geometry.centroid.x))
+
+    def dem(self, **_):
+        return self._dem
+
+    def rivers(self, **_):
+        raise RuntimeError("no network in this test")
+
+
+def test_the_report_writes_eight_pages_without_a_network(tmp_path):
+    """Every page must draw, including the two that stand in for the network."""
+    import numpy as np
+    from shapely.geometry import box
+
+    pytest.importorskip("matplotlib")
+    pytest.importorskip("pyflwdir")
+    from basinkit.report import report
+
+    rng = np.random.default_rng(6)
+    dem = _scene(slope_m_per_m=0.12, n=120, noise=1.5)
+    dem = dem.copy(data=np.asarray(dem.values) + rng.normal(0, 0.5, (120, 120)))
+    bounds = dem.rio.bounds()
+    basin = _StandInBasin(dem, box(*bounds).buffer(-0.0002), 9.0)
+
+    returned = report(basin, tmp_path / "report.pdf", title="Test Catchment")
+    written = tmp_path / "report.pdf"
+    assert returned == str(written)
+    assert written.exists() and written.stat().st_size > 20_000
+
+    import re
+
+    data = written.read_bytes()
+    assert data.startswith(b"%PDF"), data[:8]
+    # The page tree records how many pages it holds, which is a firmer answer
+    # than counting page objects.
+    counts = [int(n) for n in re.findall(rb"/Count\s+(\d+)", data)]
+    assert 8 in counts, f"expected an eight-page document, page tree says {counts}"
+
+
+def test_every_printed_parameter_has_a_symbol_and_a_source():
+    """A table of numbers without definitions is not a publication table."""
+    from basinkit.report import PARAMETERS
+
+    keys = [row[1] for row in PARAMETERS]
+    assert len(keys) == len(set(keys)), "a parameter is listed twice"
+    for section, key, name, symbol, unit, source in PARAMETERS:
+        assert section in ("areal", "linear", "relief"), section
+        assert name and not name.startswith("_") and "_" not in name, name
+        assert symbol and len(symbol) <= 5, (key, symbol)
+        assert unit, key
+        assert source, key
