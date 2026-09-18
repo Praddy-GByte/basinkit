@@ -175,6 +175,45 @@ cells to 9,248.
 snapping distances tried. That is the ceiling this catalogue supports, rather
 than a property of the tools.
 
+### Reservoir bridging: measured, then rejected
+
+D8 flow direction is undefined on a level surface, so a reservoir can fragment
+the flow network and leave a catchment delineated from below a dam far too
+small. The standard fix is to detect standing water by its smoothness and
+impose a slight fall across it before routing, carving a channel to the outlet
+when one is known. It was implemented here and tested on six catchments, four
+of them the worst failures in the sample:
+
+| catchment | published | error without bridging | error with bridging |
+|---|---:|---:|---:|
+| Koyna Dam, India | 891.8 km2 | +1.3% | +1.3% |
+| Katse Dam, Lesotho | 1867.0 km2 | +0.2% | +0.2% |
+| PL_0000048, Poland | 276.0 km2 | +101.6% | +100.9% |
+| SE_0000025, Sweden | 202.7 km2 | +172.8% | +172.8% |
+| CA_0003306, Manitoba | 278.0 km2 | +54.5% | **-98.0%** |
+| US_0001851, Florida | 303.0 km2 | +99.2% | **-94.5%** |
+
+Nothing improved, two answers were destroyed, and the runtime on Koyna went
+from 27 to 92 seconds. The two failures are the same failure: on a window
+sized automatically rather than drawn by hand, the smoothness test finds the
+sea. It reported a single 2,368 km2 water body near Koyna and a 2,196 km2 one
+in Florida, then imposed a drainage gradient across each.
+
+The deeper reason it had nothing to fix is in the sample itself. Across the 88
+stations between 100 and 2,000 km2, the DEM backend returns **no**
+under-estimates at all -- every error is an over-estimate. Fragmentation by
+standing water produces the opposite signature, a basin truncated above the
+lake. The mechanism does work where the geometry calls for it: on a synthetic
+reservoir whose dam stands above a lower saddle on its own rim, depression
+filling spills the wrong way and bridging recovers the catchment. That geometry
+did not appear in any real catchment tested, and where the answer was already
+right the correction had nothing to add.
+
+A more conservative detector, restricted to water inside a first-pass basin,
+would avoid the damage. It would not buy anything, because there is no measured
+gain for it to protect. The feature was removed rather than shipped switched
+off.
+
 ### What the checks in 0.5.0 are worth
 
 The river-network check fires when the basin exceeds twice the area draining to
