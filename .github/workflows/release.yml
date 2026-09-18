@@ -3,6 +3,15 @@ name: Release
 on:
   release:
     types: [published]
+  # A release fires 'published' exactly once, so a workflow that was disabled
+  # at that moment misses it and cannot be replayed by editing the release.
+  # This lets the same job be run by hand against the tag instead.
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Tag or branch to build and publish"
+        required: true
+        default: main
 
 jobs:
   publish:
@@ -12,6 +21,8 @@ jobs:
       id-token: write     # trusted publishing, no API token to leak
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
       - uses: actions/setup-python@v6
         with: { python-version: "3.12" }
       - run: pip install build && python -m build
