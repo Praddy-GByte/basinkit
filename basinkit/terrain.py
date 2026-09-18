@@ -158,12 +158,22 @@ def curvature(dem):
     return _wrap(dem, gyy + gxx, "curvature", "1/m", "profile curvature")
 
 
-def flow_accumulation(dem, *, method: str = "d8"):
-    """Number of upstream cells draining through each cell.
+def cell_area_km2(dem):
+    """Area of every cell, in square kilometres, as a 2-D array."""
+    import numpy as np
 
-    Runs pyflwdir over the basin's own elevation, which means the network is
-    consistent with the terrain in front of you rather than with a global
-    product at a different resolution.
+    values = _as_array(dem)
+    dy_m, dx_m = _spacing(dem, values)
+    return np.broadcast_to((dy_m * dx_m[:, None]) / 1e6, values.shape).copy()
+
+
+def _flwdir(dem):
+    """Route the basin's own elevation, with everything outside it as nodata.
+
+    Cells outside the polygon must be nodata rather than filled ground.
+    Filling them with elevation turns every neighbouring catchment into a
+    ridge that drains inwards, and the accumulation then counts cells that are
+    not in this basin at all.
     """
     import numpy as np
 
@@ -173,24 +183,82 @@ def flow_accumulation(dem, *, method: str = "d8"):
         raise MissingDependency("pyflwdir", "delineate") from exc
 
     values = _as_array(dem)
-    # Cells outside the polygon must be nodata, not filled ground. Filling
-    # them with the maximum elevation turns every neighbouring catchment into
-    # a ridge that drains inwards, and the accumulation then counts cells that
-    # are not in this basin at all.
     nodata = -9999.0
-    filled = np.where(np.isfinite(values), values, nodata)
+    masked = np.where(np.isfinite(values), values, nodata).astype("float32")
+    # Route on the depression-filled surface and keep it: height above
+    # drainage measured against the raw elevation goes negative inside every
+    # filled pit, because the cell sits below the channel it now drains into.
+    filled, _ = pyflwdir.dem.fill_depressions(
+        masked, nodata=nodata, outlets="min"
+    )
     flw = pyflwdir.from_dem(
-        data=filled.astype("float32"), nodata=nodata,
+        data=filled, nodata=nodata,
         transform=dem.rio.transform(),
         latlon=not (dem.rio.crs is not None and dem.rio.crs.is_projected),
         outlets="min",
     )
+    return flw, values, filled
+
+
+def flow_accumulation(dem, *, method: str = "d8"):
+    """Number of upstream cells draining through each cell.
+
+    Runs pyflwdir over the basin's own elevation, which means the network is
+    consistent with the terrain in front of you rather than with a global
+    product at a different resolution.
+    """
+    import numpy as np
+
     if method != "d8":
         raise ValueError(f"Unknown method {method!r}. Only 'd8' is implemented.")
-    acc = flw.upstream_area(unit="cell").astype("float64")
-    acc = np.where(np.isfinite(values), acc, np.nan)
-    return _wrap(dem, acc, "flow_accumulation", "cells",
+    flw, values, _ = _flwdir(dem)
+    acc = np.where(np.isfinite(values), flw.upstream_area(unit="cell"), np.nan)
+    return _wrap(dem, acc.astype("float64"), "flow_accumulation", "cells",
                  "cells draining through each cell")
+
+
+def streams(dem, *, min_area_km2: float = 1.0):
+    """Boolean mask of the channel network, thresholded on drained area.
+
+    The threshold is the choice that decides how far the network reaches into
+    the headwaters. A square kilometre is a common default for a 30 m grid;
+    raise it on flat or arid ground where the routed network runs further than
+    any channel actually does.
+    """
+    import numpy as np
+
+    flw, values, _ = _flwdir(dem)
+    drained = flw.upstream_area(unit="cell") * cell_area_km2(dem)
+    mask = np.isfinite(values) & (drained >= float(min_area_km2))
+    return _wrap(dem, mask.astype("float32"), "streams", "1",
+                 f"channel network, drained area at least {min_area_km2:g} km2")
+
+
+def hand(dem, *, min_area_km2: float = 1.0):
+    """Height above the nearest drainage, in metres.
+
+    The drop from each cell to the channel it drains into, following the flow
+    path rather than the straight line. Low HAND is the ground a river reaches
+    first, so this is the terrain layer flood work actually wants; elevation
+    on its own says nothing about how far above the water a place sits.
+
+    After Nobre et al. (2016), Hydrological Processes 30, 320-333.
+    """
+    import numpy as np
+
+    flw, values, filled = _flwdir(dem)
+    drained = flw.upstream_area(unit="cell") * cell_area_km2(dem)
+    drain = np.isfinite(values) & (drained >= float(min_area_km2))
+    if not drain.any():
+        raise ValueError(
+            f"No cell drains {min_area_km2:g} km2 or more, so there is no "
+            "channel to measure height above. Lower min_area_km2, or work on "
+            "a larger basin."
+        )
+    heights = flw.hand(drain=drain, elevtn=filled)
+    heights = np.where(np.isfinite(values), heights, np.nan)
+    return _wrap(dem, heights.astype("float64"), "hand", "m",
+                 "height above nearest drainage")
 
 
 def twi(dem, *, accumulation=None):

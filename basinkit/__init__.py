@@ -19,8 +19,9 @@ announce themselves before the first byte moves. ``basinkit.catalog.table()``
 shows the whole picture.
 """
 
-from . import cache, catalog, clip, delineate, sources
+from . import cache, catalog, climate, clip, delineate, sources, terrain
 from .basin import Basin
+from .compare import compare
 from .exceptions import (
     BasinkitError,
     DataSourceError,
@@ -37,6 +38,9 @@ __version__ = "0.5.0"
 __all__ = [
     "Basin",
     "River",
+    "compare",
+    "terrain",
+    "climate",
     "Confluence",
     "catalog", "cache", "clip", "delineate", "sources",
     "BasinkitError", "DelineationError", "OutletSnapError",
