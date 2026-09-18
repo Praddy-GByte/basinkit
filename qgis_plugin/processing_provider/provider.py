@@ -10,7 +10,11 @@ from qgis.PyQt.QtGui import QIcon
 from .algorithms.delineate import DelineateBasinAlgorithm
 from .algorithms.fetch_layers import FetchBasinLayersAlgorithm
 from .algorithms.morphometry import BasinMorphometryAlgorithm
+from .algorithms.report import BasinReportAlgorithm
 from .algorithms.statistics import BasinStatisticsAlgorithm
+from .algorithms.subbasins import SubBasinsAlgorithm
+from .algorithms.suitability import DemSuitabilityAlgorithm
+from .algorithms.terrain import TerrainSurfacesAlgorithm
 
 
 class BasinkitProvider(QgsProcessingProvider):
@@ -19,9 +23,13 @@ class BasinkitProvider(QgsProcessingProvider):
     def loadAlgorithms(self) -> None:      # noqa: N802  (QGIS API name)
         for algorithm in (
             DelineateBasinAlgorithm(),
+            SubBasinsAlgorithm(),
             FetchBasinLayersAlgorithm(),
+            TerrainSurfacesAlgorithm(),
+            DemSuitabilityAlgorithm(),
             BasinStatisticsAlgorithm(),
             BasinMorphometryAlgorithm(),
+            BasinReportAlgorithm(),
         ):
             self.addAlgorithm(algorithm)
 

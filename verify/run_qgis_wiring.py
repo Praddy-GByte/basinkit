@@ -1,7 +1,7 @@
 """Static check of the QGIS plugin against stubbed QGIS bindings.
 
-Proves: every module imports, classFactory works, the provider registers three
-algorithms, every initAlgorithm runs, every required override exists and
+Proves: every module imports, classFactory works, the provider registers all of
+its algorithms, every initAlgorithm runs, every required override exists and
 createInstance returns a distinct object. It cannot prove behaviour inside QGIS.
 """
 import os, pathlib, sys
@@ -40,7 +40,7 @@ check("provider registered", len(registered) == 1, f"{len(registered)}")
 provider = registered[0]
 provider.loadAlgorithms()
 check("provider id", provider.id() == "basinkit", provider.id())
-check("three algorithms", len(provider.algorithms) == 3,
+check("every algorithm registered", len(provider.algorithms) == 8,
       ", ".join(a.name() for a in provider.algorithms))
 
 for algorithm in provider.algorithms:
