@@ -2,6 +2,53 @@
 
 ## Unreleased
 
+### An eight-page report, ready for a thesis
+
+`Basin.report("basin.pdf")` writes everything basinkit computes about a basin
+onto A4, with the suitability grade on the cover rather than in a footnote and
+every parameter carrying its symbol, unit and original reference. Eight pages:
+elevation and hypsometry, slope and aspect with their distributions and an
+aspect rose, curvature and slope position and ruggedness and the landform
+classes, the channel network with Horton's laws, the full morphometric table,
+what the answer rests on, and a methods page with the software versions,
+licences and citations.
+
+Two pages depend on the river network. Without it they are replaced by a page
+that says which parameters are missing and why, rather than by a partial table
+that reads like a complete one.
+
+The report states outright that its two drainage densities are different
+measurements: one from the mapped river network, one from the channels routed
+off this elevation raster. On the Koyna they are 0.37 and 1.38 km/km2. Neither
+is wrong; quoting one as the other is.
+
+### Drainage density as a curve, not a number
+
+`Basin.drainage_density()` reports drainage density across an order of
+magnitude either side of a slope-scaled channel-initiation threshold, after
+Montgomery and Dietrich (1988), and says which threshold was chosen and why.
+
+Drainage density is the most quoted parameter in basin morphometry and the
+least comparable, because it is not a property of a basin: it is a function of
+where you decide a channel begins. On the Koyna it moves by a factor of eleven
+across that span. A single figure without its threshold cannot be compared
+with anyone else's, and now the threshold comes with it.
+
+### The shape of the ground
+
+`Basin.tpi()`, `Basin.tri()`, `Basin.roughness()` and `Basin.landform()`:
+topographic position index (Weiss 2001), terrain ruggedness index (Riley et
+al. 1999), local relief (Wilson et al. 2007), and the six slope-position
+classes the first two imply. The position index uses a summed-area table, so
+an eleven-cell window costs the same as a three-cell one.
+
+The ruggedness index carries a caveat in its own docstring, and a test that
+holds the caveat true: on a smooth uniform slope it largely restates the
+gradient, because it is not a residual after removing the local trend. A
+perfectly smooth thirty percent plane scores about 82 m on a 110 m grid. It
+separates rough ground from smooth ground at a given gradient, not rough
+ground from steep ground.
+
 ### The elevation model has to earn the terrain analysis
 
 `Basin.dem_suitability()` grades whether this basin's elevation raster can

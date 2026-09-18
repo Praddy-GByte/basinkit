@@ -19,17 +19,17 @@ announce themselves before the first byte moves. ``basinkit.catalog.table()``
 shows the whole picture.
 """
 
-from . import cache, catalog, climate, clip, delineate, sources, suitability, terrain
+from . import cache, catalog, climate, clip, delineate, report, sources, suitability, terrain
 from .basin import Basin
 from .compare import compare
 from .exceptions import (
-    BasinkitError,
-    DataSourceError,
-    DelineationError,
-    LicenseError,
-    MissingDependency,
-    NotImplementedSource,
-    OutletSnapError,
+               BasinkitError,
+               DataSourceError,
+               DelineationError,
+               LicenseError,
+               MissingDependency,
+               NotImplementedSource,
+               OutletSnapError,
 )
 from .river import Confluence, River
 
@@ -41,6 +41,7 @@ __all__ = [
     "compare",
     "terrain",
     "suitability",
+    "report",
     "climate",
     "Confluence",
     "catalog", "cache", "clip", "delineate", "sources",

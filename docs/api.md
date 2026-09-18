@@ -6,6 +6,8 @@
 
 ::: basinkit.suitability
 
+::: basinkit.report
+
 ::: basinkit.clip
 
 ::: basinkit.mosaic

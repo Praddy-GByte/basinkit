@@ -315,6 +315,57 @@ class Basin:
         return hand(self.dem(**kwargs) if dem is None else dem,
                     min_area_km2=min_area_km2)
 
+    def tpi(self, *, dem=None, window: int = 11, **kwargs):
+        """Topographic position index: height above the surrounding ground."""
+        from .terrain import tpi
+
+        return tpi(self.dem(**kwargs) if dem is None else dem, window=window)
+
+    def tri(self, *, dem=None, **kwargs):
+        """Terrain ruggedness index: how far a cell sits from its neighbours."""
+        from .terrain import tri
+
+        return tri(self.dem(**kwargs) if dem is None else dem)
+
+    def roughness(self, *, dem=None, **kwargs):
+        """Local relief within each cell's 3x3 neighbourhood."""
+        from .terrain import roughness
+
+        return roughness(self.dem(**kwargs) if dem is None else dem)
+
+    def landform(self, *, dem=None, window: int = 11, **kwargs):
+        """Six slope-position classes: valley, slopes, flat, ridge."""
+        from .terrain import landform
+
+        return landform(self.dem(**kwargs) if dem is None else dem, window=window)
+
+    def drainage_density(self, *, dem=None, thresholds=None,
+                         chosen_km2=None, **kwargs):
+        """Drainage density across the range of defensible thresholds.
+
+        Not one number: the density moves by a large factor across channel
+        initiation thresholds that are all defensible, so the curve and the
+        threshold used are what make the figure comparable with anyone else's.
+        """
+        from .terrain import drainage_density
+
+        return drainage_density(self.dem(**kwargs) if dem is None else dem,
+                                thresholds=thresholds, chosen_km2=chosen_km2)
+
+    def report(self, path, *, title=None, dem=None, rivers=None, **kwargs):
+        """Write the eight-page PDF report for this basin.
+
+        Cover with the elevation data suitability grade, elevation and
+        hypsometry, slope and aspect, the shape of the ground, the channel
+        network and Horton's laws, the morphometric table with symbols and
+        references, what the answer rests on, and a methods page.
+        """
+        from .report import report
+
+        return report(self, path, title=title,
+                      dem=self.dem(**kwargs) if dem is None else dem,
+                      rivers=rivers)
+
     def dem_suitability(self, *, dem=None, support_map: bool = False, **kwargs):
         """Whether the elevation model supports terrain analysis in this basin.
 
