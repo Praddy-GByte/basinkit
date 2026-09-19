@@ -500,11 +500,18 @@ class Basin:
         if vals.size == 0:
             return {}
 
-        res = abs(float(elev.rio.resolution()[0]))
-        lat = self.centroid[0]
-        cell_m = res * 111_320 * np.cos(np.deg2rad(lat))
-        gy, gx = np.gradient(np.nan_to_num(np.asarray(elev.values, dtype="float64")))
-        slope = np.degrees(np.arctan(np.hypot(gx, gy) / max(cell_m, 1e-6)))
+        # Slope comes from the same routine the slope map uses, which keeps
+        # nodata as nodata. Filling the space around the polygon with zeros
+        # before differencing puts a plain around the basin and a cliff at its
+        # edge, and the mean then answers to those instead: on the Helmand
+        # above the Kajaki Dam, which fills 43% of its bounding box, it read 7
+        # degrees where the basin's own slopes average 16. That is the
+        # bounding-box mistake this package exists to avoid, made against
+        # itself.
+        from .terrain import slope as _slope_of
+
+        slope = np.asarray(_slope_of(elev).values, dtype="float64")
+        finite_slope = slope[np.isfinite(slope)]
 
         return {
             "area_km2": round(self.area_km2, 2),
@@ -512,7 +519,8 @@ class Basin:
             "elev_max_m": round(float(vals.max()), 1),
             "elev_mean_m": round(float(vals.mean()), 1),
             "relief_m": round(float(vals.max() - vals.min()), 1),
-            "slope_mean_deg": round(float(np.nanmean(slope)), 2),
+            "slope_mean_deg": (round(float(finite_slope.mean()), 2)
+                               if finite_slope.size else None),
             "bbox_efficiency": round(self.bbox_efficiency, 3),
         }
 

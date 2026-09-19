@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+### Mean slope was measuring the rectangle, not the basin
+
+`terrain_stats()` filled the nodata around the polygon with zeros before
+differencing the surface, so the mean slope it reported answered partly to the
+plain that fill creates and to the cliff at its edge. On the Helmand above the
+Kajaki Dam, a basin that fills 43 per cent of its own bounding box, it read
+7.2 degrees where the basin's own slopes average 16.2. The number now comes
+from the same routine the slope map uses, which keeps nodata as nodata, and a
+test on a plane with nodata above and below it pins the behaviour.
+
+This reached `summary()`, `compare()`, the river report and the QGIS basin
+statistics algorithm, all of which read the same field. Elevation, relief and
+bbox efficiency were never affected.
+
 ## 0.6.0 -- 2026-09-18
 
 ### Two measurements widened enough to carry their claims

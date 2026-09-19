@@ -2135,3 +2135,55 @@ def test_every_printed_parameter_has_a_symbol_and_a_source():
         assert symbol and len(symbol) <= 5, (key, symbol)
         assert unit, key
         assert source, key
+
+
+def test_mean_slope_ignores_the_ground_outside_the_polygon():
+    """A clip is a rectangle with a basin in it; the rest must not be averaged.
+
+    ``Basin.dem()`` returns the clip's bounding box with everything outside the
+    polygon as nodata. Filling that with zeros before differencing puts a plain
+    around the catchment and a cliff at its edge, and the mean slope then
+    answers to those rather than to the basin: on a real catchment filling 43%
+    of its box it fell from 16 degrees to 7, and on the plane below it rises.
+    """
+    import numpy as np
+    import rioxarray  # noqa: F401
+    import xarray as xr
+
+    from basinkit.basin import Basin
+
+    lons = np.linspace(85.0, 85.4, 81)
+    lats = np.linspace(27.4, 27.0, 81)
+    fall = np.linspace(2_000.0, 1_000.0, 81)         # a uniform planar slope
+    z = np.tile(fall, (81, 1))
+    z[:20, :] = np.nan                               # nodata above the basin
+    z[-20:, :] = np.nan                              # and below it
+    dem = xr.DataArray(z, coords={"y": lats, "x": lons},
+                       dims=("y", "x")).rio.write_crs("EPSG:4326")
+
+    class OnePlane:
+        """Only what terrain_stats reads, so the test stays about the slope."""
+
+        area_km2 = 100.0
+        bbox_efficiency = 0.5
+        centroid = (27.2, 85.2)
+
+        def dem(self, *args, **kwargs):
+            return dem
+
+    stats = Basin.terrain_stats(OnePlane())
+
+    from basinkit.terrain import slope as slope_of
+
+    truth = np.asarray(slope_of(dem).values, dtype="float64")
+    assert stats["slope_mean_deg"] == pytest.approx(float(np.nanmean(truth)), abs=0.01)
+
+    # The plane falls 12.5 m per 495 m step, which is 1.45 degrees everywhere.
+    assert stats["slope_mean_deg"] == pytest.approx(1.45, abs=0.05)
+
+    # What zero-filling would have reported instead, on the same clip. Which
+    # way it goes depends on how much plain and how much edge the fill adds;
+    # what is certain is that it is not the slope of this basin.
+    filled = float(np.nanmean(np.asarray(slope_of(dem.fillna(0.0)).values,
+                                         dtype="float64")))
+    assert abs(filled - stats["slope_mean_deg"]) > 1.0
