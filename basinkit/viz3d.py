@@ -415,7 +415,7 @@ def _heights(dem, mesh_width: int) -> tuple[str, dict]:
     return base64.b64encode(packed.tobytes()).decode("ascii"), meta
 
 
-def _texture(rgb, mask, width: int, high: float, gamma: float, lift: float) -> str:
+def _texture(rgb, mask, width: int, high: float | None, gamma: float, lift: float) -> str:
     """Stretch a reflectance composite into an 8-bit JPEG, as a base64 string."""
     from io import BytesIO
 
@@ -428,6 +428,11 @@ def _texture(rgb, mask, width: int, high: float, gamma: float, lift: float) -> s
             "texture=None."
         ) from exc
 
+    if high is None:
+        # Set the white point from the scene itself: a forest in autumn and a
+        # desert in summer differ by a factor of five in reflectance.
+        bright = [np.nanpercentile(rgb[..., i][mask], 99) for i in range(3)] if mask.any() else [0.62]
+        high = float(max(bright))
     out = np.zeros_like(rgb)
     for i in range(3):
         band = rgb[..., i]
@@ -491,7 +496,7 @@ def export_3d(
     title: str | None = None,
     subtitle: str | None = None,
     facts: dict[str, str] | None = None,
-    high: float = 0.62,
+    high: float | None = None,
     gamma: float = 0.58,
     lift: float = 0.07,
 ) -> Path:
@@ -510,8 +515,9 @@ def export_3d(
         Columns in the terrain mesh. 384 is about 200k vertices and turns
         smoothly on a laptop; raise it for stills, lower it for large basins.
     high, gamma, lift
-        Display stretch for the imagery: white point in reflectance, gamma, and
-        how far the shadows are lifted. Only affects how it looks.
+        Display stretch for the imagery: white point in reflectance (``None``
+        takes the scene's own 99th percentile), gamma, and how far the shadows
+        are lifted. Only affects how it looks.
 
     Returns
     -------
