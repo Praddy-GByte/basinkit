@@ -146,10 +146,8 @@ def check_outlet(
                 basin_area_km2=basin_area_km2)
 
     import geopandas as gpd
-    from shapely.geometry import Point
 
     bbox = _deg_box(lat, lon, search_km)
-    point = Point(lon, lat)
     best = None
     for region in regions:
         try:

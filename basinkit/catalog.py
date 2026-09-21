@@ -71,7 +71,7 @@ DEFAULT_STACK = (
     "hydrobasins", "hydrorivers", "hydrolakes",
     "worldcover", "esri_lulc",
     "soilgrids",
-    "chirps", "terraclimate", "persiann",
+    "chirps", "terraclimate",
     "jrc_gsw",
     "sentinel2", "sentinel1_rtc", "landsat",
 )
@@ -299,10 +299,12 @@ _reg(Dataset(
     key="persiann", name="PERSIANN-CDR v1r1", category="climate",
     resolution="0.25 degree, daily", temporal="1983-01-01 to present",
     coverage="60N-60S", license="No constraints on access or use", auth="none",
-    route="NOAA NCEI ERDDAP griddap (server-side spatial and temporal subsetting)",
+    route="Unavailable: NOAA withdrew the NCEI ERDDAP dataset (404). Daily global "
+          "files remain at s3://noaa-cdr-precip-persiann-pds",
     commercial_ok=True, redistributable=True,
-    notes="Underused: ERDDAP subsets server-side, so a 40-year basin series is one "
-          "small request rather than a terabyte of tiles.",
+    notes="Not fetchable until a new route is added; basin.precipitation("
+          "source='persiann') raises a DataSourceError saying so.",
+    implemented=False,
 ))
 _reg(Dataset(
     key="terraclimate", name="TerraClimate", category="climate",

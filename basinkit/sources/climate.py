@@ -289,8 +289,22 @@ def persiann(
     geometry, start: str | int = "2000-01-01", end: str | int | None = None,
     *, aggregate: bool = True, progress: bool = True
 ):
-    """PERSIANN-CDR daily rainfall via NOAA ERDDAP (server-side subsetting)."""
-    import xarray as xr
+    """PERSIANN-CDR daily rainfall. Currently unavailable: see the error below.
+
+    NOAA withdrew the NCEI ERDDAP dataset this function subset server-side; the
+    endpoint now answers 404. The same record survives as one global file per
+    day on NOAA's open-data bucket, which means a 40-year basin series is some
+    fifteen thousand downloads instead of one request. Rather than fetch that
+    silently, this says so and points at CHIRPS, which covers the same years.
+    """
+    raise DataSourceError(
+        "PERSIANN-CDR is not available at the moment: NOAA withdrew the ERDDAP "
+        "dataset basinkit read it from, and the endpoint now returns 404. The "
+        "daily files remain at s3://noaa-cdr-precip-persiann-pds (anonymous), "
+        "one global file per day. For basin rainfall use "
+        "basin.precipitation(source='chirps'), which covers 1981 onwards."
+    )
+    import xarray as xr  # noqa: F401  (kept for when a new route is added)
 
     start = _as_date(start)
     end = _as_date(end, end_of_year=True) if end else date.today().strftime("%Y-%m-%d")

@@ -162,7 +162,7 @@ layers you fetched. Put it in your methods section.
 
 Copernicus DEM GLO-30/90, NASADEM, SRTM · HydroBASINS, HydroRIVERS, HydroLAKES,
 BasinATLAS · ESA WorldCover, ESRI Annual LULC · SoilGrids · CHIRPS,
-PERSIANN-CDR, TerraClimate · JRC Global Surface Water · Sentinel-2, Sentinel-1
+TerraClimate · JRC Global Surface Water · Sentinel-2, Sentinel-1
 RTC, Landsat Collection 2, HLS.
 
 ## Licence
