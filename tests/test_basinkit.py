@@ -2287,3 +2287,24 @@ def test_3d_texture_white_point_follows_the_scene():
     assert img[15].mean() > 200          # a dark forest scene is stretched to full range
     fixed = np.asarray(Image.open(io.BytesIO(base64.b64decode(_texture(rgb, mask, 20, 0.62, 1.0, 0.0)))))
     assert fixed[15].mean() < 30
+
+
+def test_stac_search_outline_is_small_and_contains_the_basin():
+    from shapely.geometry import Polygon
+    from basinkit.sources.stac import _search_geometry
+
+    ring = [(np.cos(t) * (1 + 0.05 * np.sin(40 * t)), np.sin(t) * (1 + 0.05 * np.sin(40 * t)))
+            for t in np.linspace(0, 2 * np.pi, 20000, endpoint=False)]
+    basin = Polygon(ring)
+    outline = _search_geometry(basin, max_vertices=500)
+    assert len(outline.exterior.coords) <= 500
+    assert outline.contains(basin)
+    small = Polygon([(0, 0), (1, 0), (1, 1)])
+    assert _search_geometry(small) is small
+
+
+def test_3d_page_declares_utf8_and_scales_its_camera():
+    from basinkit import viz3d
+
+    assert viz3d._TEMPLATE.startswith('<meta charset="utf-8">')
+    assert "Math.max(900, SPAN * 6)" in viz3d._TEMPLATE
