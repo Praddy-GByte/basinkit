@@ -16,6 +16,14 @@ This reached `summary()`, `compare()`, the river report and the QGIS basin
 statistics algorithm, all of which read the same field. Elevation, relief and
 bbox efficiency were never affected.
 
+### The geopandas floor now matches what the code calls
+
+`pyproject.toml` allowed geopandas 0.14, but delineation, `from_file()` and the
+clipping code call `GeoDataFrame.union_all()`, which geopandas added in 1.0.
+Where 0.14 was already installed, as it is in the system Python some QGIS
+installs use, pip left it in place and the first delineation stopped with an
+`AttributeError`. The floor is now 1.0, so pip upgrades it instead.
+
 ## 0.6.0 -- 2026-09-18
 
 ### Two measurements widened enough to carry their claims
