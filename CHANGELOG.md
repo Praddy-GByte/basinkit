@@ -32,6 +32,15 @@ about that method. It exists now, and says where the run stopped and the two
 things most often behind it. A test walks every algorithm and fails if one
 calls a helper that is not defined.
 
+### The outlet check measures distance on the ground
+
+The check against the river network converted degrees to kilometres with one
+constant, which treats a degree of longitude as a degree of latitude. East-west
+distances came out too long by 1/cos(latitude), half again at 48 degrees and
+double at 60, so the check could miss a river that was well inside its search
+radius. Distances are now measured in a projection centred on the outlet, and
+the warning geopandas raised about measuring in degrees is gone with it.
+
 ## 0.6.0 -- 2026-09-18
 
 ### Two measurements widened enough to carry their claims

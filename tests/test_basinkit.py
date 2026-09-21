@@ -2221,3 +2221,18 @@ def test_plugin_methods_called_on_self_all_exist():
             for name in sorted(called - defined):
                 problems.append(f"{path.name}:{cls.name}.{name}")
     assert not problems, problems
+
+
+def test_outlet_check_measures_distance_on_the_ground():
+    """East-west distance must not be inflated at high latitude."""
+    import geopandas as gpd
+    from shapely.geometry import Point
+
+    from basinkit.verify import _km_from
+
+    lat, lon = 60.0, 10.0
+    # a point one degree of longitude east, at 60 N, is about 55.8 km away
+    gdf = gpd.GeoDataFrame(geometry=[Point(lon + 1.0, lat)], crs="EPSG:4326")
+    km = float(_km_from(gdf, lat, lon).iloc[0])
+    assert km == pytest.approx(55.8, abs=0.5)
+    assert km < 0.6 * 110.574           # the old degree-times-constant answer
