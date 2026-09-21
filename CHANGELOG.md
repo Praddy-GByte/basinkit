@@ -1,6 +1,23 @@
 # Changelog
 
-## Unreleased
+## 0.6.1 -- 2026-09-21
+
+### Imagery accepts the options its own warning suggests
+
+When a Sentinel-2, Landsat or Sentinel-1 request is larger than the pixel
+budget, basinkit warns and says to pass `max_pixels=` or `resolution=`. Doing
+so raised a `TypeError`, because those options went to the catalogue search
+instead of the step that builds the raster. They now reach the raster step.
+
+### PERSIANN-CDR is marked unavailable instead of failing with a 404
+
+NOAA withdrew the NCEI ERDDAP dataset basinkit read PERSIANN-CDR from, and the
+endpoint now answers 404. The record survives as one global file per day on
+NOAA's open-data bucket, fifteen thousand downloads for a 40-year basin series,
+so rather than fetch that silently `precipitation(source="persiann")` now
+raises a `DataSourceError` that says what happened and points at CHIRPS, which
+covers the same years. The catalogue marks it as documented but not fetchable,
+and the count of fetchable datasets drops from twenty to nineteen.
 
 ### Mean slope was measuring the rectangle, not the basin
 

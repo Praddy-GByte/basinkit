@@ -78,7 +78,7 @@ of what a bounding-box download transfers is therefore somebody else's
 catchment, and those pixels sit inside every "basin average" computed from it.
 
 **It needs no account.** Not for the DEM, not for Sentinel-2, not for Landsat,
-not for terrain-corrected radar. Twenty of the twenty-seven catalogued datasets
+not for terrain-corrected radar. Nineteen of the twenty-seven catalogued datasets
 are fetchable today, and every one of those is anonymous.
 Compare: MERIT Hydro is behind a Google Form and an emailed Dropbox password;
 the OpenTopography API allows fifty calls a day on a non-academic key; Earth

@@ -270,7 +270,7 @@ reprojection for you.
 
 ```python
 rain = basin.precipitation(2000, 2024)              # CHIRPS, mm/month
-rain = basin.precipitation(source="terraclimate")   # or persiann
+rain = basin.precipitation(source="terraclimate")
 wb   = basin.water_balance(2015, 2020)              # ppt, aet, pet, q, soil
 ```
 

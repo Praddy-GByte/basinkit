@@ -3,7 +3,7 @@ name=basinkit
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Click a river anywhere on Earth and get an analysis-ready basin package: elevation, terrain surfaces, land cover, soil, rainfall, surface water, rivers, full Horton-Strahler morphometry, a grade for whether the elevation model can carry any of it, and an eight-page report.
-version=0.6.0
+version=0.6.1
 author=Pradeepika Kaushik
 email=pradeepika.kaushik@gmail.com
 
@@ -25,12 +25,23 @@ hasProcessingProvider=yes
 # their Python dependencies, so the plugin detects it at load
 # and hands the user a command that works. Declaring it here is what puts it in
 # the "External dependencies" field on plugins.qgis.org.
-external_deps=basinkit>=0.6
+external_deps=basinkit>=0.6.1
 server=False
 
 tags=hydrology,watershed,catchment,basin,delineation,dem,terrain,slope,hand,morphometry,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
 
-changelog=0.6.0
+changelog=0.6.1
+    - 'Basin statistics' reported mean slope over the whole bounding box, with
+      the ground outside the basin filled in as a flat plain. On a catchment
+      filling 43 percent of its box that read 7 degrees where the basin's own
+      slopes average 16. It now measures inside the basin only.
+    - A failed delineation now says why, instead of reporting an
+      AttributeError about a missing helper.
+    - The check against the river network measures distance on the ground, so
+      it no longer misses rivers inside its search radius at high latitude.
+    - Needs basinkit 0.6.1, which also requires geopandas 1.0: on installs with
+      an older geopandas the first delineation used to fail.
+    0.6.0
     - Four new Processing algorithms. 'Terrain surfaces' computes slope,
       aspect, hillshade, curvature, topographic position, ruggedness, local
       relief, slope-position classes, flow accumulation, the channel network,

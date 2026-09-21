@@ -227,12 +227,13 @@ class Basin:
         from .sources.stac import composite as reduce_time
         from .sources.stac import stac_search, stac_stack
 
+        stack_kw = _stack_kwargs(kwargs)
         items = stac_search(
             "sentinel2", geometry=self.geometry, start=start, end=end,
             cloud_cover=cloud_cover, **kwargs
         )
         ds = stac_stack(items, self.geometry, bands=bands or ["blue", "green", "red", "nir"],
-                        collection="sentinel2")
+                        collection="sentinel2", **stack_kw)
         return reduce_time(ds, composite) if composite else ds
 
     def landsat(self, start: str, end: str, *, cloud_cover: float = 20,
@@ -242,12 +243,13 @@ class Basin:
         from .sources.stac import composite as reduce_time
         from .sources.stac import stac_search, stac_stack
 
+        stack_kw = _stack_kwargs(kwargs)
         items = stac_search(
             "landsat", geometry=self.geometry, start=start, end=end,
             cloud_cover=cloud_cover, **kwargs
         )
         ds = stac_stack(items, self.geometry, bands=bands or ["blue", "green", "red", "nir08"],
-                        collection="landsat")
+                        collection="landsat", **stack_kw)
         return reduce_time(ds, composite) if composite else ds
 
     def sentinel1(self, start: str, end: str, *, bands: list[str] | None = None,
@@ -256,11 +258,12 @@ class Basin:
         from .sources.stac import composite as reduce_time
         from .sources.stac import stac_search, stac_stack
 
+        stack_kw = _stack_kwargs(kwargs)
         items = stac_search(
             "sentinel1_rtc", geometry=self.geometry, start=start, end=end, **kwargs
         )
         ds = stac_stack(items, self.geometry, bands=bands or ["vv", "vh"],
-                        collection="sentinel1_rtc")
+                        collection="sentinel1_rtc", **stack_kw)
         return reduce_time(ds, composite) if composite else ds
 
     # -- summaries ---------------------------------------------------------
@@ -751,3 +754,14 @@ class Basin:
         from .viz import plot
 
         return plot(self, **kwargs)
+
+
+#: Options that shape the raster rather than the search. The pixel-budget
+#: warning tells people to pass ``max_pixels=`` or ``resolution=``; before these
+#: were routed to the stacking step, doing what it said raised a TypeError.
+_STACK_OPTIONS = ("max_pixels", "resolution", "crs", "chunks", "clip", "nodata",
+                  "mask_nodata", "scale")
+
+
+def _stack_kwargs(kwargs: dict) -> dict:
+    return {k: kwargs.pop(k) for k in _STACK_OPTIONS if k in kwargs}

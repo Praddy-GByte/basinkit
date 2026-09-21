@@ -97,7 +97,7 @@ of what a bounding-box download transfers is therefore somebody else's
 catchment, and those pixels sit inside every "basin average" computed from it.
 
 **It needs no account.** Not for the DEM, not for Sentinel-2, not for Landsat,
-not for terrain-corrected radar. Twenty of the twenty-seven catalogued datasets
+not for terrain-corrected radar. Nineteen of the twenty-seven catalogued datasets
 are fetchable today, and every one of those is anonymous.
 Compare: MERIT Hydro is behind a Google Form and an emailed Dropbox password;
 the OpenTopography API allows fifty calls a day on a non-academic key; Earth
@@ -286,7 +286,7 @@ export. A polygon always says where it came from.
 | `landcover()` | ESA WorldCover / ESRI annual LULC | 10 m | no |
 | `soil()` | SoilGrids 250 m, 13 properties, 6 depths | 250 m | no |
 | `available_water_capacity()` | derived: field capacity − wilting point | 250 m | no |
-| `precipitation()` | CHIRPS v3.0 / PERSIANN-CDR / TerraClimate | 0.05-0.25° | no |
+| `precipitation()` | CHIRPS v3.0 / TerraClimate | 0.05° / ~4 km | no |
 | `water_balance()` | TerraClimate P/AET/PET/Q/soil + closure residual | 4 km | no |
 | `surface_water()` | JRC Global Surface Water (37 years of Landsat) | 30 m | no |
 | `sentinel2()` | Sentinel-2 L2A via Earth Search | 10 m | no |
@@ -297,7 +297,7 @@ export. A polygon always says where it came from.
 
 **Documented but not fetchable** (`basinkit catalog` marks these `DOC`):
 ERA5-Land, GPM IMERG, GloFAS and GRACE need an account and a client basinkit
-does not ship; MERIT Hydro, FABDEM and GRDC are licence-gated or have no API at
+does not ship; PERSIANN-CDR lost the NOAA endpoint basinkit read it from; MERIT Hydro, FABDEM and GRDC are licence-gated or have no API at
 all. Asking for one returns instructions, not a stack trace.
 
 ### The fast way to characterise a basin

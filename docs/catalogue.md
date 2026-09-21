@@ -63,7 +63,7 @@ The Planetary Computer mirror is abandoned and returns zero items. Go through NA
 | Temporal | 1983-01-01 to present |
 | Coverage | 60N-60S |
 | Licence | No constraints on access or use |
-| Access | NOAA NCEI ERDDAP griddap (server-side spatial and temporal subsetting) |
+| Access | Unavailable: NOAA withdrew the NCEI ERDDAP dataset (404). Daily global files remain at `s3://noaa-cdr-precip-persiann-pds` |
 | Fetchable by basinkit | yes |
 | Commercial use | yes |
 | Redistribution | yes |

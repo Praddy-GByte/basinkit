@@ -2236,3 +2236,32 @@ def test_outlet_check_measures_distance_on_the_ground():
     km = float(_km_from(gdf, lat, lon).iloc[0])
     assert km == pytest.approx(55.8, abs=0.5)
     assert km < 0.6 * 110.574           # the old degree-times-constant answer
+
+
+def test_imagery_passes_raster_options_to_the_stack(monkeypatch):
+    """Following the pixel-budget warning's own advice must not crash."""
+    from shapely.geometry import box
+
+    import basinkit.sources.stac as stac
+    from basinkit.basin import Basin
+
+    seen = {}
+
+    def fake_search(collection, **kw):
+        seen["search"] = kw
+        return ["item"]
+
+    def fake_stack(items, geometry=None, bands=None, **kw):
+        seen["stack"] = kw
+        return "stacked"
+
+    monkeypatch.setattr(stac, "stac_search", fake_search)
+    monkeypatch.setattr(stac, "stac_stack", fake_stack)
+    b = Basin.from_geometry(box(65.0, 32.0, 65.1, 32.1))
+    for call in (lambda: b.sentinel2("2024-01-01", "2024-02-01", composite=None, max_pixels=5, resolution=60),
+                 lambda: b.landsat("2024-01-01", "2024-02-01", composite=None, max_pixels=5),
+                 lambda: b.sentinel1("2024-01-01", "2024-02-01", composite=None, max_pixels=5)):
+        seen.clear()
+        assert call() == "stacked"
+        assert "max_pixels" not in seen["search"]
+        assert seen["stack"]["max_pixels"] == 5
