@@ -162,7 +162,7 @@ def check_outlet(
             continue
         if reaches is None or reaches.empty:
             continue
-        reaches = reaches.assign(km=reaches.geometry.distance(point) * 110.574)
+        reaches = reaches.assign(km=_km_from(reaches, lat, lon))
         reaches = reaches[reaches["km"] <= search_km]
         if reaches.empty:
             continue
@@ -230,3 +230,16 @@ def check_outlet(
         suggested_area_km2=round(largest, 2),
         notes=["outlet may be on a different river from the returned basin"],
         **common)
+
+
+def _km_from(gdf, lat: float, lon: float):
+    """Distance in km from (lat, lon) to each geometry, measured on the ground.
+
+    Multiplying a distance in degrees by 110.574 treats a degree of longitude
+    as if it were a degree of latitude, which overstates east-west distance by
+    1/cos(latitude): half again at 48 degrees, double at 60. A projection centred
+    on the outlet measures true distance in every direction.
+    """
+    local = gdf.to_crs(f"+proj=aeqd +lat_0={lat} +lon_0={lon} +units=m +datum=WGS84")
+    from shapely.geometry import Point as _P
+    return local.geometry.distance(_P(0, 0)) / 1000.0
