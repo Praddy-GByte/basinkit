@@ -2187,3 +2187,37 @@ def test_mean_slope_ignores_the_ground_outside_the_polygon():
     filled = float(np.nanmean(np.asarray(slope_of(dem.fillna(0.0)).values,
                                          dtype="float64")))
     assert abs(filled - stats["slope_mean_deg"]) > 1.0
+
+
+def test_plugin_methods_called_on_self_all_exist():
+    """A failure inside an algorithm must reach the user as its message.
+
+    Calling a helper that was never defined turns every real error in that
+    path into an AttributeError about the helper, which is what the
+    delineation algorithm did until its guidance method was restored.
+    """
+    import ast
+    import pathlib
+
+    root = pathlib.Path(__file__).resolve().parents[1]
+    folder = root / "qgis_plugin" / "processing_provider" / "algorithms"
+    base = ast.parse((folder / "base.py").read_text())
+    inherited = {n.name for c in base.body if isinstance(c, ast.ClassDef)
+                 for n in c.body if isinstance(n, ast.FunctionDef)}
+    problems = []
+    for path in sorted(folder.glob("*.py")):
+        for cls in ast.parse(path.read_text()).body:
+            if not isinstance(cls, ast.ClassDef):
+                continue
+            defined = inherited | {n.name for n in cls.body
+                                   if isinstance(n, ast.FunctionDef)}
+            called = {n.func.attr for n in ast.walk(cls)
+                      if isinstance(n, ast.Call)
+                      and isinstance(n.func, ast.Attribute)
+                      and isinstance(n.func.value, ast.Name)
+                      and n.func.value.id == "self"
+                      and n.func.attr.startswith("_")
+                      and not n.func.attr.startswith("__")}
+            for name in sorted(called - defined):
+                problems.append(f"{path.name}:{cls.name}.{name}")
+    assert not problems, problems
