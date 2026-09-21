@@ -346,7 +346,9 @@ def _build_profile(r: River, n: int, dem=None, stem=None, basin=None):
     pts = [line.interpolate(d) for d in dists]
     gs = gpd.GeoSeries([Point(p.x, p.y) for p in pts], crs=crs)
 
-    elev = dem if dem is not None else basin.dem()
+    # A profile samples a few hundred points, so a capped read is enough and
+    # keeps large basins inside memory.
+    elev = dem if dem is not None else basin.dem(max_pixels=6_000_000, progress=False)
     dem_crs = getattr(getattr(elev, "rio", None), "crs", None) or "EPSG:4326"
     ll = gs.to_crs(dem_crs)
     xname = "x" if "x" in elev.coords else "longitude"
