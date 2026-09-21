@@ -31,7 +31,8 @@ from . import cache
 # change under a user whose export worked last week.
 THREE_JS_URL = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
 
-_TEMPLATE = r"""<title>__TITLE__</title>
+_TEMPLATE = r"""<meta charset="utf-8">
+<title>__TITLE__</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@400;500;600;700&display=swap">
 <style>
   :root{
@@ -154,7 +155,9 @@ __FACTS__
   var SPAN = Math.max(spanX, spanZ);
   scene.fog = new THREE.Fog(0x080C0F, SPAN * 1.0, SPAN * 2.8);
 
-  var camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, 0.5, 900);
+  // The far plane scales with the basin: a fixed 900 km cut a continental
+  // basin out of view entirely.
+  var camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, 0.5, Math.max(900, SPAN * 6));
   var renderer = new THREE.WebGLRenderer({antialias:true});
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.setSize(innerWidth, innerHeight);
@@ -325,7 +328,7 @@ __FACTS__
   cv.addEventListener("contextmenu", function(e){ e.preventDefault(); });
   cv.addEventListener("wheel", function(e){
     e.preventDefault();
-    dist = Math.min(400, Math.max(12, dist * (1 + Math.sign(e.deltaY) * 0.09)));
+    dist = Math.min(Math.max(400, SPAN * 3), Math.max(12, dist * (1 + Math.sign(e.deltaY) * 0.09)));
     place(); hideHint();
   }, {passive:false});
 
@@ -525,13 +528,17 @@ def export_3d(
         The file written.
     """
     path = Path(path)
-    dem = basin.dem()
+    # The mesh and the texture are a few megapixels at most, so read no more
+    # than that: a full-budget read of a continental basin exhausts memory.
+    budget = max(4 * int(texture_width) ** 2, 4 * int(mesh_width) ** 2)
+    dem = basin.dem(max_pixels=budget, progress=False)
     heights, meta = _heights(dem, mesh_width)
 
     tex = ""
     if texture == "sentinel2":
         s2 = basin.sentinel2(start, end, cloud_cover=cloud_cover,
-                             bands=["red", "green", "blue"], composite="median")
+                             bands=["red", "green", "blue"], composite="median",
+                             max_pixels=budget)
         matched = s2.rio.reproject_match(dem)
         step = max(1, dem.rio.shape[1] // int(texture_width))
         stack = np.stack(
