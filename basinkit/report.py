@@ -230,7 +230,8 @@ def _cover(plt, pdf, basin, title, grade, elevation, page):
                    if finite.size else "not available"),
         ("Highest point", f"{float(finite.max()):,.0f} m" if finite.size else "-"),
         ("Lowest point", f"{float(finite.min()):,.0f} m" if finite.size else "-"),
-        ("Elevation source", str(provenance.get("source_dataset", "Copernicus DEM"))),
+        ("Elevation source", _elevation_source(elevation)),
+        ("Boundary source", str(provenance.get("source_dataset", "unknown"))),
     ]
     y = 0.345
     for label, value in headline:
@@ -729,6 +730,18 @@ def _missing_network_page(plt, pdf, reason, page):
 
 
 # --- the report ------------------------------------------------------------
+
+
+_DEM_NAMES = {"cop30": "Copernicus DEM GLO-30", "cop90": "Copernicus DEM GLO-90",
+              "nasadem": "NASADEM", "srtm30": "SRTM 30 m"}
+
+
+def _elevation_source(elevation) -> str:
+    """Name the elevation product, with the cell it was read at."""
+    attrs = getattr(elevation, "attrs", {}) or {}
+    name = _DEM_NAMES.get(str(attrs.get("basinkit_product", "")), "Copernicus DEM")
+    res = attrs.get("basinkit_output_res_m")
+    return f"{name}, read at {float(res):.0f} m" if res not in (None, "") else name
 
 
 def report(basin, path, *, title: str | None = None, dem=None, rivers=None,
