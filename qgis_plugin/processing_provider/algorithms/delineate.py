@@ -146,6 +146,20 @@ class DelineateBasinAlgorithm(BasinkitAlgorithm):
         )
 
     # -- run --------------------------------------------------------------
+    @staticmethod
+    def _guidance(exc, lat, lon) -> str:
+        """What failed, where, and the two things most often behind it."""
+        return (
+            f"Delineation at {lat:.5f}, {lon:.5f} stopped: "
+            f"{type(exc).__name__}: {exc}\n\n"
+            "Two things account for most failures here. A point far from any "
+            "mapped river cannot be snapped, so move it onto the channel or "
+            "raise the snap distance. And a point clicked in a projected layer "
+            "is only as good as that layer's CRS, so check the outlet reads as "
+            "latitude and longitude in the log above. If neither applies, the "
+            "full traceback is in the basinkit tab of the Log Messages panel."
+        )
+
     def processAlgorithm(self, parameters, context, feedback):  # noqa: N802
         self.require_basinkit(feedback)
         import basinkit as bk

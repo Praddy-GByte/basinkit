@@ -24,6 +24,14 @@ Where 0.14 was already installed, as it is in the system Python some QGIS
 installs use, pip left it in place and the first delineation stopped with an
 `AttributeError`. The floor is now 1.0, so pip upgrades it instead.
 
+### A failed delineation in QGIS now says why
+
+The delineation algorithm handed any error to a guidance method that did not
+exist, so whatever actually went wrong reached the user as an `AttributeError`
+about that method. It exists now, and says where the run stopped and the two
+things most often behind it. A test walks every algorithm and fails if one
+calls a helper that is not defined.
+
 ## 0.6.0 -- 2026-09-18
 
 ### Two measurements widened enough to carry their claims
