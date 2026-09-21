@@ -146,6 +146,33 @@ def _catalogue_unreachable(url: str, exc: Exception) -> str:
     return f"{opening} for the STAC catalogue at {url}: {exc}"
 
 
+def _search_geometry(geometry, max_vertices: int = 1000):
+    """A small outline that contains ``geometry``, for the search request only.
+
+    A continental basin dissolved from thousands of sub-catchments carries
+    hundreds of thousands of vertices, and a STAC API refuses a request that
+    large. Scenes are only chosen here; every layer is still clipped to the
+    full geometry afterwards. Buffering before simplifying keeps the outline
+    a superset, so no scene that touches the basin is dropped.
+    """
+    from shapely.geometry import MultiPolygon, Polygon
+
+    def vertices(g):
+        polys = getattr(g, "geoms", [g])
+        return sum(len(p.exterior.coords) for p in polys if hasattr(p, "exterior"))
+
+    if vertices(geometry) <= max_vertices:
+        return geometry
+    tol = 0.01
+    while True:
+        g = geometry.buffer(tol).simplify(tol / 2)
+        polys = [Polygon(p.exterior) for p in getattr(g, "geoms", [g]) if hasattr(p, "exterior")]
+        g = polys[0] if len(polys) == 1 else MultiPolygon(polys)
+        if vertices(g) <= max_vertices or tol > 1.0:
+            return g
+        tol *= 2
+
+
 def stac_search(
     collection: str,
     geometry=None,
@@ -179,7 +206,7 @@ def stac_search(
     if geometry is not None:
         from shapely.geometry import mapping
 
-        kwargs["intersects"] = mapping(geometry)
+        kwargs["intersects"] = mapping(_search_geometry(geometry))
     elif bbox is not None:
         kwargs["bbox"] = list(bbox)
     else:
