@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.6.2 -- 2026-09-22
+
+Found by running every analysis basinkit offers on two basins end to end, the
+Ganga above Farakka (934,516 km2) and the Potomac at Little Falls, and checking
+the results against independent records.
+
+### Satellite searches work on continental basins
+
+A basin dissolved from thousands of sub-catchments can have tens of thousands
+of vertices; the Ganga above Farakka has 49,808. Every STAC search sent that
+outline and was refused as too large, so `sentinel2()`, `landsat()`,
+`sentinel1()` and `landcover_change()` all failed. The search now sends a
+buffered, simplified outline that still contains the basin; results are
+clipped to the full outline as before.
+
+### The 3D page fits large basins
+
+`export_3d()` read the elevation model at the full default budget to build a
+384-column mesh and ran out of memory on the Ganga; it now reads only what the
+mesh and texture need. The camera's far plane and zoom limit were fixed at 900
+and 400 km, so a basin 1,500 km wide rendered as a black screen; both now scale
+with the basin. The page declares its text encoding, and takes its white point
+from the scene's 99th percentile instead of a fixed 0.62, which left forested
+basins nearly black (`high=` still overrides it).
+
+### River profile and report
+
+`River` reads a capped elevation model for the long profile instead of the
+default-budget one, which needed more than 6 GB on a 30,000 km2 basin. The report's first
+page names the elevation product it used rather than the boundary source.
+
 ## 0.6.1 -- 2026-09-21
 
 ### Imagery accepts the options its own warning suggests
