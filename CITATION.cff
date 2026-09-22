@@ -25,7 +25,7 @@ authors:
     family-names: Kaushik
     # orcid: "https://orcid.org/0000-0000-0000-0000"   # add yours
 version: 0.6.2
-doi: "10.5281/zenodo.22181933"
+doi: "10.5281/zenodo.22896595"
 identifiers:
   - type: doi
     value: "10.5281/zenodo.22181933"
