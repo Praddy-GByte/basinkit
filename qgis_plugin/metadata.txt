@@ -3,7 +3,7 @@ name=basinkit
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Click a river anywhere on Earth and get an analysis-ready basin package: elevation, terrain surfaces, land cover, soil, rainfall, surface water, rivers, full Horton-Strahler morphometry, a grade for whether the elevation model can carry any of it, and an eight-page report.
-version=0.6.1
+version=0.6.2
 author=Pradeepika Kaushik
 email=pradeepika.kaushik@gmail.com
 
@@ -25,12 +25,29 @@ hasProcessingProvider=yes
 # their Python dependencies, so the plugin detects it at load
 # and hands the user a command that works. Declaring it here is what puts it in
 # the "External dependencies" field on plugins.qgis.org.
-external_deps=basinkit>=0.6.1
+external_deps=basinkit>=0.6.2
 server=False
 
 tags=hydrology,watershed,catchment,basin,delineation,dem,terrain,slope,hand,morphometry,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
 
-changelog=0.6.1
+changelog=0.6.2
+    - Found by running every analysis on the Ganga above Farakka (934,516
+      square kilometres) and on the Potomac, then checking the results
+      against GRDC, 190 Nepal gauges, IMD rainfall and USGS records.
+    - Sentinel-2, Landsat, Sentinel-1 and land cover change failed on very
+      large basins: the basin outline was too big for the catalogue search.
+      The search now sends a simplified outline that still contains the
+      basin; results are clipped to the full outline as before.
+    - The 3D page ran out of memory on large basins and showed a black screen
+      for basins wider than 900 km. Both fixed; the page also declares its
+      text encoding so symbols render correctly.
+    - The river profile reads a capped elevation model; on a 30,000 km2
+      basin it used to need more than 6 GB of memory.
+    - The 3D page sets its colour balance from the scene, so forested basins
+      no longer render nearly black.
+    - The report's first page names the elevation product it used.
+    - Needs basinkit 0.6.2.
+    0.6.1
     - 'Basin statistics' reported mean slope over the whole bounding box, with
       the ground outside the basin filled in as a flat plain. On a catchment
       filling 43 percent of its box that read 7 degrees where the basin's own
