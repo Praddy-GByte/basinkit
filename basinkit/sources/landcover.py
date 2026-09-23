@@ -144,6 +144,15 @@ def esri_lulc(geometry, year: int | None = None, *, clip: bool = True, **kwargs)
 
     if da.dtype.kind == "f":
         da = da.astype("uint8")
+    # odc-stac hands back a float array whose nodata is NaN. Casting the codes
+    # to integers leaves that NaN behind in the encoding, and every later
+    # reader -- .rio.nodata, reproject_match, to_raster -- then raises
+    # "cannot convert float NaN to integer". ESRI's own legend starts at 1 and
+    # uses 0 for no data, so that is what the array should carry.
+    da.attrs.pop("_FillValue", None)
+    da.encoding.pop("_FillValue", None)
+    da.encoding.pop("nodata", None)
+    da = da.rio.write_nodata(0, encoded=False)
     da.name = "landcover"
     da.attrs.update({
         **ds.attrs,

@@ -6,6 +6,8 @@
 
 ::: basinkit.suitability
 
+::: basinkit.quality
+
 ::: basinkit.report
 
 ::: basinkit.clip

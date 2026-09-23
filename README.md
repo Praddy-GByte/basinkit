@@ -200,6 +200,35 @@ Full results, including the twelve named rivers this check replaced as the
 headline, are in
 [Verification](https://praddy-gbyte.github.io/basinkit/verification/).
 
+### And a grade for every other layer too
+
+Suggested by Prof. Dr. B. Mishra, who asked for quality indicators reported per
+terrain type, basin size and data source rather than for the elevation model
+alone. `Basin.data_quality()` measures each layer against something produced
+independently of it: land cover as the agreement between ESA WorldCover and the
+ESRI annual series, rainfall as CHIRPS against TerraClimate, soil as the width
+of SoilGrids' own published 90% interval, surface water as the permanent-to-
+seasonal split, delineation as the network check plus the accuracy regime for a
+basin of this size -- and elevation as the suitability grade split by terrain
+class, because a basin that is part plain and part mountain is not one number.
+
+The Salzach at Salzburg, 4,510 km2, comes back LIMITED overall, and the reason
+is the rainfall rather than the terrain: CHIRPS and TerraClimate track each
+other at r = 0.60 there and differ by 17% in the mean. The elevation model is
+HIGH -- but on the 11% of the basin that is flat valley floor, 63% of slopes
+fall below the angle a 52 m cell can resolve, and only the per-terrain split
+says so.
+
+Two layers come back with no grade at all. Nobody publishes a threshold that
+says a SoilGrids interval is too wide to use, or that a permanent-water share is
+too low, so those report the measurement and say in `not_graded_because` why
+they will not be graded, instead of inventing a cut-off and printing it as
+though it were established. Every threshold that does exist is printed beside
+the measurement it judged.
+
+Details in
+[Data quality](https://praddy-gbyte.github.io/basinkit/data-quality/).
+
 ---
 
 ## Install
@@ -354,12 +383,13 @@ A few things basinkit handles that trip up hand-rolled pipelines:
 
 ## QGIS
 
-`qgis_plugin/` is a Processing provider with eight algorithms: delineate a
+`qgis_plugin/` is a Processing provider with nine algorithms: delineate a
 basin from a canvas click, hand back the sub-catchments it was assembled from
 with their routing, fetch layers clipped to it, compute the terrain surfaces,
-grade whether the elevation model can carry them, basin statistics, the full
-morphometry, and the eight-page PDF report. Being Processing algorithms, they
-all work in batch mode, in the Model Builder and under `qgis_process`.
+grade whether the elevation model can carry them, grade every other layer
+against something independent of it, basin statistics, the full morphometry,
+and the eight-page PDF report. Being Processing algorithms, they all work in
+batch mode, in the Model Builder and under `qgis_process`.
 
 **QGIS 3.28 or newer.** Older builds ship Python 3.7 or 3.8, which basinkit's
 dependencies do not support, so the package cannot be installed there at all.

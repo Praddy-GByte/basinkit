@@ -369,6 +369,19 @@ class Basin:
                       dem=self.dem(**kwargs) if dem is None else dem,
                       rivers=rivers)
 
+    def data_quality(self, **kwargs):
+        """A quality indicator for every layer, each against something independent.
+
+        The elevation grade split by terrain class; two independently produced
+        land cover maps compared; SoilGrids' own 90 per cent interval; CHIRPS
+        against TerraClimate; permanent against seasonal water; and the checks
+        that exist for the boundary. Each entry carries the measurement, the
+        threshold it was judged against, and what was compared with what.
+        """
+        from .quality import data_quality
+
+        return data_quality(self, **kwargs)
+
     def dem_suitability(self, *, dem=None, support_map: bool = False, **kwargs):
         """Whether the elevation model supports terrain analysis in this basin.
 

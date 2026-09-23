@@ -139,6 +139,16 @@ Florida is the one to read twice: it is also the station where the DEM
 backend's own area error is +99%, so the grade names the case before the
 number misleads anyone.
 
+And `Basin.data_quality()` asks the same question of every other layer, each
+against something produced independently of it: land cover as the agreement
+between ESA WorldCover and the ESRI annual series, rainfall as CHIRPS against
+TerraClimate, soil as the width of SoilGrids' own published interval, surface
+water as the permanent-to-seasonal split, delineation as the network check and
+the accuracy regime for a basin of this size -- and elevation split by terrain
+class, because a basin that is part plain and part mountain is not one number.
+Where no defensible threshold exists, the layer is reported and deliberately
+not graded. See [Data quality](data-quality.md).
+
 And one command writes the lot to paper: `basin.report("basin.pdf")` produces
 eight A4 pages with the suitability grade on the cover, every morphometric
 parameter carrying its symbol and original reference, the channel network

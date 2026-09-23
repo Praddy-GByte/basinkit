@@ -1,5 +1,54 @@
 # Changelog
 
+## 0.7.0 -- 2026-09-23
+
+### A quality indicator for every layer, not only for the elevation model
+
+Suggested publicly by Prof. Dr. B. Mishra, who asked for built-in validation
+and quality-control indicators reported per terrain type, basin size and data
+source. Until now `Basin.dem_suitability()` graded the elevation raster and
+nothing else, so a land cover map, a soil raster and a rainfall series all came
+back looking equally authoritative and nothing in the output said which of them
+could carry the weight a study put on it.
+
+`Basin.data_quality()` measures each layer against something produced
+independently of it:
+
+- **elevation** -- the suitability grade, and the same measurement split by
+  terrain class, so a basin that is part plain and part mountain is not
+  reported as one number. The classes are cut on local relief, which is the
+  quantity a 30 m model's vertical error competes with.
+- **land cover** -- ESA WorldCover against the ESRI annual series for the same
+  year, reduced to the classes both legends define, and the share of the basin
+  where the two mapping teams agree.
+- **soil** -- the width of the 90% interval SoilGrids publishes beside its own
+  mean, in the units of the property. That is the model's own statement about
+  how well it knows this ground.
+- **precipitation** -- CHIRPS against TerraClimate over the same years: their
+  correlation, and the difference between their means.
+- **surface water** -- how much of the water is permanent, how much seasonal,
+  and how much of the basin the Landsat record never observed cleanly.
+- **delineation** -- the river-network consistency check, and the accuracy
+  regime a basin of this size falls in.
+
+Two of those are reported without a grade. Nobody publishes a threshold that
+says a SoilGrids interval is too wide to use, or that a permanent-water share
+is too low, so the module reports the measurement and says in
+`not_graded_because` why it will not grade it, instead of inventing a cut-off
+and printing it as though it were established. A layer that fails to fetch is
+reported as an error rather than dropped, so the absence is visible. Every
+threshold that does exist is printed beside the measurement it judged.
+
+The same thing is in the QGIS Processing Toolbox as **Data quality report**, which
+prints the graded table and writes `data_quality.csv`.
+
+### The ESRI land cover reader now carries an integer nodata
+
+Found while building the layer above. `esri_lulc()` returned a raster whose
+`_FillValue` came through as a float on an integer band, so a comparison
+against another class raster saw nodata as a class. The reader now writes an
+integer nodata of 0 and clears the inherited attributes.
+
 ## 0.6.3 -- 2026-09-23
 
 ### An old QGIS now says so

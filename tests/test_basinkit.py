@@ -2324,3 +2324,95 @@ def test_old_python_is_reported_instead_of_a_missing_module(monkeypatch):
     assert message is not None
     assert "3.7.3" in message and "3.10" in message and "3.28" in message
     assert deps.status_message() == message    # reported before the module check
+
+
+def _fake_basin(**layers):
+    """A stand-in with only the methods one quality indicator asks for."""
+
+    class Fake:
+        area_km2 = 5000.0
+        provenance = {"backend": "hydrobasins", "outlet_check": {"ok": True, "reason": "consistent"}}
+
+        def __getattr__(self, name):
+            if name in layers:
+                return layers[name]
+            raise AttributeError(name)
+
+    return Fake()
+
+
+def test_landcover_quality_measures_agreement_between_two_maps():
+    import xarray as xr
+
+    from basinkit.quality import landcover_quality
+
+    # WorldCover codes: 10 tree, 40 crop. ESRI: 2 tree, 5 crop. One cell of
+    # four is mapped as crop by one and tree by the other.
+    wc = xr.DataArray(np.array([[10, 10], [40, 40]], dtype="float64"), dims=("y", "x"))
+    esri = xr.DataArray(np.array([[2, 2], [5, 2]], dtype="float64"), dims=("y", "x"))
+    got = landcover_quality(_fake_basin(landcover=lambda year=None, source=None, **kw:
+                                        wc if source == "worldcover" else esri))
+    assert got["value"] == 0.75
+    assert got["compared_cells"] == 4
+    assert got["grade"] == "MODERATE"          # 0.75 sits between the two thresholds
+    assert "75%" in got["statement"]
+
+
+def test_soil_quality_reports_the_interval_and_refuses_to_grade_it():
+    import xarray as xr
+
+    from basinkit.quality import soil_quality
+
+    def layer(prop="clay", depth="0-5cm", stat="mean", **kw):
+        values = {"mean": 200.0, "Q0.05": 100.0, "Q0.95": 400.0}[stat]
+        return xr.DataArray(np.full((2, 2), values), dims=("y", "x"))
+
+    got = soil_quality(_fake_basin(soil=layer))
+    assert got["grade"] is None and "threshold" not in got
+    assert got["interval_width_percent_points"] == 30.0     # (400-100)/10, g/kg to %
+    assert got["median_mean_percent"] == 20.0
+    assert got["value"] == 150.0                            # interval is 150% of the mean
+    assert "not_graded_because" in got
+
+
+def test_data_quality_reports_a_layer_that_failed_instead_of_dropping_it():
+    from basinkit.quality import data_quality
+
+    class Broken:
+        area_km2 = 100.0
+        provenance = {"backend": "hydrobasins"}
+
+        def soil(self, *a, **k):
+            raise RuntimeError("no tiles here")
+
+    got = data_quality(Broken(), layers=("soil", "delineation"))
+    soil = next(r for r in got["layers"] if r["layer"] == "soil")
+    assert soil["grade"] is None and "no tiles here" in soil["error"]
+    assert got["overall"] in {"HIGH", "MODERATE", "LIMITED"}   # from the layer that did run
+
+
+def test_esri_landcover_carries_an_integer_nodata():
+    # Regression: the ESRI reader cast a float array to uint8 and left NaN in
+    # the nodata encoding, so .rio.nodata, reproject_match and to_raster all
+    # raised "cannot convert float NaN to integer".
+    import inspect
+
+    from basinkit.sources import landcover as lc
+
+    source = inspect.getsource(lc.esri_lulc)
+    assert "write_nodata(0" in source
+
+
+def test_the_noise_floor_follows_the_cell_the_split_was_measured_on():
+    # The terrain split may be measured on a decimated copy of the elevation
+    # raster. A wider cell resolves a gentler slope, so comparing decimated
+    # slopes against the full-resolution floor would report ground as
+    # unresolvable that is not.
+    from basinkit.quality import _noise_floor_deg
+    from basinkit.suitability import DEFAULT_VERTICAL_ERROR_M
+
+    error = DEFAULT_VERTICAL_ERROR_M
+    full = _noise_floor_deg(error, 30.0)
+    decimated = _noise_floor_deg(error, 60.0)
+    assert decimated < full
+    assert full == pytest.approx(math.degrees(math.atan(error / 30.0)))
