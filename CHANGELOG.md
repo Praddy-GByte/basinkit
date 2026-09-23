@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.6.3 -- 2026-09-23
+
+### An old QGIS now says so
+
+Reported from the field: on QGIS 3.4 LTR, `pip install basinkit` appeared to
+succeed and `import basinkit` then failed with `ModuleNotFoundError`. The
+package had gone to another Python on the machine, and could not have gone to
+that QGIS in any case: basinkit needs Python 3.10, which geopandas 1.0 and
+rasterio require, and QGIS builds before 3.28 ship Python 3.7 or 3.8. The
+plugin now reports the Python it is running on and what to update, instead of
+reporting a missing module and sending people to look for an installation
+fault that is not there.
+
+The install instructions in the README, the docs and the plugin page now lead
+with the QGIS Python Console route, which installs into the interpreter QGIS
+imports from on every platform, state the QGIS and Python floors up front, and
+note that `!pip install` is Jupyter syntax that the QGIS console does not
+understand.
+
 ## 0.6.2 -- 2026-09-22
 
 Found by running every analysis basinkit offers on two basins end to end, the

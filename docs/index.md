@@ -29,6 +29,8 @@ basin.download_all("koshi/")                 # the whole stack, one call
 basin.export_3d("koshi.html")                # an interactive 3D page
 ```
 
+Needs Python 3.10 or newer, and QGIS 3.28 or newer for the plugin.
+
 Or without writing any Python at all:
 
 ```bash

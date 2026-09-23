@@ -23,6 +23,13 @@ from pathlib import Path
 #: The pip distribution this plugin needs, and the module it provides.
 REQUIRED = {"basinkit": "basinkit"}
 
+#: What basinkit's dependencies need. geopandas 1.0 and rasterio both require
+#: Python 3.10, so on an older QGIS pip cannot install the package at all and
+#: the resulting message ("no module named basinkit") sends people looking for
+#: an installation fault that is not there.
+MIN_PYTHON = (3, 10)
+MIN_QGIS = "3.28"
+
 #: Extras worth having. The plugin degrades gracefully without them.
 OPTIONAL = {"basinkit[stac]": "pystac_client"}
 
@@ -114,8 +121,29 @@ def console_command(distributions: list[str] | None = None) -> str:
             'runpy.run_module("pip", run_name="__main__")')
 
 
+def python_too_old() -> str | None:
+    """A message when this QGIS ships a Python basinkit cannot run on.
+
+    Reported before the missing-package message, because on such a build the
+    package is not missing by accident: pip cannot install it here at all.
+    """
+    if sys.version_info >= MIN_PYTHON:
+        return None
+    running = ".".join(str(n) for n in sys.version_info[:3])
+    return (f"This QGIS runs Python {running}, and basinkit needs "
+            f"{MIN_PYTHON[0]}.{MIN_PYTHON[1]} or newer, as geopandas and "
+            "rasterio do.\n\nUpdate QGIS to "
+            f"{MIN_QGIS} or newer (3.34 LTR and 3.40 both ship a new enough "
+            "Python), then install the package. Installing it into another "
+            "Python on this machine will not help: QGIS imports only its own.")
+
+
 def status_message() -> str | None:
     """A ready-to-show message, or ``None`` when everything is present."""
+    stale = python_too_old()
+    if stale is not None:
+        return stale
+
     absent = missing()
     if not absent:
         return None
