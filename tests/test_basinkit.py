@@ -2308,3 +2308,19 @@ def test_3d_page_declares_utf8_and_scales_its_camera():
 
     assert viz3d._TEMPLATE.startswith('<meta charset="utf-8">')
     assert "Math.max(900, SPAN * 6)" in viz3d._TEMPLATE
+
+
+def test_old_python_is_reported_instead_of_a_missing_module(monkeypatch):
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "qgis_plugin"))
+    import deps
+
+    assert deps.python_too_old() is None       # this interpreter is new enough
+
+    monkeypatch.setattr(deps.sys, "version_info", (3, 7, 3))
+    message = deps.python_too_old()
+    assert message is not None
+    assert "3.7.3" in message and "3.10" in message and "3.28" in message
+    assert deps.status_message() == message    # reported before the module check

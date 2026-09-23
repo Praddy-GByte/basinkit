@@ -99,20 +99,38 @@ All four are Processing algorithms, so batch mode, the Model Builder and
 
 ## Install
 
-**1. Install the Python package.** QGIS ships its own Python and there is still
+**Requires QGIS 3.28 or newer**, because basinkit needs Python 3.10 (geopandas
+1.0 and rasterio both do) and older QGIS builds ship Python 3.7 or 3.8. On
+those, pip cannot install the package at all, whichever interpreter you point
+it at. QGIS 3.34 LTR and 3.40 are both new enough.
+
+**1. Install the plugin.** *Plugins → Manage and Install Plugins*, search
+"basinkit", Install. (Or *Install from ZIP* with the file from the plugin
+repository.)
+
+**2. Install the Python package.** QGIS ships its own Python and there is still
 no official way for a plugin to declare a pip dependency, so this step is
-manual. Open the **OSGeo4W Shell** on Windows, or a terminal on macOS and
-Linux:
+manual. The surest route on every platform is from inside QGIS itself, because
+it installs into the interpreter QGIS imports from: *Plugins → Python Console*,
+then paste
+
+```python
+import runpy, sys
+sys.argv = ["pip", "install", "--upgrade", "basinkit[stac]"]
+runpy.run_module("pip", run_name="__main__")
+```
+
+From a terminal instead: the **OSGeo4W Shell** on Windows (not the ordinary
+Command Prompt), or a terminal on macOS and Linux:
 
 ```
 python -m pip install --upgrade "basinkit[stac]"
 ```
 
-If you are unsure which interpreter QGIS uses, install the plugin first and
-open it; the message bar will print the exact command for your installation.
-
-**2. Install the plugin.** *Plugins → Manage and Install Plugins → Install from
-ZIP*, and pick `basinkit_qgis-0.1.0.zip`.
+`!pip install` works only in Jupyter or IPython; the QGIS Python Console does
+not understand the `!` prefix. If you are unsure which interpreter QGIS uses,
+open the plugin: the message bar prints the exact command for your
+installation.
 
 **3. Restart QGIS.** The provider appears in the Processing Toolbox.
 

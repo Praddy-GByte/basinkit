@@ -204,6 +204,10 @@ headline, are in
 
 ## Install
 
+**Needs Python 3.10 or newer** (geopandas 1.0 and rasterio do), and **QGIS 3.28
+or newer** for the plugin. QGIS 3.28 and later ship a new enough Python;
+anything older cannot install basinkit at all.
+
 ```bash
 pip install basinkit              # core: delineation, DEM, land cover, soil, climate
 pip install "basinkit[all]"       # + STAC imagery, DEM routing, interactive maps
@@ -357,10 +361,26 @@ grade whether the elevation model can carry them, basin statistics, the full
 morphometry, and the eight-page PDF report. Being Processing algorithms, they
 all work in batch mode, in the Model Builder and under `qgis_process`.
 
-Install the zip through *Plugins → Manage and Install Plugins → Install from
-ZIP*. QGIS ships its own Python and there is still no official way for a plugin
-to declare a pip dependency, so `basinkit` itself is installed separately; the
-plugin prints the exact command for your installation.
+**QGIS 3.28 or newer.** Older builds ship Python 3.7 or 3.8, which basinkit's
+dependencies do not support, so the package cannot be installed there at all.
+
+Install the plugin from *Plugins → Manage and Install Plugins*, search
+"basinkit". QGIS ships its own Python and there is still no official way for a
+plugin to declare a pip dependency, so `basinkit` itself is installed
+separately; the plugin prints the exact command for your installation. The
+surest route, on every platform, is from inside QGIS -- *Plugins → Python
+Console*, then:
+
+```python
+import runpy, sys
+sys.argv = ["pip", "install", "--upgrade", "basinkit"]
+runpy.run_module("pip", run_name="__main__")
+```
+
+That installs into the interpreter QGIS itself imports from. On Windows, a
+terminal install must use the **OSGeo4W Shell**, not the ordinary Command
+Prompt. `!pip install` works only in Jupyter; the QGIS console does not
+understand it.
 
 ## Citation
 

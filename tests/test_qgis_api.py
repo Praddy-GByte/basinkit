@@ -49,7 +49,7 @@ def stub_basinkit():
     """A module object standing in for the package, so imports resolve."""
     mod = types.ModuleType("basinkit")
     mod.__spec__ = importlib.machinery.ModuleSpec("basinkit", loader=None)
-    mod.__version__ = "0.6.2"
+    mod.__version__ = "0.6.3"
     mod.__file__ = "/stub/basinkit/__init__.py"
     sys.modules.setdefault("basinkit", mod)
     yield

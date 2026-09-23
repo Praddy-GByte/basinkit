@@ -3,13 +3,13 @@ name=basinkit
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Click a river anywhere on Earth and get an analysis-ready basin package: elevation, terrain surfaces, land cover, soil, rainfall, surface water, rivers, full Horton-Strahler morphometry, a grade for whether the elevation model can carry any of it, and an eight-page report.
-version=0.6.2
+version=0.6.3
 author=Pradeepika Kaushik
 email=pradeepika.kaushik@gmail.com
 
 about=Click a point on any river in the world and get the basin draining into it, then pull DEM, land cover, soil, rainfall, surface water, rivers and lakes for that basin -- clipped and masked to the polygon, not to its bounding box. No account is needed for any of it. Delineation is validated blind against 2,550 gauges in 99 countries on six continents, whose catchment areas are published by the agencies that operate them, and the plugin reports which accuracy regime an answer falls in rather than quoting a single figure: 0.3 percent median area error above 100,000 square kilometres, 1.7 percent from 2,000 to 10,000. Below about 2,000 square kilometres the DEM backend is the right instrument, and the plugin says so at the moment it matters and switches to it where the evidence supports the switch.
     Other plugins delineate from a clicked point, and Sen Hydro does it well through the same public mghydro service this plugin can use. Three things here are different. The data: elevation, land cover, soil, rainfall, surface water, rivers and lakes come back as layers clipped to the polygon, not as a report. The morphometry: the full Horton-Strahler-Schumm set from one algorithm, with Strahler streams counted as streams rather than as the reaches a river dataset splits them into. And the offline path: the default backend walks the HydroBASINS level-12 graph from a cached local copy, so after the first download it needs no network at all. Every algorithm is a Processing algorithm, so batch mode, the Model Builder and qgis_process all work.
-    SETUP: this plugin runs on the Python package "basinkit", which is installed once with pip into the Python that QGIS itself uses. The plugin detects whether it is present and prints the exact command for your installation, so setup is a single copy and paste. See the plugin homepage for details.
+    SETUP: needs QGIS 3.28 or newer, because the package needs Python 3.10 (geopandas 1.0 and rasterio both do) and older QGIS builds ship Python 3.7 or 3.8, where pip cannot install it at all. QGIS 3.34 LTR and 3.40 are both new enough. This plugin runs on the Python package "basinkit", which is installed once with pip into the Python that QGIS itself uses. The plugin detects whether it is present and prints the exact command for your installation, so setup is a single copy and paste. The surest route on every platform is from the QGIS Python Console, which installs into the interpreter QGIS imports from; note that "!pip install" works only in Jupyter, not in the QGIS console. See the plugin homepage for details.
 
 tracker=https://github.com/Praddy-GByte/basinkit/issues
 repository=https://github.com/Praddy-GByte/basinkit
@@ -30,7 +30,15 @@ server=False
 
 tags=hydrology,watershed,catchment,basin,delineation,dem,terrain,slope,hand,morphometry,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
 
-changelog=0.6.2
+changelog=0.6.3
+    - On QGIS builds older than 3.28 the plugin now says so. basinkit needs
+      Python 3.10, which those builds do not ship, so pip cannot install it
+      there at all and the old message ('no module named basinkit') sent
+      people looking for an installation fault that was not there.
+    - The install instructions now lead with the QGIS Python Console route,
+      which installs into the interpreter QGIS imports from on every
+      platform, and note that '!pip install' works only in Jupyter.
+    0.6.2
     - Found by running every analysis on the Ganga above Farakka (934,516
       square kilometres) and on the Potomac, then checking the results
       against GRDC, 190 Nepal gauges, IMD rainfall and USGS records.
