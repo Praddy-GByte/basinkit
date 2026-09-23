@@ -54,6 +54,7 @@ nav:
   - Related work: related-work.md
   - Data catalogue: catalogue.md
   - Verification: verification.md
+  - Data quality: data-quality.md
   - Notebooks:
       - Quickstart: notebooks/01_quickstart.ipynb
   - API reference: api.md

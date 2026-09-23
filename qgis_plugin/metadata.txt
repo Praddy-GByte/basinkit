@@ -2,8 +2,8 @@
 name=basinkit
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
-description=Click a river anywhere on Earth and get an analysis-ready basin package: elevation, terrain surfaces, land cover, soil, rainfall, surface water, rivers, full Horton-Strahler morphometry, a grade for whether the elevation model can carry any of it, and an eight-page report.
-version=0.6.3
+description=Click a river anywhere on Earth and get an analysis-ready basin package: elevation, terrain surfaces, land cover, soil, rainfall, surface water, rivers, full Horton-Strahler morphometry, a grade for whether the elevation model can carry any of it, a quality indicator for every other layer, and an eight-page report.
+version=0.7.0
 author=Pradeepika Kaushik
 email=pradeepika.kaushik@gmail.com
 
@@ -25,12 +25,28 @@ hasProcessingProvider=yes
 # their Python dependencies, so the plugin detects it at load
 # and hands the user a command that works. Declaring it here is what puts it in
 # the "External dependencies" field on plugins.qgis.org.
-external_deps=basinkit>=0.6.2
+external_deps=basinkit>=0.7.0
 server=False
 
 tags=hydrology,watershed,catchment,basin,delineation,dem,terrain,slope,hand,morphometry,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
 
-changelog=0.6.3
+changelog=0.7.0
+    - New algorithm: Data quality. A grade for every layer, not only for the
+      elevation model, each measured against something produced independently
+      of it: land cover as the agreement between ESA WorldCover and the ESRI
+      annual series, rainfall as CHIRPS against TerraClimate, soil as the width
+      of SoilGrids' own published interval, surface water as the permanent to
+      seasonal split, delineation as the network check and the accuracy regime
+      for a basin of this size, and elevation as the suitability grade split by
+      terrain class. Suggested by Prof. Dr. B. Mishra.
+    - Soil and surface water are reported without a grade, because no published
+      threshold exists for either; the output says so rather than inventing a
+      cut-off. Every threshold that does exist is printed beside the
+      measurement it judged.
+    - The ESRI land cover reader now writes an integer nodata value, so a
+      comparison against another class raster no longer counts nodata as a
+      class.
+    0.6.3
     - On QGIS builds older than 3.28 the plugin now says so. basinkit needs
       Python 3.10, which those builds do not ship, so pip cannot install it
       there at all and the old message ('no module named basinkit') sent

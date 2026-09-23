@@ -7,6 +7,7 @@ import os
 from qgis.core import QgsProcessingProvider
 from qgis.PyQt.QtGui import QIcon
 
+from .algorithms.data_quality import DataQualityAlgorithm
 from .algorithms.delineate import DelineateBasinAlgorithm
 from .algorithms.fetch_layers import FetchBasinLayersAlgorithm
 from .algorithms.morphometry import BasinMorphometryAlgorithm
@@ -27,6 +28,7 @@ class BasinkitProvider(QgsProcessingProvider):
             FetchBasinLayersAlgorithm(),
             TerrainSurfacesAlgorithm(),
             DemSuitabilityAlgorithm(),
+            DataQualityAlgorithm(),
             BasinStatisticsAlgorithm(),
             BasinMorphometryAlgorithm(),
             BasinReportAlgorithm(),

@@ -19,7 +19,8 @@ announce themselves before the first byte moves. ``basinkit.catalog.table()``
 shows the whole picture.
 """
 
-from . import cache, catalog, climate, clip, delineate, report, sources, suitability, terrain
+from . import (cache, catalog, climate, clip, delineate, quality, report, sources,
+               suitability, terrain)
 from .basin import Basin
 from .compare import compare
 from .exceptions import (
@@ -33,7 +34,7 @@ from .exceptions import (
 )
 from .river import Confluence, River
 
-__version__ = "0.6.3"
+__version__ = "0.7.0"
 
 __all__ = [
     "Basin",
@@ -41,6 +42,7 @@ __all__ = [
     "compare",
     "terrain",
     "suitability",
+    "quality",
     "report",
     "climate",
     "Confluence",

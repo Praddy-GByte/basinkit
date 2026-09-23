@@ -377,7 +377,7 @@ ramp collapses into one flat tone and the drainage network disappears.
 ## Step 4: Without writing any Python
 
 Install the QGIS plugin (`Plugins → Manage and Install Plugins → Install from
-ZIP`), then open the Processing Toolbox. Eight algorithms appear under
+ZIP`), then open the Processing Toolbox. Nine algorithms appear under
 **basinkit**:
 
 | Algorithm | What it does |
@@ -387,6 +387,7 @@ ZIP`), then open the Processing Toolbox. Eight algorithms appear under
 | **Fetch basin data layers** | Basin polygon in, clipped rasters out |
 | **Terrain surfaces** | Slope, aspect, curvature, position, wetness, HAND, from one download |
 | **Elevation data suitability** | HIGH, MODERATE or LIMITED, with the measurements and a support raster |
+| **Data quality report** | The same question for every other layer, each against an independent source |
 | **Basin statistics** | Area, relief, mean slope, land cover fractions as HTML |
 | **Basin morphometry** | The Horton-Strahler-Schumm set, with its consistency checks |
 | **Basin report (PDF)** | Eight A4 pages, ready for a thesis or a manuscript |
@@ -394,7 +395,10 @@ ZIP`), then open the Processing Toolbox. Eight algorithms appear under
 The normal sequence is to run the first, check the polygon on the canvas, then
 feed it to the others. Run **Elevation data suitability** before quoting any
 terrain number: it says whether the elevation model can carry it in this
-basin. The plugin needs the `basinkit` Python package; if it is
+basin. **Data quality report** does the same for land cover, soil, rainfall,
+surface water and the delineation itself, and writes `data_quality.csv`.
+
+The plugin needs the `basinkit` Python package; if it is
 missing, it prints the exact `pip` command for QGIS's own Python, which is not
 the same Python as your terminal.
 
