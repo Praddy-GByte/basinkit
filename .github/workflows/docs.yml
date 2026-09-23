@@ -12,4 +12,9 @@ jobs:
       - uses: actions/setup-python@v6
         with: { python-version: "3.12" }
       - run: pip install -e ".[all,dev]"
+      # gh-deploy commits to gh-pages. Without an identity the commit lands
+      # with an empty author, which GitHub then attributes to nobody.
+      - run: |
+          git config user.name "Pradeepika Kaushik"
+          git config user.email "pradeepikakaushik4@gmail.com"
       - run: mkdocs gh-deploy --force
