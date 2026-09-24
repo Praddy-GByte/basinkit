@@ -1,0 +1,2215 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Point to river basin to every open Earth observation layer">
+      
+      
+      
+        <link rel="canonical" href="https://praddy-gbyte.github.io/basinkit/verification/">
+      
+      
+        <link rel="prev" href="../catalogue/">
+      
+      
+        <link rel="next" href="../data-quality/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/logo-32.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Verification - basinkit</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../assets/byline.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#verification" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+            
+  <div class="bk-byline">
+    <span class="bk-byline__name">Created by Dr. Pradeepika (Praddy) Kaushik</span>
+    <span class="bk-byline__role">Geospatial and Data Visualization Expert &middot; GeoAI &middot; EO Expert</span>
+    <span class="bk-byline__links">
+      <a href="https://github.com/Praddy-GByte" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/dr-pradeepika-kaushik/" rel="noopener">LinkedIn</a>
+      <a href="https://doi.org/10.5281/zenodo.22181933" rel="noopener">Zenodo DOI</a>
+    </span>
+  </div>
+
+          </div>
+          
+        </aside>
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="basinkit" class="md-header__button md-logo" aria-label="basinkit" data-md-component="logo">
+      
+  <img src="../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            basinkit
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Verification
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Praddy-GByte/basinkit" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="basinkit" class="md-nav__button md-logo" aria-label="basinkit" data-md-component="logo">
+      
+  <img src="../assets/logo.svg" alt="logo">
+
+    </a>
+    basinkit
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Praddy-GByte/basinkit" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../why/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Why basinkit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../delineation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delineation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../related-work/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Related work
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../catalogue/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data catalogue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#delineation-against-published-gauge-areas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delineation against published gauge areas
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Delineation against published gauge areas">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-twelve-named-rivers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The twelve named rivers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-distribution-not-the-best-basin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The distribution, not the best basin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-murray-is-not-a-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Murray is not a failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-blind-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The blind check
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The blind check">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#by-catchment-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        By catchment size
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#by-continent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        By continent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whose-mistake-it-is" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Whose mistake it is
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#against-other-implementations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Against other implementations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-twelve-metre-backend-on-360-gauges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The twelve-metre backend, on 360 gauges
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-the-suitability-grade-mean-anything" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Does the suitability grade mean anything?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reservoir-bridging-measured-then-rejected" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reservoir bridging: measured, then rejected
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-the-checks-in-050-are-worth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the checks in 0.5.0 are worth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#outlets-that-are-not-on-rivers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outlets that are not on rivers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prior-art" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prior art
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limits
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#merit-hydro-not-a-check-a-migration-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MERIT-Hydro: not a check, a migration path
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rainfall-against-published-climatology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rainfall against published climatology
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optical-imagery-end-to-end" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optical imagery end to end
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#clipping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clipping
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-catalogue-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The catalogue audit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basinatlas-as-an-independent-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BasinATLAS as an independent check
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#defects-this-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Defects this found
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#platform-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Platform coverage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reproducing-this-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reproducing this page
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-quality/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data quality
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notebooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Notebooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../notebooks/01_quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    basinkit quickstartFrom an outlet coordinate to a fully characterised river basin, with no accountanywhere in the chain.We'll use the Sapta Koshi at Chatara (26.87 N, 87.15 E) -- a Himalayan basinthat drains Everest and empties onto the Gangetic plain. It is a good test casebecause its area is independently published, so we can check the answer.
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#delineation-against-published-gauge-areas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delineation against published gauge areas
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Delineation against published gauge areas">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-twelve-named-rivers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The twelve named rivers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-distribution-not-the-best-basin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The distribution, not the best basin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-murray-is-not-a-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Murray is not a failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-blind-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The blind check
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The blind check">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#by-catchment-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        By catchment size
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#by-continent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        By continent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whose-mistake-it-is" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Whose mistake it is
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#against-other-implementations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Against other implementations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-twelve-metre-backend-on-360-gauges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The twelve-metre backend, on 360 gauges
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-the-suitability-grade-mean-anything" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Does the suitability grade mean anything?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reservoir-bridging-measured-then-rejected" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reservoir bridging: measured, then rejected
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-the-checks-in-050-are-worth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the checks in 0.5.0 are worth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#outlets-that-are-not-on-rivers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outlets that are not on rivers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prior-art" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prior art
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limits
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#merit-hydro-not-a-check-a-migration-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MERIT-Hydro: not a check, a migration path
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rainfall-against-published-climatology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rainfall against published climatology
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optical-imagery-end-to-end" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optical imagery end to end
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#clipping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clipping
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-catalogue-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The catalogue audit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basinatlas-as-an-independent-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BasinATLAS as an independent check
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#defects-this-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Defects this found
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#platform-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Platform coverage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reproducing-this-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reproducing this page
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="verification">Verification<a class="headerlink" href="#verification" title="Permanent link">&para;</a></h1>
+<p>Every number on this page was produced by running the package, not by
+inspecting it. The scripts are in <code>verify/</code>, and every figure below traces to a
+single run of <code>verify/run_delineation.py</code> against basinkit 0.1.0 on
+26 August 2026, not to a mixture of runs.</p>
+<p>Prepared by Pradeepika Kaushik.</p>
+<h2 id="delineation-against-published-gauge-areas">Delineation against published gauge areas<a class="headerlink" href="#delineation-against-published-gauge-areas" title="Permanent link">&para;</a></h2>
+<p>Two checks live here, and they answer different questions.</p>
+<p>The <strong>twelve-gauge check</strong> below is a demonstration on named rivers. Those
+twelve were selected because their areas are published, which concentrates the
+sample in large, well-mapped basins, so its median error of 0.74% describes
+that class of river rather than the tool's range. It is kept because the three
+basins that diverge are instructive about what a published area includes.</p>
+<p>The <strong>blind check</strong> further down is the validation the package's claims rest
+on: 2,740 delineations at 2,550 gauges in 99 countries, drawn by seed before
+any result was seen.</p>
+<h3 id="the-twelve-named-rivers">The twelve named rivers<a class="headerlink" href="#the-twelve-named-rivers" title="Permanent link">&para;</a></h3>
+<p>The published areas come from operating agencies and GRDC station records,
+<strong>not</strong> from HydroBASINS, so agreement is an external check rather than a
+tautology.</p>
+<table>
+<thead>
+<tr>
+<th>basin</th>
+<th style="text-align: right;">basinkit</th>
+<th style="text-align: right;">published</th>
+<th style="text-align: right;">error</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Danube @ Bratislava</td>
+<td style="text-align: right;">131,449</td>
+<td style="text-align: right;">131,300</td>
+<td style="text-align: right;">0.11%</td>
+</tr>
+<tr>
+<td>Amazon @ Obidos</td>
+<td style="text-align: right;">4,671,504</td>
+<td style="text-align: right;">4,680,000</td>
+<td style="text-align: right;">0.18%</td>
+</tr>
+<tr>
+<td>Godavari @ Polavaram</td>
+<td style="text-align: right;">306,750</td>
+<td style="text-align: right;">307,800</td>
+<td style="text-align: right;">0.34%</td>
+</tr>
+<tr>
+<td>Mississippi @ Vicksburg</td>
+<td style="text-align: right;">2,979,823</td>
+<td style="text-align: right;">2,964,000</td>
+<td style="text-align: right;">0.53%</td>
+</tr>
+<tr>
+<td>Rhine @ Lobith</td>
+<td style="text-align: right;">159,776</td>
+<td style="text-align: right;">160,800</td>
+<td style="text-align: right;">0.64%</td>
+</tr>
+<tr>
+<td>Sapta Koshi @ Chatara</td>
+<td style="text-align: right;">54,497</td>
+<td style="text-align: right;">54,100</td>
+<td style="text-align: right;">0.73%</td>
+</tr>
+<tr>
+<td>Mekong @ Pakse</td>
+<td style="text-align: right;">549,061</td>
+<td style="text-align: right;">545,000</td>
+<td style="text-align: right;">0.75%</td>
+</tr>
+<tr>
+<td>Columbia @ The Dalles</td>
+<td style="text-align: right;">619,618</td>
+<td style="text-align: right;">613,800</td>
+<td style="text-align: right;">0.95%</td>
+</tr>
+<tr>
+<td>Zambezi @ Victoria Falls</td>
+<td style="text-align: right;">519,436</td>
+<td style="text-align: right;">507,000</td>
+<td style="text-align: right;">2.45%</td>
+</tr>
+<tr>
+<td>Parana @ Corrientes</td>
+<td style="text-align: right;">2,127,355</td>
+<td style="text-align: right;">1,950,000</td>
+<td style="text-align: right;">9.10%</td>
+</tr>
+<tr>
+<td>Niger @ Lokoja</td>
+<td style="text-align: right;">1,747,192</td>
+<td style="text-align: right;">2,074,000</td>
+<td style="text-align: right;">15.76%</td>
+</tr>
+<tr>
+<td>Murray @ Wentworth</td>
+<td style="text-align: right;">541,385</td>
+<td style="text-align: right;">950,000</td>
+<td style="text-align: right;">43.01%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-distribution-not-the-best-basin">The distribution, not the best basin<a class="headerlink" href="#the-distribution-not-the-best-basin" title="Permanent link">&para;</a></h3>
+<p><strong>n = 12.</strong> Median error <strong>0.74%</strong>. Eight of twelve within 1%, nine within
+3%. Excluding the three basins whose published figure includes large
+non-contributing area (below), n = 9, median 0.64%, worst 2.45%.</p>
+<p>Twelve is a small sample and these are large, well-mapped rivers; the gauges
+were chosen because their areas are published, which biases toward basins that
+have been studied. Quoting a single basin would make the package look four
+times more accurate than it is; the Koshi alone reads 0.73%, and the best of the
+twelve reads 0.11%. Neither is the number.</p>
+<p>The Amazon result is still worth pausing on: 4.67 million km² across 35,625
+sub-basins, delineated in 43 seconds, 0.18% from the published figure. That is
+what graph traversal buys over raster fill.</p>
+<h3 id="the-murray-is-not-a-failure">The Murray is not a failure<a class="headerlink" href="#the-murray-is-not-a-failure" title="Permanent link">&para;</a></h3>
+<p>A 43% shortfall looks like a bug until you look at the water balance:</p>
+<div class="highlight"><pre><span></span><code>delineated area          541,385 km²
+nominal published area   950,000 km²
+mean annual rainfall         434 mm
+mean annual runoff          27.5 mm
+runoff coefficient           0.063
+</code></pre></div>
+<p>A runoff coefficient of 6% over half a million square kilometres is the
+signature of a basin most of which does not drain to its own outlet. The
+Murray-Darling has vast internally-draining western areas; the 950,000 km²
+figure is the nominal basin, while HydroBASINS routes only what actually
+reaches Wentworth. <strong>basinkit's answer is the hydrologically contributing
+area</strong>, and for most modelling purposes that is the number you want. The
+divergence is worth knowing about, not worth hiding.</p>
+<p>The Niger and Paraná gaps have the same character on a smaller scale: both have
+large arid or wetland zones whose contribution is intermittent.</p>
+<hr />
+<h2 id="the-blind-check">The blind check<a class="headerlink" href="#the-blind-check" title="Permanent link">&para;</a></h2>
+<p>The twelve above were picked. These were not.</p>
+<p><strong>Source.</strong> The Global Streamflow Indices and Metadata archive (Do et al. 2018,
+<em>Earth Syst. Sci. Data</em> 10, 765-785): 30,959 gauges whose catchment areas come
+from the agencies that operate them. 18,785 carry an agency area, sit inside
+HydroSHEDS coverage, and are absent from GSIM's own list of distrusted
+coordinates.</p>
+<p><strong>Method.</strong> Four samples, four seeds, drawn before anything was run. Every
+station attempted is recorded, failures included. GSIM ships two coordinates per
+station: the agency's original, and one its authors moved so that the delineated
+area would match the reported area. 16,412 of 18,785 were moved that way. All of
+this uses the <strong>original</strong>, so no reported area ever entered a delineation.</p>
+<p>One trap, found before the first run: <code>GSIM_metadata.csv</code> reports area in square
+<strong>miles</strong> for its 2,395 USGS stations and square kilometres for everyone else.
+Taking that column at face value manufactures a 61% error across North America
+and nowhere else. The figures here use <code>area.meta</code>, which is km2 throughout.</p>
+<h3 id="by-catchment-size">By catchment size<a class="headerlink" href="#by-catchment-size" title="Permanent link">&para;</a></h3>
+<p><img alt="Median catchment area error by size band, on a log scale. It falls from 181 percent below 100 km2 to 0.3 percent above 100,000 km2." src="../assets/figures/error-by-catchment-size-light.svg#only-light" />
+<img alt="Median catchment area error by size band, on a log scale. It falls from 181 percent below 100 km2 to 0.3 percent above 100,000 km2." src="../assets/figures/error-by-catchment-size-dark.svg#only-dark" /></p>
+<table>
+<thead>
+<tr>
+<th>catchment area</th>
+<th style="text-align: right;">median error</th>
+<th style="text-align: right;">within 20%</th>
+<th style="text-align: right;">out by &gt;100%</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>above 100,000 km2</td>
+<td style="text-align: right;">0.3%</td>
+<td style="text-align: right;">92%</td>
+<td style="text-align: right;">0%</td>
+</tr>
+<tr>
+<td>10,000 to 100,000</td>
+<td style="text-align: right;">1.3%</td>
+<td style="text-align: right;">92%</td>
+<td style="text-align: right;">0%</td>
+</tr>
+<tr>
+<td>2,000 to 10,000</td>
+<td style="text-align: right;">1.7%</td>
+<td style="text-align: right;">96%</td>
+<td style="text-align: right;">0%</td>
+</tr>
+<tr>
+<td>500 to 2,000</td>
+<td style="text-align: right;">8.9%</td>
+<td style="text-align: right;">78%</td>
+<td style="text-align: right;">4%</td>
+</tr>
+<tr>
+<td>100 to 500</td>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">16%</td>
+</tr>
+<tr>
+<td>below 100</td>
+<td style="text-align: right;">181%</td>
+<td style="text-align: right;">22%</td>
+<td style="text-align: right;">58%</td>
+</tr>
+</tbody>
+</table>
+<p>Weighted to the catalogue's own size mix: 61.9% within 20%, 16.7% out by more
+than 100%.</p>
+<h3 id="by-continent">By continent<a class="headerlink" href="#by-continent" title="Permanent link">&para;</a></h3>
+<p>Equal effort per continent and size band, because the catalogue is 72% European
+and North American and sampling it in proportion measures the North Atlantic and
+calls the result global. Pooled per continent, between 59 and 68% of answers
+land within 20%, from Africa to South America. Comparing catchments under
+500 km2 against those over 10,000 within each continent separately, the median
+error is larger by 53x in Asia, 62x in North America, 65x in Africa, 102x in
+Europe and 217x in South America. Not one continent escapes it.</p>
+<p>Two of 1,240 could not be attempted: gauges in French Polynesia, where the
+HydroSHEDS regional files stop at longitude 180 degrees. The tool raised a clear
+error naming the cause rather than returning a polygon.</p>
+<h3 id="whose-mistake-it-is">Whose mistake it is<a class="headerlink" href="#whose-mistake-it-is" title="Permanent link">&para;</a></h3>
+<p>Every HydroBASINS unit carries <code>UP_AREA</code>, the dataset's own figure for
+everything draining through it. The traversal reproduces that to within 1% on
+95.3% of stations, and on 96.2% of the stations whose answer is wrong by more
+than a fifth. The walk is right; the outlet unit is wrong. A level-12 unit has a
+median area near 130 km2, so a point on a creek draining 0.8 km2 still lands
+inside some unit whose outlet is on the trunk river, and the trunk's whole basin
+comes back.</p>
+<p>Scored by overlap rather than area, on 360 stations against GSIM's own catchment
+boundaries: median IoU is 0.10 below 100 km2 and 0.99 above 10,000. Spearman
+correlation between area error and overlap is -0.847, and of 230 answers within
+20% on area, <strong>none</strong> had an overlap below 0.5, so the area metric is not hiding
+a right-size-wrong-place failure here. GSIM's own boundaries differ from the
+agency areas by 2.0% at the median, which is the reference's own floor.</p>
+<h3 id="against-other-implementations">Against other implementations<a class="headerlink" href="#against-other-implementations" title="Permanent link">&para;</a></h3>
+<p><img alt="Median area error for four D8 implementations on the same 59 rasters: basinkit 4.6 percent, WhiteboxTools 8.6 percent answering 76 percent of them, pysheds 17.6 percent, HydroBASINS 41.6 percent." src="../assets/figures/implementations-light.svg#only-light" />
+<img alt="Median area error for four D8 implementations on the same 59 rasters: basinkit 4.6 percent, WhiteboxTools 8.6 percent answering 76 percent of them, pysheds 17.6 percent, HydroBASINS 41.6 percent." src="../assets/figures/implementations-dark.svg#only-dark" /></p>
+<p>59 catchments under 2,000 km2, one Copernicus 30 m window per station, three D8
+implementations on the identical raster:</p>
+<table>
+<thead>
+<tr>
+<th>method</th>
+<th style="text-align: right;">answered</th>
+<th style="text-align: right;">median error</th>
+<th style="text-align: right;">within 20%</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HydroBASINS (default)</td>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">41.6%</td>
+<td style="text-align: right;">34%</td>
+</tr>
+<tr>
+<td>basinkit on the DEM</td>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">4.6%</td>
+<td style="text-align: right;">68%</td>
+</tr>
+<tr>
+<td>pysheds</td>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">17.6%</td>
+<td style="text-align: right;">56%</td>
+</tr>
+<tr>
+<td>WhiteboxTools 2.4.0</td>
+<td style="text-align: right;">76%</td>
+<td style="text-align: right;">8.6%</td>
+<td style="text-align: right;">51%</td>
+</tr>
+</tbody>
+</table>
+<p>Where all three return a basin they agree to within 5% on 73% of stations, which
+locates the small-catchment limit in the resolution of pre-computed sub-basins
+rather than in any one implementation.</p>
+<p>Two harness settings were corrected before scoring, since both would have
+understated a baseline: pysheds' <code>catchment</code> defaults to <code>snap='corner'</code>, which
+returns a single cell, and rioxarray writes the DEM with nodata 0, which leaves
+interior pits and reduces WhiteboxTools' flow accumulation from 8.5 million
+cells to 9,248.</p>
+<p>25% of these stations sit outside what any of the four reproduces, at both
+snapping distances tried. That is the ceiling this catalogue supports, rather
+than a property of the tools.</p>
+<h3 id="the-twelve-metre-backend-on-360-gauges">The twelve-metre backend, on 360 gauges<a class="headerlink" href="#the-twelve-metre-backend-on-360-gauges" title="Permanent link">&para;</a></h3>
+<p><img alt="Median area error by size band for the default backend against the twelve-metre one. The gap is widest at 100 to 200 km2 and closes by 350 to 500 km2." src="../assets/figures/tdx-by-catchment-size-light.svg#only-light" />
+<img alt="Median area error by size band for the default backend against the twelve-metre one. The gap is widest at 100 to 200 km2 and closes by 350 to 500 km2." src="../assets/figures/tdx-by-catchment-size-dark.svg#only-dark" /></p>
+<p>The first measurement of <code>backend="tdx"</code> was 60 gauges in two regions. Widened
+to 360 between 100 and 500 km2 across eight GEOGLOWS regions on four
+continents, drawn by seed before any result was seen:</p>
+<table>
+<thead>
+<tr>
+<th>backend</th>
+<th style="text-align: right;">median error</th>
+<th style="text-align: right;">within 20%</th>
+<th style="text-align: right;">better on</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hydrobasins</code></td>
+<td style="text-align: right;">32.5%</td>
+<td style="text-align: right;">38%</td>
+<td style="text-align: right;">34%</td>
+</tr>
+<tr>
+<td><code>tdx</code></td>
+<td style="text-align: right;"><strong>10.5%</strong></td>
+<td style="text-align: right;"><strong>58%</strong></td>
+<td style="text-align: right;"><strong>66%</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Broken down by size, the gain behaves exactly as the mechanism predicts:</p>
+<table>
+<thead>
+<tr>
+<th>catchment size</th>
+<th style="text-align: right;">n</th>
+<th style="text-align: right;"><code>hydrobasins</code></th>
+<th style="text-align: right;"><code>tdx</code></th>
+<th style="text-align: right;">tdx better</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100-200 km2</td>
+<td style="text-align: right;">142</td>
+<td style="text-align: right;">60.6%</td>
+<td style="text-align: right;">10.6%</td>
+<td style="text-align: right;">78%</td>
+</tr>
+<tr>
+<td>200-350 km2</td>
+<td style="text-align: right;">129</td>
+<td style="text-align: right;">27.5%</td>
+<td style="text-align: right;">6.9%</td>
+<td style="text-align: right;">60%</td>
+</tr>
+<tr>
+<td>350-500 km2</td>
+<td style="text-align: right;">89</td>
+<td style="text-align: right;">19.4%</td>
+<td style="text-align: right;">17.9%</td>
+<td style="text-align: right;">55%</td>
+</tr>
+</tbody>
+</table>
+<p>The advantage is largest where a catchment is a fraction of a level-12 unit and
+closes as the catchment grows past one. That is the claim, and it is the shape
+the measurement has.</p>
+<p>Two qualifications that belong with the headline. It is the better answer in
+seven of the eight regions and not in the eighth, region 706, where the default
+is better at the median. And the two backends fail in opposite directions: the
+default's median signed error is +31% and its quartiles are +7% to +87%, so it
+returns too much; <code>tdx</code> sits at -1% but its lower quartile is -67%, so it
+occasionally snaps to a tributary and returns far too little. A <code>tdx</code> answer
+that looks small should be checked against <code>provenance["snap_km"]</code>.</p>
+<h3 id="does-the-suitability-grade-mean-anything">Does the suitability grade mean anything?<a class="headerlink" href="#does-the-suitability-grade-mean-anything" title="Permanent link">&para;</a></h3>
+<p><img alt="Left: agreement between two independent elevation models falls from 0.94 at HIGH to 0.76 at LIMITED. Right: the same basins measured in degrees of slope disagreement, where the order reverses." src="../assets/figures/grade-validation-light.svg#only-light" />
+<img alt="Left: agreement between two independent elevation models falls from 0.94 at HIGH to 0.76 at LIMITED. Right: the same basins measured in degrees of slope disagreement, where the order reverses." src="../assets/figures/grade-validation-dark.svg#only-dark" /></p>
+<p>A grade is worth nothing until it predicts something it was not fitted to. The
+test: compute the grade from Copernicus GLO-30, then ask a second, independently
+produced elevation model to describe the same ground. NASADEM comes from the
+Shuttle Radar Topography Mission of February 2000, separately reprocessed;
+Copernicus comes from TanDEM-X flown 2011-2015. Different sensors, different
+decades, different processing chains, so their disagreement is not a shared
+artefact. Where a basin's terrain is above what either can resolve, the two
+slope fields should describe the same hillsides. Where it is below, both are
+returning their own noise.</p>
+<p>160 gauges drawn by seed from the blind validation set before any result was
+seen; 133 carried both models. The measure is the correlation between the two
+slope fields:</p>
+<table>
+<thead>
+<tr>
+<th>grade</th>
+<th style="text-align: right;">n</th>
+<th style="text-align: right;">median Pearson r</th>
+<th style="text-align: right;">p25</th>
+<th style="text-align: right;">p75</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HIGH</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;"><strong>0.935</strong></td>
+<td style="text-align: right;">0.928</td>
+<td style="text-align: right;">0.949</td>
+</tr>
+<tr>
+<td>MODERATE</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">0.934</td>
+<td style="text-align: right;">0.903</td>
+<td style="text-align: right;">0.965</td>
+</tr>
+<tr>
+<td>LIMITED</td>
+<td style="text-align: right;">78</td>
+<td style="text-align: right;"><strong>0.756</strong></td>
+<td style="text-align: right;">0.602</td>
+<td style="text-align: right;">0.878</td>
+</tr>
+</tbody>
+</table>
+<p>HIGH against LIMITED, Mann-Whitney: z = -4.84, p = 1.3e-06. The grade predicts
+whether two independent elevation models agree about the terrain, which is
+what it claims to be about.</p>
+<p>Each test carries its own weight in the same direction. Where the slope test is
+unmet, median r is 0.748 against 0.935 elsewhere; where the filling test is
+unmet, 0.671 against 0.898; the two basins where the relief test is unmet sit
+at 0.415.</p>
+<p><strong>The measure had to be a correlation, not a difference.</strong> Disagreement in
+degrees runs the other way: HIGH basins differ by 1.89 degrees at the median
+and LIMITED basins by 1.02. That is not the models agreeing on flat ground, it
+is flat ground having less gradient to disagree about. A measure of resolvability
+that rewards a basin for being flat is measuring the wrong thing, and any
+absolute threshold on slope disagreement would have inverted this result.</p>
+<p><strong>The grade does not predict catchment area error, and must not be read that
+way.</strong> On the same sample the HIGH basins have a median area error of 73% and
+the LIMITED basins 9%. That is a size confound, not a finding: the HIGH basins
+here have a median area of 397 km2 and the LIMITED ones 1,207 km2, and area
+error is governed by catchment size. This is the separation the grade's own
+documentation states, holding up under test: it describes the terrain products
+computed from the raster, and the accuracy of the boundary is a different
+question measured elsewhere on this page.</p>
+<p>One number worth sitting with: <strong>78 of 133 gauged catchments graded LIMITED</strong>.
+On a 30 m global elevation model, most gauged catchments are not well enough
+resolved for the terrain products usually computed over them, and until now
+nothing said so.</p>
+<p>27 of the 160 dropped out, 24 because the benchmark's own cache eviction
+removed a tile mid-run and 3 on a read error. The eviction fired on a timer
+under disk pressure, so the loss is unrelated to any property of the basins.</p>
+<h3 id="reservoir-bridging-measured-then-rejected">Reservoir bridging: measured, then rejected<a class="headerlink" href="#reservoir-bridging-measured-then-rejected" title="Permanent link">&para;</a></h3>
+<p>D8 flow direction is undefined on a level surface, so a reservoir can fragment
+the flow network and leave a catchment delineated from below a dam far too
+small. The standard fix is to detect standing water by its smoothness and
+impose a slight fall across it before routing, carving a channel to the outlet
+when one is known. It was implemented here and tested on six catchments, four
+of them the worst failures in the sample:</p>
+<table>
+<thead>
+<tr>
+<th>catchment</th>
+<th style="text-align: right;">published</th>
+<th style="text-align: right;">error without bridging</th>
+<th style="text-align: right;">error with bridging</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Koyna Dam, India</td>
+<td style="text-align: right;">891.8 km2</td>
+<td style="text-align: right;">+1.3%</td>
+<td style="text-align: right;">+1.3%</td>
+</tr>
+<tr>
+<td>Katse Dam, Lesotho</td>
+<td style="text-align: right;">1867.0 km2</td>
+<td style="text-align: right;">+0.2%</td>
+<td style="text-align: right;">+0.2%</td>
+</tr>
+<tr>
+<td>PL_0000048, Poland</td>
+<td style="text-align: right;">276.0 km2</td>
+<td style="text-align: right;">+101.6%</td>
+<td style="text-align: right;">+100.9%</td>
+</tr>
+<tr>
+<td>SE_0000025, Sweden</td>
+<td style="text-align: right;">202.7 km2</td>
+<td style="text-align: right;">+172.8%</td>
+<td style="text-align: right;">+172.8%</td>
+</tr>
+<tr>
+<td>CA_0003306, Manitoba</td>
+<td style="text-align: right;">278.0 km2</td>
+<td style="text-align: right;">+54.5%</td>
+<td style="text-align: right;"><strong>-98.0%</strong></td>
+</tr>
+<tr>
+<td>US_0001851, Florida</td>
+<td style="text-align: right;">303.0 km2</td>
+<td style="text-align: right;">+99.2%</td>
+<td style="text-align: right;"><strong>-94.5%</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Nothing improved, two answers were destroyed, and the runtime on Koyna went
+from 27 to 92 seconds. The two failures are the same failure: on a window
+sized automatically rather than drawn by hand, the smoothness test finds the
+sea. It reported a single 2,368 km2 water body near Koyna and a 2,196 km2 one
+in Florida, then imposed a drainage gradient across each.</p>
+<p>The deeper reason it had nothing to fix is in the sample itself. Across the 88
+stations between 100 and 2,000 km2, the DEM backend returns <strong>no</strong>
+under-estimates at all -- every error is an over-estimate. Fragmentation by
+standing water produces the opposite signature, a basin truncated above the
+lake. The mechanism does work where the geometry calls for it: on a synthetic
+reservoir whose dam stands above a lower saddle on its own rim, depression
+filling spills the wrong way and bridging recovers the catchment. That geometry
+did not appear in any real catchment tested, and where the answer was already
+right the correction had nothing to add.</p>
+<p>A more conservative detector, restricted to water inside a first-pass basin,
+would avoid the damage. It would not buy anything, because there is no measured
+gain for it to protect. The feature was removed rather than shipped switched
+off.</p>
+<h3 id="what-the-checks-in-050-are-worth">What the checks in 0.5.0 are worth<a class="headerlink" href="#what-the-checks-in-050-are-worth" title="Permanent link">&para;</a></h3>
+<p>The river-network check fires when the basin exceeds twice the area draining to
+the largest river within 2 km of the outlet: <strong>85% precision, 3.2% false
+alarms, 30% recall</strong>, with precision from 75% in Europe to 93% in Africa.</p>
+<p>The corrective re-delineation, tested on 300 gauges drawn after all of it was
+designed and used nowhere else: <strong>19 corrected, 279 unchanged, 0 made worse</strong>,
+with the median error where it acted falling from 1,731% to 4.3%.</p>
+<h3 id="outlets-that-are-not-on-rivers">Outlets that are not on rivers<a class="headerlink" href="#outlets-that-are-not-on-rivers" title="Permanent link">&para;</a></h3>
+<p>Every gauge sits on a river by construction, so a gauge sample does not cover
+a click on a city, a lake surface or a desert. Those are tested separately, and
+they set the distance gate on the refinement step:</p>
+<table>
+<thead>
+<tr>
+<th>outlet</th>
+<th style="text-align: right;">sub-basin route</th>
+<th style="text-align: right;">refinement ungated</th>
+<th style="text-align: right;">0.5.0 as shipped</th>
+<th style="text-align: right;">published</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>central Delhi</td>
+<td style="text-align: right;">36,944</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">36,944 + warning</td>
+<td style="text-align: right;">about 9,700</td>
+</tr>
+<tr>
+<td>Lake Victoria surface</td>
+<td style="text-align: right;">195</td>
+<td style="text-align: right;">195</td>
+<td style="text-align: right;">195 + warning</td>
+<td style="text-align: right;">about 184,000</td>
+</tr>
+<tr>
+<td>Lake Baikal surface</td>
+<td style="text-align: right;">786</td>
+<td style="text-align: right;">786</td>
+<td style="text-align: right;">786 + warning</td>
+<td style="text-align: right;">about 560,000</td>
+</tr>
+<tr>
+<td>Sahara interior</td>
+<td style="text-align: right;">145</td>
+<td style="text-align: right;">145</td>
+<td style="text-align: right;">145 + warning</td>
+<td style="text-align: right;">endorheic</td>
+</tr>
+<tr>
+<td>Svalbard</td>
+<td style="text-align: right;">115</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">115 + warning</td>
+<td style="text-align: right;">small, plausible</td>
+</tr>
+</tbody>
+</table>
+<p>The switch is now gated on the distance to the river it would judge by. All 25
+corrective switches that were right had theirs within 0.91 km, median 0.15 km;
+all five of these had theirs beyond 1.3 km. The gate costs one correction in
+300 and prevents all five.</p>
+<p>None of those outlets has a resolvable catchment at this grid: a lake surface
+and a closed depression have no upstream network to assemble. The package now
+identifies each situation by name, reports it, and leaves the more conservative
+of the two available answers in place.</p>
+<p>Clicks that are refused outright, with the reason named: open ocean, Antarctica,
+a coordinate a few hundred metres offshore, and latitude and longitude
+swapped.</p>
+<p>An earlier version searched 1 km instead of 2 and rewrote two correct
+continental answers, including a Mekong gauge whose 373,000 km2 became 9.5
+because the only mapped reach within a kilometre drained 5.9 km2. That is why
+the radius is 2 km.</p>
+<h3 id="prior-art">Prior art<a class="headerlink" href="#prior-art" title="Permanent link">&para;</a></h3>
+<p>The finding that automatic delineation fails on small catchments is not new and
+is not claimed as new. Kauffeldt et al. (2013, <em>HESS</em> 17, 2845-2857) plotted
+area error against basin size for 7,518 GRDC gauges. Lehner (2012, GRDC Report
+41) wrote it plainly: small watersheds are found close to any location,
+including incorrect ones. Godet et al. (2024), Johnston et al. (2009) and
+Heberger (2025) all stratify by size. Caravan encodes it as a 100 km2 floor,
+HYSETS replaces catchments under 50 km2 with bounding boxes, MERIT-Basins stops
+at 25 km2.</p>
+<p>What differs here is narrow: the large-sample studies feed the reported area
+into the outlet-snapping objective and then score against that same reported
+area. This does not.</p>
+<h3 id="limits">Limits<a class="headerlink" href="#limits" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Australasia contributes 43 scorable stations in the whole archive and none
+  above 100,000 km2, so that row is indicative rather than measured.</li>
+<li>Remote Pacific islands are outside HydroSHEDS altogether.</li>
+<li>One threshold was validated on unseen data. The design around it was not.</li>
+<li>The baseline is two implementations, not five, and all three compared route
+  D8 on the same Copernicus grid.</li>
+<li>Agency areas can be stale or refer to a different structure, and GSIM's
+  boundaries come from the same HydroSHEDS grid, so the overlap metric measures
+  agreement with the accepted delineation rather than with the ground.</li>
+</ul>
+<h2 id="merit-hydro-not-a-check-a-migration-path">MERIT-Hydro: not a check, a migration path<a class="headerlink" href="#merit-hydro-not-a-check-a-migration-path" title="Permanent link">&para;</a></h2>
+<p>This was presented as independent confirmation. It is better read as the
+opposite.</p>
+<table>
+<thead>
+<tr>
+<th>backend</th>
+<th>base grid</th>
+<th>source</th>
+<th style="text-align: right;">Koshi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hydrobasins</code> <em>(default)</em></td>
+<td>15 arc-sec, ~460 m</td>
+<td>SRTM, February 2000</td>
+<td style="text-align: right;">54,497 km²</td>
+</tr>
+<tr>
+<td><code>api</code></td>
+<td>3 arc-sec, ~90 m</td>
+<td>MERIT-Hydro, error-removed</td>
+<td style="text-align: right;">54,045 km²</td>
+</tr>
+<tr>
+<td><code>dem</code></td>
+<td>1 arc-sec, ~30 m</td>
+<td>Copernicus, 2011-2015</td>
+<td style="text-align: right;">-</td>
+</tr>
+</tbody>
+</table>
+<p>The two agree to <strong>0.8%</strong> with different source DEMs, different algorithms and
+no shared code, which is real evidence that neither is badly wrong. But
+agreement is not the interesting fact here. The default backend routes on a
+quarter-century-old 460 m grid. MERIT-Hydro is five times finer and
+hydrologically conditioned. A South Asian toolkit that runs at 90 m is a reason
+to exist; one that agrees with the 450 m product is a validation exercise.</p>
+<p>The obstacle is not technical: the 90 m path is already implemented as the
+<code>api</code> backend. It is licensing: MERIT-Hydro is CC BY-NC 4.0 or ODbL, acquisition
+cannot be automated, and the current route depends on one research group's
+server. Making 90 m the <em>default</em> means solving distribution, not routing.</p>
+<h2 id="rainfall-against-published-climatology">Rainfall against published climatology<a class="headerlink" href="#rainfall-against-published-climatology" title="Permanent link">&para;</a></h2>
+<p>Sapta Koshi basin, 2010-2019:</p>
+<table>
+<thead>
+<tr>
+<th>product</th>
+<th style="text-align: right;">basin mean</th>
+<th>published range</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CHIRPS v3.0</td>
+<td style="text-align: right;">1,335 mm/yr</td>
+<td>1,200-1,500 mm/yr</td>
+</tr>
+<tr>
+<td>TerraClimate</td>
+<td style="text-align: right;">1,002 mm/yr</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<p>CHIRPS lands inside the published band. TerraClimate reads 25% lower, which is
+a known characteristic rather than a defect: it is downscaled from coarse
+reanalysis and systematically under-resolves orographic enhancement in high
+mountains. <strong>For a Himalayan or Andean basin, prefer CHIRPS.</strong> TerraClimate's
+value is its water balance terms, not its rainfall.</p>
+<h2 id="optical-imagery-end-to-end">Optical imagery end to end<a class="headerlink" href="#optical-imagery-end-to-end" title="Permanent link">&para;</a></h2>
+<p>Rur basin at Jülich (1,555 km²), Sentinel-2 median composite, July-August 2023:</p>
+<table>
+<thead>
+<tr>
+<th>quantity</th>
+<th style="text-align: right;">value</th>
+<th>expected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>red reflectance (mean)</td>
+<td style="text-align: right;">0.047</td>
+<td>0.03-0.08 for vegetated land</td>
+</tr>
+<tr>
+<td>NIR reflectance (mean)</td>
+<td style="text-align: right;">0.290</td>
+<td>0.25-0.40</td>
+</tr>
+<tr>
+<td><strong>NDVI (median)</strong></td>
+<td style="text-align: right;"><strong>0.82</strong></td>
+<td>0.6-0.85, temperate cropland and forest in July</td>
+</tr>
+<tr>
+<td>finite fraction</td>
+<td style="text-align: right;">0.500</td>
+<td>bbox efficiency 0.509</td>
+</tr>
+</tbody>
+</table>
+<p>Getting a correct NDVI requires the search, the nodata masking, the scale, the
+offset, the solar-day grouping, the composite and the polygon clip all to be
+right at once. It is the single most informative check in the suite.</p>
+<p>Sentinel-1 RTC on the same basin returns a mean γ⁰ of <strong>−9.3 dB</strong>, within the
+published −15 to −5 dB range for vegetated land.</p>
+<h2 id="clipping">Clipping<a class="headerlink" href="#clipping" title="Permanent link">&para;</a></h2>
+<p>The finite fraction of every clipped layer tracks <code>bbox_efficiency</code> to within a
+couple of percent: Sentinel-2 0.500 against 0.509, Landsat 0.514, Sentinel-1
+0.514, exported GeoTIFFs 0.602 against 0.601 on the Danube. That is the clip
+doing exactly what it claims, measured rather than asserted.</p>
+<h2 id="the-catalogue-audit">The catalogue audit<a class="headerlink" href="#the-catalogue-audit" title="Permanent link">&para;</a></h2>
+<p>Rating the package honestly meant auditing what it claims against what it does.
+Two things came out of that.</p>
+<p><strong>Eight of twenty-six catalogued datasets had no fetcher.</strong> The catalogue listed
+them with resolution, licence and access route, and <code>grace</code> and <code>hydroatlas</code>
+even showed <code>auth=none, commercial=yes</code>, so a reader would reasonably conclude
+they could be downloaded. Fixed three ways: <code>hydroatlas</code> is now implemented,
+<code>grace</code> was corrected to <code>auth=account</code> (the CSR anonymous mirror was
+unreachable; the working route is JPL via Earthdata Login), and the remaining
+six raise <code>NotImplementedSource</code> carrying the access route and licence.</p>
+<div class="highlight"><pre><span></span><code>&gt;&gt;&gt; basinkit.catalog.require("glofas")
+NotImplementedSource: GloFAS v4 (CEMS-Floods) is catalogued but basinkit
+cannot fetch it yet.
+    Access : CEMS Early Warning Data Store (ewds.climate.copernicus.eu/api)
+    Licence: CEMS-Floods licence
+    Auth   : account required
+    Once you have it locally, pass the geometry to
+    basinkit.clip.clip_raster() to cut it to the basin.
+</code></pre></div>
+<p><strong>Seven public methods had never been executed.</strong> <code>plot()</code> was one of them, and
+it crashed on NumPy 2.x: <code>ndarray.ptp()</code> was removed in NumPy 2.0 while
+<code>pyproject</code> allows <code>numpy&gt;=1.24</code>. <code>explore()</code> was another: leafmap simply was
+not installed, so the interactive path had never run at all. Both now have
+tests, and one of those tests scans the whole package for every NumPy-2-removed
+API.</p>
+<h2 id="basinatlas-as-an-independent-check">BasinATLAS as an independent check<a class="headerlink" href="#basinatlas-as-an-independent-check" title="Permanent link">&para;</a></h2>
+<p>Implementing BasinATLAS produced an unplanned validation. It ships its own mean
+elevation per basin, derived from a different DEM by a different group:</p>
+<table>
+<thead>
+<tr>
+<th>quantity</th>
+<th style="text-align: right;">BasinATLAS</th>
+<th style="text-align: right;">basinkit (COP-DEM)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Koshi mean elevation</td>
+<td style="text-align: right;">3,782 m</td>
+<td style="text-align: right;">3,786 m</td>
+</tr>
+</tbody>
+</table>
+<p><strong>0.1% apart.</strong> Its precipitation reads 851 mm/yr against CHIRPS's 1,335, the
+same orographic under-resolution seen in TerraClimate, and for the same reason:
+BasinATLAS's climate layers come from WorldClim, downscaled from coarse
+gridded data.</p>
+<h2 id="defects-this-found">Defects this found<a class="headerlink" href="#defects-this-found" title="Permanent link">&para;</a></h2>
+<p>Verification is only worth doing if it changes the code. It changed twelve
+things, and every one is now a regression test.</p>
+<table>
+<thead>
+<tr>
+<th>what</th>
+<th>how it showed up</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Outlet on a riverbank</strong></td>
+<td>Rhine at Lobith returned 271 km² instead of 160,800. The point sits in a 270 km² bank unit; the main stem is 200 m away. Godavari at Polavaram, same story, 454 m. HydroBASINS' own <code>UP_AREA</code> agreed with the tiny answer, so every internal check still passed. Fixed by snapping when a nearby unit drains ≥10× more, with a warning.</td>
+</tr>
+<tr>
+<td><strong>Sentinel-2 offset applied twice</strong></td>
+<td>Earth Search pre-applies the baseline-04.00 BOA offset and flags it, while still publishing the nominal −0.1. Applying it again gave a <strong>mean reflectance of −0.05</strong> over a green catchment.</td>
+</tr>
+<tr>
+<td><strong>Nodata averaged into composites</strong></td>
+<td>Optical products encode "no observation" as 0. A basin straddles several MGRS tiles, so most scenes cover a fraction of it, and an unmasked Sentinel-2 median came back <strong>87% zero</strong>.</td>
+</tr>
+<tr>
+<td><strong>Clip broken on every Dataset</strong></td>
+<td><code>Dataset</code> has no <code>.values</code> array; reaching for one picks up a method. The clip worked on every single-band raster and failed on every multi-band STAC result.</td>
+</tr>
+<tr>
+<td><strong>Rasters exported without nodata</strong></td>
+<td>Correctly masked in memory, then written to GeoTIFF with no declared nodata, so QGIS paints the outside solid black and rasterio returns no mask. The clip silently stopped existing the moment the file left Python.</td>
+</tr>
+<tr>
+<td><strong>Nodata sentinel averaged in mosaics</strong></td>
+<td>JRC surface water uses 255 without declaring it, so an averaging resample produced occurrence values of <strong>101%</strong>.</td>
+</tr>
+<tr>
+<td><strong><code>outlets="min"</code> in flow routing</strong></td>
+<td>Routes a whole DEM window to its lowest cell. A river with 2,500 km² upstream came back with 0.2 km² at the same coordinate, purely because the window shifted.</td>
+</tr>
+<tr>
+<td><strong><code>Basin.plot()</code> broken on NumPy 2</strong></td>
+<td><code>ndarray.ptp()</code> was removed in NumPy 2.0; <code>pyproject</code> allows <code>numpy&gt;=1.24</code>. Found only by auditing which methods no test had ever called.</td>
+</tr>
+<tr>
+<td><strong>BasinATLAS extent code misread</strong></td>
+<td>Extent is the first letter of a column's <em>third</em> token (<code>pre_mm_uyr</code> upstream, <code>run_mm_syr</code> sub-catchment), not a trailing suffix. Read as a suffix it matched nothing and <code>attributes()</code> returned an empty dict.</td>
+</tr>
+<tr>
+<td><strong>BasinATLAS scaled integers</strong></td>
+<td>Stored as integers to keep the tables compact. Read raw, the Koshi averages 50 °C and a 204° slope.</td>
+</tr>
+<tr>
+<td><strong>The README's own example was wrong</strong></td>
+<td>Found on release day by running it. <code>from_point(26.5, 85.2)</code>, advertised as "14,384 km²", sits 16 km off the Bagmati channel and returns 434 km². The delineation was correct and HydroBASINS' <code>UP_AREA</code> agreed with it to 0.2%; the <em>coordinate</em> was wrong and the printed figure had gone stale. The first code block a new user ran disagreed with its own output by a factor of thirty. Fixed by moving every documented example to the Chatara outlet the network suite verifies, adding an off-channel advisory warning, and pinning the documented coordinate to the tested one.</td>
+</tr>
+<tr>
+<td><strong>ESRI land cover returned the wrong year</strong></td>
+<td>Found while trying to build a year-by-year change animation. Every annual item ends at 00:00 on 1 January, so a naive year window matches the previous year's map at the boundary instant: asking for 2024 (the package default) returned the 2023 map. Nothing raised, and the array was entirely valid. Three more defects sat in the same code path: the WorldCover legend applied to ESRI codes (reporting cloud as forest), a Dataset returned where a DataArray was expected, and two tiles stacked on a time axis instead of mosaicked.</td>
+</tr>
+</tbody>
+</table>
+<p>Ten of the twelve produce answers that look entirely plausible: an empty
+dict, a negative reflectance, a 271 km² Rhine. <strong>Only two of the twelve raised an
+exception</strong>, and both were found by auditing which methods no test had ever
+called, not by the suite. That is the argument for checking against published
+values rather than snapshots: a snapshot test would have locked the other eight
+in as the expected answer.</p>
+<h2 id="platform-coverage">Platform coverage<a class="headerlink" href="#platform-coverage" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>offline suite</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python 3.10</td>
+<td>31 passed, 2 skipped</td>
+<td>skips are optional extras not in <code>[dev]</code></td>
+</tr>
+<tr>
+<td>Python 3.11</td>
+<td>48 passed</td>
+<td>full extras installed</td>
+</tr>
+<tr>
+<td>Python 3.12</td>
+<td>31 passed, 2 skipped</td>
+<td></td>
+</tr>
+<tr>
+<td>Windows, macOS</td>
+<td><strong>not run</strong></td>
+<td>CI declares them; nobody has executed them</td>
+</tr>
+</tbody>
+</table>
+<p>Linux only so far. The CI matrix claims three operating systems and three
+Python versions; two of the three Pythons are now real, the two other operating
+systems are still a claim.</p>
+<h2 id="reproducing-this-page">Reproducing this page<a class="headerlink" href="#reproducing-this-page" title="Permanent link">&para;</a></h2>
+<p>The benchmark samples behind the figures are in <code>verify/benchmarks/</code>, and the
+scripts that produced and read them are in <code>verify/</code>:</p>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>verify/run_tdx_wide.py<span class="w">            </span><span class="c1"># the 360-gauge sample</span>
+python<span class="w"> </span>verify/run_grade_validation.py<span class="w">    </span><span class="c1"># the 133-gauge grade test</span>
+python<span class="w"> </span>verify/analyse_tdx_wide.py<span class="w">        </span><span class="c1"># the tables above, recomputed</span>
+python<span class="w"> </span>verify/analyse_grade_validation.py
+python<span class="w"> </span>verify/make_figures.py<span class="w">            </span><span class="c1"># every figure, light and dark</span>
+</code></pre></div>
+<p>One table is not reproducible from this repository, and it is the biggest one.
+The blind validation of 2,740 delineations is built on GSIM station records,
+and shipping the identified set would be redistributing that dataset rather
+than this package's own results. What is shipped is the result as the table
+above reports it, in <code>verify/benchmarks/accuracy_by_size.csv</code>, which is what
+the first figure is drawn from -- so the chart and the table cannot drift
+apart, but neither can be recomputed here from scratch. The gauge list is
+GSIM's, and anyone with it can repeat the run.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.sections", "content.code.copy", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
