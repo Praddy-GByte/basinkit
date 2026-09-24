@@ -2269,6 +2269,7 @@ def test_imagery_passes_raster_options_to_the_stack(monkeypatch):
 
 def test_report_names_the_elevation_product_not_the_boundary():
     import xarray as xr
+
     from basinkit.report import _elevation_source
 
     da = xr.DataArray(np.zeros((2, 2)), attrs={"basinkit_product": "cop30", "basinkit_output_res_m": "123.7"})
@@ -2277,11 +2278,15 @@ def test_report_names_the_elevation_product_not_the_boundary():
 
 
 def test_3d_texture_white_point_follows_the_scene():
-    import base64, io
+    import base64
+    import io
+
     from PIL import Image
+
     from basinkit.viz3d import _texture
 
-    rgb = np.full((20, 20, 3), 0.05, dtype="float32"); rgb[:10] = 0.02
+    rgb = np.full((20, 20, 3), 0.05, dtype="float32")
+    rgb[:10] = 0.02
     mask = np.ones((20, 20), bool)
     img = np.asarray(Image.open(io.BytesIO(base64.b64decode(_texture(rgb, mask, 20, None, 1.0, 0.0)))))
     assert img[15].mean() > 200          # a dark forest scene is stretched to full range
@@ -2291,6 +2296,7 @@ def test_3d_texture_white_point_follows_the_scene():
 
 def test_stac_search_outline_is_small_and_contains_the_basin():
     from shapely.geometry import Polygon
+
     from basinkit.sources.stac import _search_geometry
 
     ring = [(np.cos(t) * (1 + 0.05 * np.sin(40 * t)), np.sin(t) * (1 + 0.05 * np.sin(40 * t)))

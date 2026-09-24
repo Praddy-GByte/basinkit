@@ -199,7 +199,7 @@ def landcover_quality(basin, year: int = 2021, max_pixels: int | None = None,
 
     common = np.zeros(a.shape, dtype="int16")
     other = np.zeros(a.shape, dtype="int16")
-    for i, (name, (wc_codes, esri_codes)) in enumerate(_COMMON.items(), start=1):
+    for i, (wc_codes, esri_codes) in enumerate(_COMMON.values(), start=1):
         common[np.isin(a, list(wc_codes))] = i
         other[np.isin(b, list(esri_codes))] = i
     usable = (common > 0) & (other > 0)
