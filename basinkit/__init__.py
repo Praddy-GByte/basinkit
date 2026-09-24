@@ -19,8 +19,18 @@ announce themselves before the first byte moves. ``basinkit.catalog.table()``
 shows the whole picture.
 """
 
-from . import (cache, catalog, climate, clip, delineate, quality, report, sources,
-               suitability, terrain)
+from . import (
+               cache,
+               catalog,
+               climate,
+               clip,
+               delineate,
+               quality,
+               report,
+               sources,
+               suitability,
+               terrain,
+)
 from .basin import Basin
 from .compare import compare
 from .exceptions import (
