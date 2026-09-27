@@ -424,7 +424,29 @@ def s_profile(C):
     ax.set_xlabel("distance from source, km", color=INK2, fontsize=8)
     ax.set_ylabel("elevation, m", color=INK2, fontsize=8)
     ax.set_xlim(0, float(d.distance_km.max()))
-    return fig, f
+    # Step 25 reports river.facts(). This step reports the drawn curve
+    # itself, so that no two steps record the same numbers.
+    x = np.asarray(d.distance_km, dtype="float64")
+    y = np.asarray(d.elevation_m, dtype="float64")
+    g = -np.gradient(y, x)                             # fall, m per km
+    drop = float(y[0] - y[-1])
+    xn = (x - x[0]) / (x[-1] - x[0])
+    yn = (y - y[-1]) / drop if drop > 0 else np.zeros_like(y)
+    # positive = concave up, the usual shape of a graded river
+    _trap = getattr(np, "trapezoid", None) or np.trapz   # numpy 1.x / 2.x
+    concavity = float(0.5 - _trap(yn, xn)) * 2.0
+    upper = xn <= (1.0 / 3.0)
+    vals = {"profile_points": int(x.size),
+            "profile_length_km": round(float(x.max()), 2),
+            "steepest_fall_m_per_km": round(float(np.nanmax(g)), 2),
+            "gentlest_fall_m_per_km": round(float(np.nanmin(g)), 2) + 0.0,
+            "median_fall_m_per_km": round(float(np.nanmedian(g)), 2),
+            "concavity_index": round(concavity, 4),
+            "drop_in_upper_third_pct": (round(float(
+                (y[0] - y[upper][-1]) / drop * 100.0), 1)
+                if drop > 0 and upper.sum() > 1 else None),
+            "monotonic_descent": bool(np.all(np.diff(y) <= 0.0))}
+    return fig, vals
 
 
 @step(24, "River", "Discharge and upland area down the river",
