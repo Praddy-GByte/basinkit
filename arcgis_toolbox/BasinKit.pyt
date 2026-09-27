@@ -67,9 +67,9 @@ def run(argv, messages=None):
     """
     exe = resolve_python()
     if not os.path.exists(RUNNER):
-        raise arcpy.ExecuteError(
-            "basinkit_runner.py is missing. Keep it in the same folder as "
-            "BasinKit.pyt.")
+        arcpy.AddError("basinkit_runner.py is missing. Keep it in the same "
+                       "folder as BasinKit.pyt.")
+        raise arcpy.ExecuteError
     cmd = [exe, RUNNER] + [str(a) for a in argv]
     arcpy.AddMessage("Running: " + " ".join(cmd))
 
@@ -84,10 +84,10 @@ def run(argv, messages=None):
             universal_newlines=True, encoding="utf-8", errors="replace",
             startupinfo=startup)
     except FileNotFoundError:
-        raise arcpy.ExecuteError(
-            "Could not start '%s'. Set the interpreter with the "
-            "'Configure BasinKit' tool, or set the BASINKIT_PYTHON "
-            "environment variable." % exe)
+        arcpy.AddError("Could not start '%s'. Set the interpreter with the "
+                       "'Configure BasinKit' tool, or set the BASINKIT_PYTHON "
+                       "environment variable." % exe)
+        raise arcpy.ExecuteError
 
     outputs, result, failed = [], {}, None
     for raw in proc.stdout:
@@ -117,39 +117,64 @@ def run(argv, messages=None):
     if failed:
         if stderr:
             arcpy.AddMessage(stderr.strip()[-4000:])
-        raise arcpy.ExecuteError("basinkit: " + failed)
+        arcpy.AddError("basinkit: " + failed)
+        raise arcpy.ExecuteError
     if code != 0:
         if stderr:
             arcpy.AddError(stderr.strip()[-4000:])
-        raise arcpy.ExecuteError(
+        arcpy.AddError(
             "basinkit_runner exited with code %d. If the message above says a "
             "module is missing, that interpreter does not have basinkit "
             "installed -- run 'Configure BasinKit' to point at one that does."
             % code)
+        raise arcpy.ExecuteError
     return outputs, result
+
+
+#: Which geometry each layer the runner writes actually contains. JSONToFeatures
+#: needs this told to it: Esri's documentation states that for a .geojson input
+#: "you must select the geometry type", and that if the file holds none of the
+#: requested type "the output feature class will be empty" -- with no error. So a
+#: missing geometry type here would produce empty layers silently, which is the
+#: single most common way a GIS tool wastes somebody's afternoon.
+GEOMETRY = {"basin": "POLYGON", "subbasins": "POLYGON", "lakes": "POLYGON",
+            "rivers": "POLYLINE"}
 
 
 def add_to_map(outputs, add_layers=True):
     """Bring the runner's files into the project.
 
     GeoJSON is converted to a feature class in the default geodatabase, because
-    a GeoJSON file is read-only to most of Pro. GeoTIFF and CSV are added as
-    they are -- Pro reads both natively.
+    a GeoJSON file is read-only to most of Pro. GeoTIFF is added as it is. CSV is
+    left on disk: addDataFromPath returns a Layer and a table is not a layer.
     """
     added = []
     gdb = arcpy.env.workspace or arcpy.env.scratchGDB
     for kind, path in outputs:
         try:
             if kind == "vector":
-                name = arcpy.ValidateTableName(
-                    os.path.splitext(os.path.basename(path))[0], gdb)
+                stem = os.path.splitext(os.path.basename(path))[0]
+                name = arcpy.ValidateTableName(stem, gdb)
                 if str(gdb).lower().endswith(".gdb"):
                     target = os.path.join(gdb, name)
                 else:
                     # No geodatabase to write into -- leave a shapefile beside
                     # the GeoJSON rather than failing.
                     target = os.path.join(os.path.dirname(path), name + ".shp")
-                arcpy.conversion.JSONToFeatures(path, target)
+                geom = GEOMETRY.get(stem.lower(), "POLYGON")
+                arcpy.conversion.JSONToFeatures(path, target, geom)
+                # An empty result here means the geometry type was wrong. Say so
+                # rather than handing over a layer with nothing in it.
+                try:
+                    n = int(arcpy.management.GetCount(target)[0])
+                    if n == 0:
+                        arcpy.AddWarning(
+                            "%s converted to 0 features as %s. The GeoJSON is "
+                            "still on disk at %s." % (stem, geom, path))
+                    else:
+                        arcpy.AddMessage("  %s: %s features" % (stem, format(n, ",")))
+                except Exception:                       # noqa: BLE001
+                    pass
                 added.append(target)
             else:
                 added.append(path)
@@ -210,7 +235,6 @@ def point_args(params, idx_backend=2, idx_out=3):
 
 class BaseTool(object):
     category = ""
-    canRunInBackground = False
 
     def isLicensed(self):
         return True
