@@ -50,6 +50,7 @@ nav:
   - Home: index.md
   - Why basinkit: why.md
   - Tutorial: tutorial.md
+  - ArcGIS Pro: arcgis-pro.md
   - Delineation: delineation.md
   - Related work: related-work.md
   - Data catalogue: catalogue.md
