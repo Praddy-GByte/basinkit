@@ -93,7 +93,7 @@ basinkit_everything.py
 
 ## Step 3 — Point it at that Python, once
 
-Open **BasinKit → Setup → Configure BasinKit**, browse to the `python.exe` path
+Open **BasinKit → 0 Configuration → Configure BasinKit**, browse to the `python.exe` path
 from step 1, and click Run. It reports the basinkit version and every dependency
 it found; anything missing comes back as a warning naming that package.
 
@@ -105,7 +105,7 @@ setting.
 
 ## Step 4 — Run it
 
-Open **BasinKit → 0 Everything → Complete basin analysis (one click)** and fill
+Open **BasinKit → 1 Comprehensive Analysis → Complete Basin Analysis** and fill
 in three things. Leave the rest on default.
 
 | Field | What to put |
@@ -180,18 +180,18 @@ ModelBuilder.
 
 | Tool | Category | What it does |
 |---|---|---|
-| Complete basin analysis (one click) | 0 Everything | One coordinate in. Seventy analyses out, plus a collage, an illustrated PDF and a manifest that re-runs the whole thing. Start here. |
-| Configure BasinKit | Setup | Point the toolbox at the Python interpreter that has basinkit, and check it works. Run this once, before anything else. |
-| Delineate basin | 1 Basin | The upstream catchment of one coordinate, as a polygon. |
-| Sub-catchments | 1 Basin | The units the basin is assembled from, each carrying `NEXT_DOWN` — the routing table a hydrological model wants. |
-| Rivers and lakes | 1 Basin | River reaches with Strahler order and mean discharge, and the lakes inside the basin. |
-| Terrain surfaces | 2 Terrain | One elevation download, twelve surfaces derived from it: hillshade, slope, aspect, curvature, TPI, TRI, roughness, landform, flow accumulation, channels, wetness index and height above nearest drainage. |
-| Land cover, soil and surface water | 3 Layers | Open Earth-observation layers clipped and masked to the basin polygon — not to its bounding box. |
-| Morphometry | 4 Shape and network | Forty-two named parameters in three sets — linear, areal and relief — plus the network by Strahler order. Streams are counted as Strahler streams, not as the raw reaches in the river layer. |
-| Zonal statistics | 4 Shape and network | Any raster summarised inside any other raster's classes. |
-| Can the DEM carry terrain analysis here? | 5 Does the data support the answer | Five tests against the elevation model's own stated vertical error, with a per-cell map of where the answer is supported and where it is not. |
-| Data quality report | 5 Does the data support the answer | New in 0.7.0. Grades elevation, land cover, soil, rainfall, surface water and the delineation itself — each against an independently produced source rather than against itself. |
-| Basin report (PDF) | 6 Output | An eight-page PDF: the suitability grade on the cover, every morphometric parameter with its symbol and original reference, and the channel network against Horton's laws. |
+| Complete Basin Analysis | 1 Comprehensive Analysis | One coordinate in. Seventy analyses out, plus a collage, an illustrated PDF and a manifest that re-runs the whole thing. Start here. |
+| Configure BasinKit | 0 Configuration | Point the toolbox at the Python interpreter that has basinkit, and check it works. Run this once, before anything else. |
+| Delineate Basin | 2 Basin Delineation | The upstream catchment of one coordinate, as a polygon. |
+| Sub-Catchments | 2 Basin Delineation | The units the basin is assembled from, each carrying `NEXT_DOWN` — the routing table a hydrological model wants. |
+| Rivers and Lakes | 2 Basin Delineation | River reaches with Strahler order and mean discharge, and the lakes inside the basin. |
+| Terrain Surfaces | 3 Surface Derivatives | One elevation download, twelve surfaces derived from it: hillshade, slope, aspect, curvature, TPI, TRI, roughness, landform, flow accumulation, channels, wetness index and height above nearest drainage. |
+| Land Cover, Soil and Surface Water | 4 Thematic Rasters | Open Earth-observation layers clipped and masked to the basin polygon — not to its bounding box. |
+| Morphometric Parameters | 5 Morphometry and Drainage Network | Forty-two named parameters in three sets — linear, areal and relief — plus the network by Strahler order. Streams are counted as Strahler streams, not as the raw reaches in the river layer. |
+| Zonal Statistics | 5 Morphometry and Drainage Network | Any raster summarised inside any other raster's classes. |
+| DEM Suitability Assessment | 6 Quality Assessment | Five tests against the elevation model's own stated vertical error, with a per-cell map of where the answer is supported and where it is not. |
+| Data Quality Report | 6 Quality Assessment | New in 0.7.0. Grades elevation, land cover, soil, rainfall, surface water and the delineation itself — each against an independently produced source rather than against itself. |
+| Basin Report (PDF) | 7 Report Generation | An eight-page PDF: the suitability grade on the cover, every morphometric parameter with its symbol and original reference, and the channel network against Horton's laws. |
 
 ---
 

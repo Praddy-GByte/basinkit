@@ -54,7 +54,7 @@ basinkit_runner.py
 **3. Add the toolbox.** In ArcGIS Pro: Catalog pane → right-click **Toolboxes**
 → **Add Toolbox** → pick `BasinKit.pyt`.
 
-**4. Point it at that Python.** Run **Setup → Configure BasinKit**, browse to the
+**4. Point it at that Python.** Run **0 Configuration → Configure BasinKit**, browse to the
 interpreter (`python.exe` on Windows), and run it. It reports the basinkit
 version and every dependency it found, and warns about any that are missing.
 
@@ -69,7 +69,7 @@ cloned Pro environment. Supported, but not what we recommend.
 
 ## One click: the whole thing
 
-**0 Everything → Complete basin analysis (one click)**
+**1 Comprehensive Analysis → Complete Basin Analysis**
 
 Give it a latitude and a longitude and an output folder. It runs **70 analyses**
 and writes:
@@ -129,18 +129,18 @@ the main lever: lower them for a first look, raise them for the final run.
 
 | Group | Tool | What it gives you |
 |---|---|---|
-| Setup | Configure BasinKit | Points at the interpreter and checks it |
-| **0 Everything** | **Complete basin analysis (one click)** | **All 70, plus collage, PDF report and manifest** |
-| 1 Basin | Delineate basin | The upstream catchment polygon of one coordinate |
-| 1 Basin | Sub-catchments | The units it is assembled from, each with `NEXT_DOWN` |
-| 1 Basin | Rivers and lakes | Reaches with stream order and discharge; lakes |
-| 2 Terrain | Terrain surfaces | One elevation download, up to twelve surfaces from it |
-| 3 Layers | Land cover, soil and surface water | Clipped and masked to the polygon, not the bounding box |
-| 4 Shape | Morphometry | 42 named parameters, plus the network by Strahler order |
-| 4 Shape | Zonal statistics | Any raster summarised inside any other raster's classes |
-| 5 Support | Can the DEM carry terrain analysis here? | Five tests, plus a per-cell support map |
-| 5 Support | Data quality report | **New in 0.7.0** — a grade for every layer |
-| 6 Output | Basin report (PDF) | Eight pages, methods and licences included |
+| 0 Configuration | Configure BasinKit | Points at the interpreter and checks it |
+| **1 Comprehensive Analysis** | **Complete Basin Analysis** | **All 70, plus collage, PDF report and manifest** |
+| 2 Basin Delineation | Delineate Basin | The upstream catchment polygon of one coordinate |
+| 2 Basin Delineation | Sub-Catchments | The units it is assembled from, each with `NEXT_DOWN` |
+| 2 Basin Delineation | Rivers and Lakes | Reaches with stream order and discharge; lakes |
+| 3 Surface Derivatives | Terrain Surfaces | One elevation download, up to twelve surfaces from it |
+| 4 Thematic Rasters | Land Cover, Soil and Surface Water | Clipped and masked to the polygon, not the bounding box |
+| 5 Morphometry and Drainage Network | Morphometric Parameters | 42 named parameters, plus the network by Strahler order |
+| 5 Morphometry and Drainage Network | Zonal Statistics | Any raster summarised inside any other raster's classes |
+| 6 Quality Assessment | DEM Suitability Assessment | Five tests, plus a per-cell support map |
+| 6 Quality Assessment | Data Quality Report | **New in 0.7.0** — a grade for every layer |
+| 7 Report Generation | Basin Report (PDF) | Eight pages, methods and licences included |
 
 ### Backends
 

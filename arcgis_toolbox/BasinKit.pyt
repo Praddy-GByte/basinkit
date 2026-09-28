@@ -261,7 +261,7 @@ class Configure(BaseTool):
         self.label = "Configure BasinKit"
         self.description = ("Point the toolbox at a Python interpreter that has "
                             "basinkit installed, and check that it works.")
-        self.category = "Setup"
+        self.category = "0 Configuration"
 
     def getParameterInfo(self):
         return [p("Python executable with basinkit installed", "python", "DEFile",
@@ -297,10 +297,10 @@ class Configure(BaseTool):
 
 class Delineate(BaseTool):
     def __init__(self):
-        self.label = "Delineate basin"
+        self.label = "Delineate Basin"
         self.description = ("The upstream catchment of one coordinate, as a "
                             "polygon. No account and no API key.")
-        self.category = "1 Basin"
+        self.category = "2 Basin Delineation"
 
     def getParameterInfo(self):
         return point_params()
@@ -313,10 +313,10 @@ class Delineate(BaseTool):
 
 class SubBasins(BaseTool):
     def __init__(self):
-        self.label = "Sub-catchments"
+        self.label = "Sub-Catchments"
         self.description = ("The units the basin is assembled from, each carrying "
                             "NEXT_DOWN -- the routing table a model wants.")
-        self.category = "1 Basin"
+        self.category = "2 Basin Delineation"
 
     def getParameterInfo(self):
         return point_params()
@@ -328,9 +328,9 @@ class SubBasins(BaseTool):
 
 class RiversLakes(BaseTool):
     def __init__(self):
-        self.label = "Rivers and lakes"
+        self.label = "Rivers and Lakes"
         self.description = "River reaches with stream order and discharge, and lakes."
-        self.category = "1 Basin"
+        self.category = "2 Basin Delineation"
 
     def getParameterInfo(self):
         prm = point_params()
@@ -353,12 +353,12 @@ class RiversLakes(BaseTool):
 
 class Terrain(BaseTool):
     def __init__(self):
-        self.label = "Terrain surfaces"
+        self.label = "Terrain Surfaces"
         self.description = ("One elevation download, twelve surfaces derived from "
                             "it: hillshade, slope, aspect, curvature, TPI, TRI, "
                             "roughness, landform, flow accumulation, channels, "
                             "wetness index and height above nearest drainage.")
-        self.category = "2 Terrain"
+        self.category = "3 Surface Derivatives"
 
     def getParameterInfo(self):
         prm = point_params()
@@ -387,10 +387,10 @@ class Terrain(BaseTool):
 
 class Layers(BaseTool):
     def __init__(self):
-        self.label = "Land cover, soil and surface water"
+        self.label = "Land Cover, Soil and Surface Water"
         self.description = ("Open Earth observation layers clipped and masked to "
                             "the basin polygon, not to its bounding box.")
-        self.category = "3 Layers"
+        self.category = "4 Thematic Rasters"
 
     def getParameterInfo(self):
         prm = point_params()
@@ -431,12 +431,12 @@ class Layers(BaseTool):
 
 class Morphometry(BaseTool):
     def __init__(self):
-        self.label = "Morphometry"
+        self.label = "Morphometric Parameters"
         self.description = ("Forty-two named parameters in three sets -- linear, "
                             "areal and relief -- plus the network by Strahler "
                             "order. Streams are counted as Strahler streams, not "
                             "as the reaches a river dataset splits them into.")
-        self.category = "4 Shape and network"
+        self.category = "5 Morphometry and Drainage Network"
 
     def getParameterInfo(self):
         return point_params()
@@ -448,9 +448,9 @@ class Morphometry(BaseTool):
 
 class Zonal(BaseTool):
     def __init__(self):
-        self.label = "Zonal statistics"
+        self.label = "Zonal Statistics"
         self.description = "Any raster summarised inside any other raster's classes."
-        self.category = "4 Shape and network"
+        self.category = "5 Morphometry and Drainage Network"
 
     def getParameterInfo(self):
         prm = point_params()
@@ -472,11 +472,11 @@ class Zonal(BaseTool):
 
 class Suitability(BaseTool):
     def __init__(self):
-        self.label = "Can the DEM carry terrain analysis here?"
+        self.label = "DEM Suitability Assessment"
         self.description = ("Five tests against the elevation model's own stated "
                             "vertical error, with a per-cell map of where the "
                             "answer is supported and where it is not.")
-        self.category = "5 Does the data support the answer"
+        self.category = "6 Quality Assessment"
 
     def getParameterInfo(self):
         prm = point_params()
@@ -503,14 +503,14 @@ class Suitability(BaseTool):
 
 class DataQuality(BaseTool):
     def __init__(self):
-        self.label = "Data quality report"
+        self.label = "Data Quality Report"
         self.description = ("New in 0.7.0. Grades elevation, land cover, soil, "
                             "rainfall, surface water and the delineation itself, "
                             "each against an independently produced source rather "
                             "than against itself. Layers for which no published "
                             "threshold exists come back ungraded, with the reason "
                             "stated rather than a cut-off invented.")
-        self.category = "5 Does the data support the answer"
+        self.category = "6 Quality Assessment"
 
     def getParameterInfo(self):
         return point_params()
@@ -529,13 +529,13 @@ class DataQuality(BaseTool):
 
 class Report(BaseTool):
     def __init__(self):
-        self.label = "Basin report (PDF)"
+        self.label = "Basin Report (PDF)"
         self.description = ("An eight-page PDF: the suitability grade on the cover, "
                             "every morphometric parameter with its symbol and "
                             "original reference, the channel network against "
                             "Horton's laws, and a methods page carrying software "
                             "versions and licences.")
-        self.category = "6 Output"
+        self.category = "7 Report Generation"
 
     def getParameterInfo(self):
         prm = point_params()
@@ -554,14 +554,14 @@ class Report(BaseTool):
 
 class Everything(BaseTool):
     def __init__(self):
-        self.label = "Complete basin analysis  (one click)"
+        self.label = "Complete Basin Analysis"
         self.description = (
             "One coordinate in. Seventy analyses out, plus a collage, an "
             "illustrated PDF report and a manifest that re-runs. Writes the "
             "basin, sub-catchments, rivers, lakes, elevation, hillshade and "
             "land cover as GIS layers and adds them to the map. Expect twenty "
             "minutes to an hour depending on basin size and the pixel budget.")
-        self.category = "0 Everything"
+        self.category = "1 Comprehensive Analysis"
 
     def getParameterInfo(self):
         prm = point_params()
