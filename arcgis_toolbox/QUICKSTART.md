@@ -79,7 +79,7 @@ If they get separated the toolbox will tell you which one is missing.
 
 ## Step 4 — Point it at the right Python  (do this once)
 
-1. Open **BasinKit → Setup → Configure BasinKit**.
+1. Open **BasinKit → 0 Configuration → Configure BasinKit**.
 2. In **Python executable with basinkit installed**, browse to the `python.exe`
    path you copied in Step 1.
 3. Click **Run**.
@@ -95,7 +95,7 @@ setting.
 
 ## Step 5 — Run it
 
-Open **BasinKit → 0 Everything → Complete basin analysis (one click)**.
+Open **BasinKit → 1 Comprehensive Analysis → Complete Basin Analysis**.
 
 Fill in three things:
 
