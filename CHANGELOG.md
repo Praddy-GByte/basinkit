@@ -1,5 +1,154 @@
 # Changelog
 
+## 0.8.0 -- unreleased
+
+### Is this landscape still changing? A new module that answers it
+
+The 42 morphometric parameters describe a basin's shape. None of them says
+whether that shape is still adjusting to uplift or to a change in base level, or
+whether it settled long ago. `basinkit.landscape` answers that, with the three
+quantities the geomorphology literature uses for it:
+
+- **χ** -- the integral from the outlet upstream of (A₀/A)^θ dx (Perron & Royden
+  2013). A profile plotted against χ instead of distance is straight where a
+  river is in equilibrium.
+- **k_sn** -- normalised channel steepness, S·A^θref (Wobus et al. 2006). One
+  number per channel cell, comparable between basins because θref is fixed at
+  0.45 and A₀ at 1 km² by convention.
+- **knickpoints** -- the breaks in that χ-elevation profile, each reported with
+  its height, so a small step can be dismissed.
+
+Plus the concavity θ fitted from the slope-area relation (Flint 1974).
+
+**k_sn was checked cell by cell against TopoToolbox 0.0.12** on two basins -- the
+Yellowstone above Corwin Springs (6,786 km²) and Fall Creek near Ithaca (326 km²)
+-- on the same DEM, reprojected to the same grid, with the same channel threshold
+and the same θ.
+
+The comparison needed one decision stated openly. TopoToolbox does not clamp its
+channel gradient, so where a DEM rises downstream it returns a negative k_sn;
+basinkit clamps those to zero and reports the fraction. Those fractions are 9.4%
+and 21.7% for TopoToolbox against 13.0% and 25.3% for basinkit, so a median over
+*all* channel cells compares a distribution holding negatives against one holding
+zeros. **Every quoted comparison is over the cells where both return a positive
+value.** On that population:
+
+| | Yellowstone | Fall Creek |
+|---|---|---|
+| median | 3.7% apart | 6.1% apart |
+| 90th percentile | 2.1% | 4.3% |
+| 99th percentile | 0.0% | 2.0% |
+| correlation, cell by cell | 0.973 | 0.987 |
+
+Against TopoToolbox's own `impose=True` setting the medians are 1.3% and 2.8%
+apart. The percentage is looser on the small low-relief basin because the
+quantities are small -- the per-cell median disagreement there is 0.35 k_sn units
+-- and the correlation is higher, not lower.
+
+**That cross-check changed the method.** The first implementation smoothed
+elevation over 500 m before differencing it, and its 99th percentile came out
+41% below TopoToolbox's. The smoothing was the cause, not TopoToolbox, so k_sn
+is now computed on raw cell-to-cell drops with negative gradients clamped at
+zero, and smoothing is kept only for the concavity fit, where it belongs: raw
+cells bias a fitted θ low, from 0.431 to 0.264 on the test basin.
+
+**Both robust and fragile numbers are reported as such.** Across a fourfold
+change in cell size (93 m to 371 m) the k_sn median moves 1.9% and its 90th
+percentile 1.9%. The knickpoint *count* does not: 2, 2, 3, 1. The fitted θ
+degrades on a grid coarse enough that the 500 m smoothing window spans one cell.
+[The documentation](https://praddy-gbyte.github.io/basinkit/landscape/) states
+all three.
+
+On two basins chosen for the contrast -- the Yellowstone above Corwin Springs
+(Rocky Mountains, long stable) and the Alaknanda at Devprayag (Himalaya,
+actively uplifting) -- k_sn medians are 59.8 and 167.2 and knickpoint counts 2
+and 10. Both medians sit inside the ranges published for their settings. The
+hypsometric integral, by contrast, put the two basins in the same band.
+
+Nothing here is an uplift rate, and the module says so in its own output. χ,
+k_sn and knickpoint counts describe form and transience; turning them into rates
+needs independent calibration.
+
+### Every number arrives with what it is worth
+
+The landscape result carries a `confidence` block: one sentence per quantity,
+attached to that quantity, saying which can be quoted as it stands and which
+needs its own diagnostic quoted with it. A weak concavity fit therefore qualifies
+θ and says in the same breath that k_sn does not depend on it — rather than
+leaving a reader to assume the whole run is soft.
+
+Separate from that, and deliberately rare, a run can print a **limit**: the short
+list of cases where a number should not be used at all — a concavity fit below
+R² 0.5, a network more than half flat, fewer than 500 channel cells. An ordinary
+run prints none, and a test pins that. A caution printed on every run is not a
+caution.
+
+### A figure, so the numbers can be seen
+
+`landscape_form.png`: the trunk in χ–elevation space with every knickpoint marked
+by its height and how far it stands above the profile's own median gradient, the
+long profile, and the slope–area relation with the fitted concavity drawn on it so
+the fit can be judged by eye rather than only by its R². On Fall Creek near Ithaca
+the Ithaca Falls gorge appears as a near-vertical wall at χ ≈ 0, which is what a
+hanging valley looks like when it is plotted this way.
+
+### The routing graph in Arc Hydro's own field names
+
+`basinkit.archydro` writes the sub-catchments and river reaches as
+`archydro.gpkg` with layers called `Catchment` and `DrainageLine`, carrying
+`HydroID`, `HydroCode`, `NextDownID` and `AreaSqKm`. Arc Hydro's tools read them
+without being told anything about basinkit.
+
+It is a renaming, not a computation. Every value written is one basinkit already
+holds: `HydroCode` is the unmodified `HYBAS_ID` or `HYRIV_ID`, `AreaSqKm` is
+HydroBASINS' own published `SUB_AREA`, and `NextDownID` is the `HydroID` of the
+unit `NEXT_DOWN` already pointed at, or −1 where there is none.
+
+`DrainID` is deliberately left out. In the Arc Hydro model it links a drainage
+line to the catchment containing it; basinkit does not hold that link, and
+deriving it with a spatial join would be a guess. Arc Hydro's own tools populate
+it.
+
+Every export reports whether the graph is a single tree draining to one outlet --
+terminal units, pointers to units that are not in the table, units in a cycle --
+and a table that fails is written anyway, with the failure named. It belongs to
+the source data.
+
+### The toolbox's wiring is now actually checked, on every commit
+
+`docs/arcgis-pro.md` claimed that "every tool's parameters and command line are
+checked automatically". That check existed as an ad-hoc script and not as a file
+in this repository, which made the claim weaker than it read.
+`verify/run_toolbox_wiring.py` now does it for real, and CI runs it: it loads
+`BasinKit.pyt` against a stub `arcpy`, instantiates all 14 tools, builds and
+fills their parameters, captures the command line each one would run, and parses
+that command line with `basinkit_runner.py`'s own parser. It catches a wrong
+parameter index, a flag the runner does not define, and a subcommand that does
+not exist -- all three were injected deliberately to confirm it fails on them.
+
+### Fixed
+
+- **A pre-release no longer publishes to PyPI.** A GitHub pre-release fires the
+  same `release: published` event as a full release, so tagging `v0.7.1-test`
+  started the publish workflow. The job now runs only for a full release or a
+  manual dispatch.
+- **`docs/arcgis-pro.md` had a duplicated block** -- the "add the toolbox"
+  instructions appeared twice, an editing leftover. Removed.
+- **`docs/arcgis-pro.md` said the toolbox had never been run inside ArcGIS Pro.**
+  It has: it loads and lists its toolsets in the Catalog pane, and `Set Up
+  BasinKit` has run there and correctly reported that Pro's own Python 3.9 is
+  below the 3.10 basinkit needs. What is still unproven is narrower than the page
+  claimed, and the page now says exactly which parts.
+
+### Two new tools in the ArcGIS Pro toolbox
+
+- **Landscape Form (Chi and Channel Steepness)**, under *5 Morphometry and
+  Drainage Network*.
+- **Export for Arc Hydro**, under a new *8 Model Coupling* toolset.
+
+Fourteen tools in all. Neither changes the 70-analysis run: they are separate
+tools, and the count of analyses in `Complete Basin Analysis` is still 70.
+
 ## 0.7.0 -- 2026-09-23
 
 ### A quality indicator for every layer, not only for the elevation model

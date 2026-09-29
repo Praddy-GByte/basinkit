@@ -15,6 +15,10 @@ on:
 
 jobs:
   publish:
+    # A pre-release fires 'published' too, so a test tag would otherwise be
+    # built and pushed to PyPI as a real version. Run only for a full release,
+    # or when dispatched by hand against a tag.
+    if: ${{ github.event_name != 'release' || !github.event.release.prerelease }}
     runs-on: ubuntu-latest
     environment: pypi
     permissions:

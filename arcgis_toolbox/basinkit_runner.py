@@ -349,6 +349,121 @@ def cmd_everything(args):
             "collage": collage, "report": report, "manifest": manifest_path})
 
 
+def arcpy_warn(msg):
+    """A caution the toolbox shows in the messages pane, and a terminal run prints.
+
+    Reported, never acted on: the run still returns every number it computed.
+    """
+    print(f"WARN{TAB}{msg}", flush=True)
+
+
+def cmd_landscape(args):
+    """chi, channel steepness, concavity and knickpoints from the basin's DEM."""
+    from basinkit import landscape as L
+
+    b = _basin(args)
+    kw = {}
+    if args.max_pixels:
+        kw["max_pixels"] = args.max_pixels
+    dem = b.dem(product=args.dem_product, **kw)
+    info("Routing flow and building the channel network")
+    r = L.analyse(dem, min_area_km2=args.min_area_km2, theta_ref=args.theta_ref,
+                  smooth_m=args.smooth_m)
+    s = r["summary"]
+    info(f"{s['channel_cells']:,} channel cells above {args.min_area_km2:g} km2")
+    info(f"{s['knickpoints']} knickpoints on a {s['trunk_length_km']} km trunk")
+
+    for name in ("chi", "ksn"):
+        _write_landscape_raster(dem, r["rasters"][name],
+                                os.path.join(args.out, name + ".tif"))
+
+    t = r["trunk"]
+    _write_table(
+        [{"chi_m": round(float(t["chi_m"][i]), 2),
+          "elevation_m": round(float(t["elevation_m"][i]), 2),
+          "distance_to_outlet_m": round(float(t["distance_to_outlet_m"][i]), 1)}
+         for i in range(len(t["chi_m"]))],
+        os.path.join(args.out, "trunk_profile.csv"),
+        fieldnames=["chi_m", "elevation_m", "distance_to_outlet_m"])
+    _write_table([{"chi_m": round(float(k["chi"]), 2),
+                   "elevation_m": k["elevation_m"], "step_m": k["step_m"],
+                   "excess_gradient_sigma": k["excess_gradient_sigma"]}
+                  for k in r["knickpoints"]],
+                 os.path.join(args.out, "knickpoints.csv"),
+                 fieldnames=["chi_m", "elevation_m", "step_m",
+                             "excess_gradient_sigma"])
+
+    fig_path = os.path.join(args.out, "landscape_form.png")
+    try:
+        L.figure(r, path=fig_path,
+                 title="Outlet %.5f, %.5f" % (args.lat, args.lon))
+        out("figure", fig_path)
+    except Exception as exc:                        # noqa: BLE001
+        info("The figure could not be drawn (%s: %s). Every number and table "
+             "above is unaffected." % (exc.__class__.__name__, exc))
+
+    s["confidence"] = L.confidence(r)
+    for w in L.limits(r):
+        arcpy_warn(w)
+    result(s)
+
+
+def _write_landscape_raster(dem, values, path):
+    """Write a derived grid with the DEM's own georeferencing."""
+    import numpy as np
+    import rasterio
+
+    transform = dem.rio.transform()
+    crs = dem.rio.crs
+    arr = np.asarray(values, dtype="float32")
+    with rasterio.open(path, "w", driver="GTiff", height=arr.shape[0],
+                       width=arr.shape[1], count=1, dtype="float32",
+                       crs=crs, transform=transform, nodata=float("nan"),
+                       compress="deflate") as dst:
+        dst.write(arr, 1)
+    out("raster", path)
+
+
+def cmd_archydro(args):
+    """The routing graph in the Arc Hydro schema, ready for Arc Hydro's tools."""
+    from basinkit import archydro as AH
+
+    b = _basin(args)
+    sub = AH.catchment_table(b.subbasins())
+    info(f"{len(sub):,} catchments")
+    riv = AH.drainage_line_table(b.rivers(min_order=args.min_order))
+    info(f"{len(riv):,} drainage lines")
+
+    gpkg = os.path.join(args.out, "archydro.gpkg")
+    sub.to_file(gpkg, layer="Catchment", driver="GPKG")
+    riv.to_file(gpkg, layer="DrainageLine", driver="GPKG")
+    out("vector", gpkg)
+    _write_vector(sub, os.path.join(args.out, "Catchment.geojson"))
+    _write_vector(riv, os.path.join(args.out, "DrainageLine.geojson"))
+
+    for name, frame, cols in (
+            ("Catchment", sub, ["HydroID", "HydroCode", "NextDownID", "AreaSqKm"]),
+            ("DrainageLine", riv, ["HydroID", "HydroCode", "NextDownID"])):
+        have = [c for c in cols if c in frame.columns]
+        path = os.path.join(args.out, "archydro_%s.csv" % name.lower())
+        _write_table(frame[have].to_dict("records"), path, fieldnames=have)
+
+    chk = AH.check(sub)
+    if not chk["single_outlet"]:
+        info("The routing table is not a single tree draining to one outlet: "
+             f"{chk['terminal_units']} terminal units, "
+             f"{chk['dangling_next_down']} pointers to units that are not here, "
+             f"{chk['units_in_a_cycle']} units in a cycle. Reported, not "
+             "repaired -- it belongs to the source data.")
+    result({"catchments": int(len(sub)), "drainage_lines": int(len(riv)),
+            "no_downstream_value": AH.NO_DOWNSTREAM,
+            "sum_of_catchment_areas_km2": round(float(sub["AreaSqKm"].sum()), 2),
+            "basin_area_km2": round(float(b.area_km2), 2),
+            "DrainID": "not written: it needs a reach-to-catchment link basinkit "
+                       "does not hold, and a spatial join would be a guess",
+            "routing_check": chk})
+
+
 def cmd_selftest(args):
     """Proves this interpreter can run basinkit at all -- used by the toolbox."""
     import basinkit as bk
@@ -437,6 +552,19 @@ def build_parser():
     sp.add_argument("--download-all", action="store_true")
     sp.add_argument("--export-3d", action="store_true")
     sp.set_defaults(func=cmd_everything)
+
+    sp = point(sub.add_parser("landscape"))
+    sp.add_argument("--dem-product", default="cop30",
+                    choices=["cop30", "cop90", "nasadem", "srtm30"])
+    sp.add_argument("--max-pixels", type=int, default=0)
+    sp.add_argument("--min-area-km2", type=float, default=1.0)
+    sp.add_argument("--theta-ref", type=float, default=0.45)
+    sp.add_argument("--smooth-m", type=float, default=500.0)
+    sp.set_defaults(func=cmd_landscape)
+
+    sp = point(sub.add_parser("archydro"))
+    sp.add_argument("--min-order", type=int, default=0)
+    sp.set_defaults(func=cmd_archydro)
 
     sub.add_parser("selftest").set_defaults(func=cmd_selftest, out=None)
     return p

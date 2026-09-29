@@ -15,43 +15,7 @@ computation; it never calls Esri's Hydrology tools.
 
 ---
 
-## Step 1 — Install a Python that is NOT ArcGIS Pro's
-
-This is the whole point of the design. Pro's own Python has `arcpy` with pinned
-GDAL and PROJ, and installing scientific packages into it is the standard way to
-break ArcGIS Pro. So basinkit goes in a **separate** Python.
-
-1. Download Python 3.12 for Windows from https://www.python.org/downloads/windows/
-2. Run the installer. **Tick "Add python.exe to PATH"** on the first screen.
-3. Open **Command Prompt** and run:
-
-```
-pip install "basinkit[all]"
-```
-
-4. Find where it landed — you will need this path in Step 4:
-
-```
-where python
-```
-
-Copy the line that ends in `python.exe`. It usually looks like:
-
-```
-C:\Users\<you>\AppData\Local\Programs\Python\Python312\python.exe
-```
-
-5. Check it worked:
-
-```
-python -c "import basinkit; print(basinkit.__version__)"
-```
-
-You should see `0.7.0`.
-
----
-
-## Step 2 — Put the three files in one folder
+## Step 1 — Put the three files in one folder
 
 Unzip `BasinKit-for-ArcGIS-Pro.zip` anywhere you like, for example
 `C:\Tools\BasinKit\`. The folder must contain all three, side by side:
@@ -66,7 +30,7 @@ If they get separated the toolbox will tell you which one is missing.
 
 ---
 
-## Step 3 — Add the toolbox to ArcGIS Pro
+## Step 2 — Add the toolbox to ArcGIS Pro
 
 1. Open ArcGIS Pro and open (or create) a project.
 2. In the **Catalog** pane, right-click **Toolboxes**.
@@ -77,23 +41,43 @@ If they get separated the toolbox will tell you which one is missing.
 
 ---
 
-## Step 4 — Point it at the right Python  (do this once)
+## Step 3 — Run Set Up BasinKit  (do this once)
 
-1. Open **BasinKit → 0 Configuration → Configure BasinKit**.
-2. In **Python executable with basinkit installed**, browse to the `python.exe`
-   path you copied in Step 1.
-3. Click **Run**.
+Open **BasinKit → 0 Configuration → Set Up BasinKit**, leave every parameter
+empty, and click **Run**.
 
-It should report the basinkit version and every dependency it found. Any package
-that is missing comes back as a warning naming that package.
+It looks for an interpreter that already has basinkit. If it finds none, it
+builds its own environment and installs basinkit into it. You do not need to
+install Python first.
 
-If you would rather not save a path, set a Windows environment variable called
-`BASINKIT_PYTHON` to the same `python.exe`. That takes priority over the saved
-setting.
+**ArcGIS Pro's own Python is never modified.** That separation is the whole
+design: Pro's Python has `arcpy` with pinned GDAL and PROJ, and installing
+scientific packages into it is the standard way to break ArcGIS Pro. BasinKit
+builds a separate environment and talks to it as another process.
+
+The environment goes in `%LOCALAPPDATA%\BasinKit\env`. The install downloads
+about 150 MB and takes a few minutes. Every line appears in the messages pane,
+so you can watch it work -- it is not frozen.
+
+When it finishes it reports the basinkit version and every dependency it found.
+
+### If you would rather set it up yourself
+
+Install Python 3.12 from https://www.python.org/downloads/windows/, ticking
+**Add python.exe to PATH**, then:
+
+```
+pip install "basinkit[all]"
+where python
+```
+
+Put that `python.exe` path into the tool's first parameter instead. A Windows
+environment variable `BASINKIT_PYTHON` pointing at the same interpreter works
+too, and takes priority over the saved setting.
 
 ---
 
-## Step 5 — Run it
+## Step 4 — Run it
 
 Open **BasinKit → 1 Comprehensive Analysis → Complete Basin Analysis**.
 
@@ -156,11 +140,9 @@ It is not frozen. Each analysis prints a line when it finishes.
 
 ## If something goes wrong
 
-**"Could not start …"** — the Python path is wrong. Re-run Configure BasinKit.
+**"Could not start …"** — the Python path is wrong. Re-run Set Up BasinKit.
 
-**A missing-module error** — that interpreter does not have basinkit. Run
-`pip install "basinkit[all]"` in the same Python you pointed at, then Configure
-BasinKit again to confirm.
+**A missing-module error** — that interpreter does not have basinkit. Re-run Set Up BasinKit and let it build its own environment.
 
 **One analysis reports "incomplete"** — a data server was busy. The run retries
 once and then carries on; the reason is recorded in `manifest.json` and printed
