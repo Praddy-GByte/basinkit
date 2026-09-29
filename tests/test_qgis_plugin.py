@@ -116,7 +116,7 @@ def test_algorithm_names_follow_the_processing_rules():
 
 def test_create_instance_returns_a_new_object():
     """Processing clones the algorithm per run; returning self leaks state."""
-    source = (PLUGIN / "processing_provider" / "algorithms" / "base.py").read_text()
+    source = (PLUGIN / "processing_provider" / "algorithms" / "base.py").read_text(encoding="utf-8")
     assert "return self.__class__()" in source
     assert "return self\n" not in source.split("def createInstance")[1][:200]
 
@@ -148,7 +148,7 @@ def test_python_command_never_returns_the_application_binary(tmp_path, monkeypat
     app = tmp_path / "QGIS.app" / "Contents" / "MacOS"
     app.mkdir(parents=True)
     binary = app / "QGIS"
-    binary.write_text("#!/bin/sh\n")
+    binary.write_text("#!/bin/sh\n", encoding="utf-8")
     binary.chmod(0o755)
 
     monkeypatch.setattr(deps.sys, "executable", str(binary))
@@ -165,10 +165,10 @@ def test_python_command_finds_the_interpreter_in_the_bundle(tmp_path, monkeypatc
     app = tmp_path / "QGIS.app" / "Contents" / "MacOS"
     (app / "bin").mkdir(parents=True)
     binary = app / "QGIS"
-    binary.write_text("#!/bin/sh\n")
+    binary.write_text("#!/bin/sh\n", encoding="utf-8")
     binary.chmod(0o755)
     interpreter = app / "bin" / "python3"
-    interpreter.write_text("#!/bin/sh\n")
+    interpreter.write_text("#!/bin/sh\n", encoding="utf-8")
     interpreter.chmod(0o755)
 
     monkeypatch.setattr(deps.sys, "executable", str(binary))
@@ -215,7 +215,7 @@ def test_no_unscoped_qt_enums():
     for path in sorted(root.rglob("*.py")):
         if "__pycache__" in str(path):
             continue
-        text = path.read_text()
+        text = path.read_text(encoding="utf-8")
         for pattern, fix in UNSCOPED:
             for hit in re.finditer(pattern, text):
                 # already scoped forms contain the scope name, skip them
