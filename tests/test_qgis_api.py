@@ -120,5 +120,5 @@ def test_the_reassurance_line_is_gone(qgis_app):
     answers, so it read as a pass on exactly the results that needed a flag."""
     from qgis_plugin.processing_provider.algorithms import delineate
 
-    source = __import__("pathlib").Path(delineate.__file__).read_text()
+    source = __import__("pathlib").Path(delineate.__file__).read_text(encoding="utf-8")
     assert "from the computed area)" not in source
