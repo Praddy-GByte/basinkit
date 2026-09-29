@@ -3,6 +3,14 @@ name: Docs
 on:
   push: { branches: [main] }
 
+# gh-deploy pushes a commit to the gh-pages branch. Two runs doing that at once
+# race, and the loser is rejected as a non-fast-forward -- a red build caused by
+# nothing but timing. One run at a time, and a newer push supersedes a queued
+# one, because only the newest documentation is worth deploying.
+concurrency:
+  group: docs-deploy
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
