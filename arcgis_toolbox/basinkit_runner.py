@@ -448,6 +448,15 @@ def cmd_archydro(args):
         path = os.path.join(args.out, "archydro_%s.csv" % name.lower())
         _write_table(frame[have].to_dict("records"), path, fieldnames=have)
 
+    fig_path = os.path.join(args.out, "archydro_routing.png")
+    try:
+        AH.figure(sub, riv, path=fig_path,
+                  title="Outlet %.5f, %.5f" % (args.lat, args.lon))
+        out("figure", fig_path)
+    except Exception as exc:                        # noqa: BLE001
+        info("The routing figure could not be drawn (%s: %s). Every table above "
+             "is unaffected." % (exc.__class__.__name__, exc))
+
     chk = AH.check(sub)
     if not chk["single_outlet"]:
         info("The routing table is not a single tree draining to one outlet: "

@@ -340,7 +340,7 @@ def _as_values(dem):
 
 
 def figure(result, *, path=None, title="", figsize=(11.0, 7.5), dpi=150):
-    """The two pictures the numbers are worth nothing without.
+    """The standard plots for a channel-steepness analysis.
 
     Top: the trunk in chi-elevation space, which is where a knickpoint is a
     visible break rather than a row in a table, with every knickpoint marked and
@@ -426,10 +426,10 @@ def figure(result, *, path=None, title="", figsize=(11.0, 7.5), dpi=150):
 def confidence(result):
     """What each reported number is worth, attached to the number itself.
 
-    This is not a list of apologies. It is the same thing an instrument does when
-    it prints a tolerance beside a reading: every value here was measured, and
-    this says which of them can be quoted alone, which needs its own diagnostic
-    quoted with it, and how much of the network each one describes.
+    Each value in the result was measured. This states which of them can be
+    quoted on their own, which should be quoted together with their own
+    diagnostic, and how much of the channel network each one describes -- the
+    same role a stated tolerance plays beside an instrument reading.
 
     Returns {quantity: sentence}. basinkit's data_quality() reports layer grades
     the same way, including its refusals to grade.
@@ -490,9 +490,10 @@ def confidence(result):
 def limits(result):
     """The few cases where a number should not be used at all.
 
-    Deliberately short. A caution on every run is not a caution; it is noise, and
-    the reader stops reading it. Everything that merely qualifies a number lives
-    in confidence() and travels with that number instead.
+    Deliberately short. A caution raised on every run carries no information and
+    is quickly ignored, so this covers only the conditions under which a value
+    should not be used. Anything that merely qualifies a value is reported by
+    confidence(), attached to the value it qualifies.
     """
     s = result["summary"]
     fit = result.get("concavity_fit")

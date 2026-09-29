@@ -22,7 +22,11 @@ tables as CSV:
 | `DrainageLine` | river reach | `HydroID`, `HydroCode`, `NextDownID`, `LengthKm` |
 
 Every original HydroBASINS and HydroRIVERS column is kept alongside, so nothing
-is lost in translation.
+is lost in translation. `archydro_routing.png` draws the table: each catchment
+filled, a line from each centroid to the centroid of the catchment its
+`NextDownID` names, and the terminal unit marked. A table that is a single tree
+draining to one outlet looks like one, and a table with two outlets, a cycle or
+a pointer into nothing does not.
 
 ## What the fields mean, and why they hold what they hold
 

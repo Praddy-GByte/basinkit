@@ -27,8 +27,8 @@ fitted concavity drawn on it so the fit can be judged by eye.
 ### Every number arrives with what it is worth
 
 The result carries a `confidence` block: one sentence per quantity, attached to
-that quantity. It is not a list of apologies — it is what an instrument does when
-it prints a tolerance beside a reading.
+that quantity, stating what that value is worth — the same role a stated tolerance
+plays beside an instrument reading.
 
 ```
 "ksn":  "Measured on the 67% of channel cells that have a downstream gradient.
@@ -45,11 +45,10 @@ it prints a tolerance beside a reading.
 So a weak θ does not contaminate k_sn, and the output says which is which
 rather than leaving the reader to guess.
 
-Separately — and rarely — a run prints a **limit**: the short list of cases where
-a number should not be used at all. A concavity fit below R² 0.5, a network more
+Separately, a run may print a **limit**: the short list of conditions under which
+a value should not be used at all — a concavity fit below R² 0.5, a network more
 than half flat, or fewer than 500 channel cells. **An ordinary run prints none**,
-and there is a test that pins that. A caution on every run is not a caution; the
-reader stops reading it.
+and a test enforces that. A caution raised on every run carries no information.
 
 ## Method
 
