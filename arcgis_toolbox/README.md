@@ -196,7 +196,7 @@ Everything lands in the output folder you choose, in formats Pro reads natively:
 MIT. If you use it in published work, please cite:
 
 > Kaushik, P. (2026). *basinkit: basin-scale acquisition of open Earth
-> observation data* (Version 0.7.0) [Computer software]. Zenodo.
+> observation data* (Version 0.8.2) [Computer software]. Zenodo.
 > https://doi.org/10.5281/zenodo.22181933
 
 The underlying datasets carry their own licences — `Basin.license_report()`
