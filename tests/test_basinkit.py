@@ -555,7 +555,7 @@ def test_no_numpy_2_removed_apis():
     offenders = [
         f"{path.name}:{i}: {line.strip()}"
         for path in root.rglob("*.py")
-        for i, line in enumerate(path.read_text().splitlines(), 1)
+        for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1)
         if removed.search(line) and "removed in NumPy 2.0" not in line
     ]
     assert not offenders, "NumPy 2.0 removed these:\n" + "\n".join(offenders)
@@ -807,7 +807,7 @@ def test_internal_and_external_checks_are_not_confused_in_the_docs():
     import pathlib
 
     doc = (pathlib.Path(__file__).resolve().parent.parent
-           / "docs" / "delineation.md").read_text()
+           / "docs" / "delineation.md").read_text(encoding="utf-8")
     assert "not an accuracy figure" in doc
     assert "54,100" in doc, "the published reference must appear beside the internal one"
 
@@ -1128,7 +1128,7 @@ def test_documented_example_uses_one_verified_coordinate():
 
     found = set()
     for name in files:
-        text = (root / name).read_text()
+        text = (root / name).read_text(encoding="utf-8")
         found |= set(re.findall(r"from_point\(\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)", text))
         found |= set(re.findall(r"--lat\s+(-?\d+\.?\d*)\s+--lon\s+(-?\d+\.?\d*)", text))
 
@@ -1156,7 +1156,7 @@ def test_readme_quotes_a_distribution_not_a_single_basin():
     import pathlib
     import re
 
-    readme = (pathlib.Path(__file__).resolve().parent.parent / "README.md").read_text()
+    readme = (pathlib.Path(__file__).resolve().parent.parent / "README.md").read_text(encoding="utf-8")
 
     assert re.search(r"\b\d[\d,]{2,}\s+gauges\b", readme), (
         "the sample size must be stated, and it must be the blind sample "
@@ -2201,12 +2201,12 @@ def test_plugin_methods_called_on_self_all_exist():
 
     root = pathlib.Path(__file__).resolve().parents[1]
     folder = root / "qgis_plugin" / "processing_provider" / "algorithms"
-    base = ast.parse((folder / "base.py").read_text())
+    base = ast.parse((folder / "base.py").read_text(encoding="utf-8"))
     inherited = {n.name for c in base.body if isinstance(c, ast.ClassDef)
                  for n in c.body if isinstance(n, ast.FunctionDef)}
     problems = []
     for path in sorted(folder.glob("*.py")):
-        for cls in ast.parse(path.read_text()).body:
+        for cls in ast.parse(path.read_text(encoding="utf-8")).body:
             if not isinstance(cls, ast.ClassDef):
                 continue
             defined = inherited | {n.name for n in cls.body

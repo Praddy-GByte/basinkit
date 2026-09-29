@@ -720,9 +720,13 @@ class Basin:
             except Exception as exc:
                 manifest["failed"][name] = f"{type(exc).__name__}: {exc}"
 
-        (outdir / "LICENSES.txt").write_text(self.license_report())
+        # Explicit UTF-8: the licence text and the manifest both carry
+        # non-ASCII, and Windows would otherwise write them as cp1252.
+        (outdir / "LICENSES.txt").write_text(self.license_report(),
+                                             encoding="utf-8")
         manifest["layers"]["licenses"] = "LICENSES.txt"
-        (outdir / "manifest.json").write_text(json.dumps(manifest, indent=2, default=str))
+        (outdir / "manifest.json").write_text(
+            json.dumps(manifest, indent=2, default=str), encoding="utf-8")
         return manifest
 
     @staticmethod

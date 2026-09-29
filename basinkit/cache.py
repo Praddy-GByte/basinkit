@@ -142,11 +142,11 @@ def memo_json(url: str, *, namespace: str = "json", max_age_days: float = 30) ->
         age_days = (time.time() - path.stat().st_mtime) / 86400
         if age_days < max_age_days:
             try:
-                return json.loads(path.read_text())
+                return json.loads(path.read_text(encoding="utf-8"))
             except json.JSONDecodeError:
                 path.unlink(missing_ok=True)
     data = get_json(url)
-    path.write_text(json.dumps(data))
+    path.write_text(json.dumps(data), encoding="utf-8")
     return data
 
 
