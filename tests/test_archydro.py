@@ -55,7 +55,7 @@ def test_the_original_identifier_survives_in_hydrocode():
 
 def test_nextdownid_points_at_the_hydroid_of_the_downstream_unit():
     c = AH.catchment_table(_catchments()).set_index("HYBAS_ID")
-    hid = dict(zip(c.index, c["HydroID"]))
+    hid = dict(zip(c.index, c["HydroID"], strict=True))
     assert c.loc[7120412090, "NextDownID"] == hid[7120409910]
     assert c.loc[7120412250, "NextDownID"] == hid[7120412090]
     assert c.loc[7120412100, "NextDownID"] == hid[7120412090]
@@ -148,7 +148,8 @@ def test_geometry_is_untouched():
     src = _catchments()
     c = AH.catchment_table(src)
     assert c.crs == src.crs
-    assert all(a.equals(b) for a, b in zip(c.geometry, src.geometry))
+    assert all(a.equals(b)
+               for a, b in zip(c.geometry, src.geometry, strict=True))
 
 
 def test_the_routing_figure_draws_and_marks_the_outlet():

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Arc Hydro schema export: basinkit's sub-catchments and rivers, renamed.
 
 This is a reshaping, not a computation. Every value written out is one basinkit
@@ -49,8 +48,8 @@ def catchment_table(subbasins):
     missing = need - set(subbasins.columns)
     if missing:
         raise ValueError(
-            "the sub-catchment layer is missing %s; Basin.subbasins() returns "
-            "these HydroBASINS attributes" % sorted(missing))
+            f"the sub-catchment layer is missing {sorted(missing)}; "
+            "Basin.subbasins() returns these HydroBASINS attributes")
 
     out = subbasins.copy()
     hid = _map_ids(out["HYBAS_ID"])
@@ -76,8 +75,8 @@ def drainage_line_table(rivers):
     missing = need - set(rivers.columns)
     if missing:
         raise ValueError(
-            "the river layer is missing %s; Basin.rivers() returns these "
-            "HydroRIVERS attributes" % sorted(missing))
+            f"the river layer is missing {sorted(missing)}; Basin.rivers() "
+            "returns these HydroRIVERS attributes")
 
     out = rivers.copy()
     hid = _map_ids(out["HYRIV_ID"])
@@ -101,11 +100,11 @@ def check(catchments):
     hid = catchments["HydroID"].astype(int).tolist()
     nxt = catchments["NextDownID"].astype(int).tolist()
     known = set(hid)
-    terminal = [h for h, n in zip(hid, nxt) if n == NO_DOWNSTREAM]
+    terminal = [h for h, n in zip(hid, nxt, strict=True) if n == NO_DOWNSTREAM]
     dangling = [n for n in nxt if n != NO_DOWNSTREAM and n not in known]
     # walk downstream from every unit; a cycle shows up as a walk that does not
     # end within the number of units
-    nx = dict(zip(hid, nxt))
+    nx = dict(zip(hid, nxt, strict=True))
     cycles = 0
     for h in hid:
         seen, cur, steps = set(), h, 0
@@ -140,8 +139,8 @@ def figure(catchments, drainage_lines=None, *, path=None, title="",
     need = {"HydroID", "NextDownID"}
     missing = need - set(catchments.columns)
     if missing:
-        raise ValueError("catchment_table() must be run first; %s missing"
-                         % sorted(missing))
+        raise ValueError("catchment_table() must be run first; "
+                         f"{sorted(missing)} missing")
 
     fig, ax = plt.subplots(figsize=figsize)
     catchments.plot(ax=ax, facecolor="#dce7f0", edgecolor="#7f9db9", linewidth=0.6)
@@ -149,9 +148,11 @@ def figure(catchments, drainage_lines=None, *, path=None, title="",
         drainage_lines.plot(ax=ax, color="#1f4e79", linewidth=0.8)
 
     pts = catchments.geometry.representative_point()
-    by_id = {int(h): (p.x, p.y) for h, p in zip(catchments["HydroID"], pts)}
+    by_id = {int(h): (p.x, p.y)
+             for h, p in zip(catchments["HydroID"], pts, strict=True)}
     outlets = 0
-    for hid, nxt in zip(catchments["HydroID"], catchments["NextDownID"]):
+    for hid, nxt in zip(catchments["HydroID"], catchments["NextDownID"],
+                        strict=True):
         a = by_id.get(int(hid))
         b = by_id.get(int(nxt))
         if a is None:
@@ -167,22 +168,22 @@ def figure(catchments, drainage_lines=None, *, path=None, title="",
         ax.plot([a[0]], [a[1]], marker="o", ms=3.2, color="#444444", zorder=5)
 
     chk = check(catchments)
+    plural = "" if chk["terminal_units"] == 1 else "s"
     ax.set_title((title + "\n" if title else "")
-                 + "Catchment routing: %d units, %d outlet%s"
-                 % (chk["units"], chk["terminal_units"],
-                    "" if chk["terminal_units"] == 1 else "s"),
+                 + f"Catchment routing: {chk['units']} units, "
+                   f"{chk['terminal_units']} outlet{plural}",
                  fontsize=10, loc="left")
     ax.set_xlabel("longitude" if (catchments.crs and catchments.crs.is_geographic)
                   else "easting")
     ax.set_ylabel("latitude" if (catchments.crs and catchments.crs.is_geographic)
                   else "northing")
     ax.set_aspect("equal", adjustable="datalim")
-    foot = ("HydroID, HydroCode, NextDownID, AreaSqKm  •  "
-            "no downstream feature = %d  •  " % NO_DOWNSTREAM
-            + ("single tree, no cycles, no dangling pointers"
+    verdict = ("single tree, no cycles, no dangling pointers"
                if chk["single_outlet"] else
-               "%d dangling pointers, %d units in a cycle"
-               % (chk["dangling_next_down"], chk["units_in_a_cycle"])))
+               f"{chk['dangling_next_down']} dangling pointers, "
+               f"{chk['units_in_a_cycle']} units in a cycle")
+    foot = ("HydroID, HydroCode, NextDownID, AreaSqKm  •  "
+            f"no downstream feature = {NO_DOWNSTREAM}  •  " + verdict)
     fig.text(0.01, 0.005, foot, fontsize=7.5, color="#444444")
     fig.tight_layout()
     if path:

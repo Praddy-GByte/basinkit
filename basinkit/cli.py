@@ -172,8 +172,8 @@ def landscape(lat: float, lon: float, backend: str, min_area_km2: float,
     """
     import numpy as np
 
-    from .basin import Basin
     from . import landscape as ls
+    from .basin import Basin
 
     b = Basin.from_point(lat, lon, backend=backend)
     r = ls.analyse(b.dem(), min_area_km2=min_area_km2, theta_ref=theta_ref,
@@ -237,8 +237,8 @@ def archydro(lat: float, lon: float, backend: str, min_order: int,
     """
     import os
 
-    from .basin import Basin
     from . import archydro as ah
+    from .basin import Basin
 
     os.makedirs(out, exist_ok=True)
     b = Basin.from_point(lat, lon, backend=backend)
