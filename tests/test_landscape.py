@@ -254,3 +254,61 @@ def test_a_weak_fit_alone_is_a_qualification_and_not_a_limit():
     r["concavity_fit"] = {"r2": 0.68, "theta": 0.46}
     assert L.limits(r) == []
     assert "weak" in L.confidence(r)["fitted_concavity"]
+
+
+def _binary(node):
+    """Is this open() call in binary mode? Then no encoding applies."""
+    import ast
+
+    mode = ""
+    if len(node.args) > 1 and isinstance(node.args[1], ast.Constant):
+        mode = str(node.args[1].value)
+    for k in node.keywords:
+        if k.arg == "mode" and isinstance(k.value, ast.Constant):
+            mode = str(k.value.value)
+    return "b" in mode
+
+
+def test_every_text_file_read_or_written_states_its_encoding():
+    """Windows defaults to cp1252, so an unstated encoding is a latent bug.
+
+    ``read_text()`` and ``write_text()`` without ``encoding=`` use the platform
+    default. On Linux and macOS that is UTF-8 and nothing goes wrong; on Windows
+    it is cp1252, and the first non-ASCII character in a source file, a cached
+    JSON or a written licence report raises a UnicodeError. It passes review on
+    a Mac and fails on a user's machine, which is the worst way to find out.
+
+    The check parses rather than pattern-matches, because a call whose argument
+    itself contains brackets defeats a regular expression. No default ruff rule
+    covers this, which is why it is a test.
+    """
+    import ast
+    import pathlib
+
+    root = pathlib.Path(__file__).resolve().parent.parent
+    watched = {"read_text", "write_text"}
+    offenders = []
+    for folder in ("basinkit", "tests", "arcgis_toolbox", "qgis_plugin"):
+        base = root / folder
+        if not base.exists():
+            continue
+        for path in sorted(base.rglob("*.py")):
+            try:
+                tree = ast.parse(path.read_text(encoding="utf-8"))
+            except SyntaxError:                     # not ours to police
+                continue
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.Call):
+                    continue
+                stated = any(k.arg == "encoding" for k in node.keywords)
+                if (isinstance(node.func, ast.Attribute)
+                        and node.func.attr in watched and not stated):
+                    offenders.append(f"{path.relative_to(root)}:{node.lineno}: "
+                                     f"{node.func.attr}() without an encoding")
+                elif (isinstance(node.func, ast.Name) and node.func.id == "open"
+                        and not stated and not _binary(node)):
+                    offenders.append(f"{path.relative_to(root)}:{node.lineno}: "
+                                     "open() in text mode without an encoding")
+    assert not offenders, (
+        "read_text/write_text without an explicit encoding breaks on Windows:\n"
+        + "\n".join(offenders))
