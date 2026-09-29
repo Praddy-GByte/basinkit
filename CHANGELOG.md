@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.1 -- 2026-09-29
+
+### Fixed
+
+- **`basinkit landscape` said it had written `knickpoints.csv` and had not.**
+  The ArcGIS Pro runner wrote the table; the command line did not, while its
+  completion message named it anyway. The command now writes it, and that
+  message is assembled from the list of files the run actually produced rather
+  than typed out, so it cannot drift from the truth again.
+
 ## 0.8.0 -- 2026-09-29
 
 ### Is this landscape still changing? A new module that answers it
