@@ -141,10 +141,12 @@ the main lever: lower them for a first look, raise them for the final run.
 | 3 Surface Derivatives | Terrain Surfaces | One elevation download, up to twelve surfaces from it |
 | 4 Thematic Rasters | Land Cover, Soil and Surface Water | Clipped and masked to the polygon, not the bounding box |
 | 5 Morphometry and Drainage Network | Morphometric Parameters | 42 named parameters, plus the network by Strahler order |
+| 5 Morphometry and Drainage Network | Landscape Form (Chi and Channel Steepness) | **New in 0.8.0** — chi, normalised channel steepness, concavity and knickpoints. Checked cell by cell against TopoToolbox, within 6% at every quantile |
 | 5 Morphometry and Drainage Network | Zonal Statistics | Any raster summarised inside any other raster's classes |
 | 6 Quality Assessment | DEM Suitability Assessment | Five tests, plus a per-cell support map |
 | 6 Quality Assessment | Data Quality Report | **New in 0.7.0** — a grade for every layer |
 | 7 Report Generation | Basin Report (PDF) | Eight pages, methods and licences included |
+| 8 Model Coupling | Export for Arc Hydro | **New in 0.8.0** — sub-catchments and reaches as `Catchment` and `DrainageLine`, with `HydroID`, `HydroCode`, `NextDownID` and `AreaSqKm` |
 
 ### Backends
 

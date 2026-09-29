@@ -79,41 +79,109 @@ def resolve_python():
     return sys.executable
 
 
-def base_python():
-    """A real python.exe to build an environment from.
+MIN_PYTHON = (3, 10)
 
-    Inside ArcGIS Pro the toolbox runs in Pro's own process, so sys.executable
-    is ArcGISPro.exe, not an interpreter. sys.prefix still points at Pro's
-    conda environment, which is where its python.exe lives.
+
+def py_version(exe):
+    """(major, minor) reported by this interpreter, or None."""
+    if not exe:
+        return None
+    try:
+        out = subprocess.check_output(
+            [exe, "-c", "import sys;sys.stdout.write('%d.%d' % sys.version_info[:2])"],
+            stderr=subprocess.STDOUT, universal_newlines=True,
+            encoding="utf-8", errors="replace", timeout=60,
+            startupinfo=_no_console())
+    except Exception:                                        # noqa: BLE001
+        return None
+    lines = (out or "").strip().splitlines()
+    if not lines:
+        return None
+    parts = lines[-1].strip().split(".")
+    try:
+        return (int(parts[0]), int(parts[1]))
+    except (ValueError, IndexError):
+        return None
+
+
+def _launcher_python(tag):
+    """Ask the Windows 'py' launcher where a given version lives."""
+    if os.name != "nt":
+        return None
+    try:
+        out = subprocess.check_output(
+            ["py", tag, "-c", "import sys;sys.stdout.write(sys.executable)"],
+            stderr=subprocess.STDOUT, universal_newlines=True,
+            encoding="utf-8", errors="replace", timeout=60,
+            startupinfo=_no_console())
+    except Exception:                                        # noqa: BLE001
+        return None
+    out = (out or "").strip().splitlines()
+    cand = out[-1].strip() if out else ""
+    return cand if cand and os.path.exists(cand) else None
+
+
+def interpreters():
+    """Every interpreter worth considering as a base, best first.
+
+    ArcGIS Pro's own Python comes last on purpose. Pro has shipped Python
+    versions older than basinkit supports, and an environment built from one
+    of those cannot install basinkit at all.
     """
-    exe = sys.executable or ""
-    stem = os.path.splitext(os.path.basename(exe))[0].lower()
-    if stem in ("python", "python3", "pythonw"):
-        return exe
+    seen, out = set(), []
 
+    def add(exe):
+        if not exe:
+            return
+        stem = os.path.splitext(os.path.basename(exe))[0].lower()
+        if not stem.startswith("python"):
+            return                       # ArcGISPro.exe is not an interpreter
+        if exe not in seen and os.path.exists(exe):
+            seen.add(exe)
+            out.append(exe)
+
+    for tag in ("-3.13", "-3.12", "-3.11", "-3.10"):
+        add(_launcher_python(tag))
+    try:
+        import shutil
+        for name in ("python3", "python"):
+            add(shutil.which(name))
+    except Exception:                                        # noqa: BLE001
+        pass
+
+    add(sys.executable)
     names = ["python.exe"] if os.name == "nt" else ["bin/python3", "bin/python"]
     roots = [sys.prefix, getattr(sys, "base_prefix", sys.prefix)]
     if os.name == "nt":
-        for pf in (os.environ.get("ProgramFiles", r"C:\Program Files"),
+        for pf in (os.environ.get("ProgramFiles", ""),
                    os.environ.get("ProgramFiles(x86)", "")):
             if pf:
                 roots.append(os.path.join(pf, "ArcGIS", "Pro", "bin", "Python",
                                           "envs", "arcgispro-py3"))
     for root in roots:
         for name in names:
-            cand = os.path.join(root, *name.split("/"))
-            if os.path.exists(cand):
-                return cand
+            add(os.path.join(root, *name.split("/")))
+    return out
 
-    try:
-        import shutil
-        for name in ("python3", "python"):
-            found = shutil.which(name)
-            if found:
-                return found
-    except Exception:                                        # noqa: BLE001
-        pass
-    return exe
+
+def base_python():
+    """An interpreter new enough to build a basinkit environment from.
+
+    Returns (path, version) or (None, best_version_seen). Inside ArcGIS Pro
+    sys.executable is ArcGISPro.exe rather than an interpreter, and Pro's own
+    Python may predate the version basinkit needs, so neither is assumed.
+    """
+    best = None
+    for exe in interpreters():
+        ver = py_version(exe)
+        if ver is None:
+            continue
+        arcpy.AddMessage("  %s  Python %d.%d" % (exe, ver[0], ver[1]))
+        if ver >= MIN_PYTHON:
+            return exe, ver
+        if best is None or ver > best:
+            best = ver
+    return None, best
 
 
 def probe(exe, timeout=60):
@@ -171,19 +239,29 @@ def candidates():
 def stream(cmd, timeout=3600):
     """Run a command, relay every line into the messages pane.
 
-    Returns the exit code. Used for environment creation and pip, which are
-    slow enough that silence would look like a hang.
+    Returns (exit code, everything it printed). Environment creation and pip
+    are slow enough that silence would look like a hang, and the text is what
+    tells the user which of several quite different things went wrong.
     """
     proc = subprocess.Popen(
         cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
         universal_newlines=True, encoding="utf-8", errors="replace",
         startupinfo=_no_console())
+    kept = []
     for line in proc.stdout:
         line = line.rstrip()
         if line:
+            kept.append(line)
             arcpy.AddMessage("    " + line)
     proc.wait(timeout=timeout)
-    return proc.returncode
+    return proc.returncode, "\n".join(kept)
+
+
+def _manual_steps():
+    return ("Install Python 3.10 or newer from https://www.python.org/downloads/ "
+            "(tick 'Add python.exe to PATH'), run "
+            "'pip install \"basinkit[all]\"' in a Command Prompt, then put that "
+            "python.exe in this tool's first parameter.")
 
 
 def build_environment(base_exe, env_dir):
@@ -194,22 +272,31 @@ def build_environment(base_exe, env_dir):
     scientific packages into it is the documented way to break ArcGIS Pro.
     Returns the path of the interpreter inside it.
     """
-    arcpy.AddMessage("Creating an environment for BasinKit")
-    arcpy.AddMessage("  location: %s" % env_dir)
-    arcpy.AddMessage("  built from: %s" % base_exe)
-    arcpy.AddMessage("ArcGIS Pro's own Python is not modified.")
-
-    parent = os.path.dirname(env_dir)
-    try:
-        os.makedirs(parent, exist_ok=True)
-    except OSError as exc:
-        arcpy.AddError("Cannot create %s (%s)." % (parent, exc))
+    ver = py_version(base_exe)
+    if ver is None:
+        arcpy.AddError("Could not run %s. %s" % (base_exe, _manual_steps()))
+        raise arcpy.ExecuteError
+    if ver < MIN_PYTHON:
+        arcpy.AddError(
+            "%s is Python %d.%d, and basinkit needs %d.%d or newer, so an "
+            "environment built from it cannot install basinkit."
+            % (base_exe, ver[0], ver[1], MIN_PYTHON[0], MIN_PYTHON[1]))
+        arcpy.AddError(_manual_steps())
         raise arcpy.ExecuteError
 
-    if stream([base_exe, "-m", "venv", env_dir], timeout=600) != 0:
-        arcpy.AddError(
-            "Could not create the environment. Install Python yourself and "
-            "point this tool at it instead -- the guide has the steps.")
+    arcpy.AddMessage("Creating an environment for BasinKit")
+    arcpy.AddMessage("  location: %s" % env_dir)
+    arcpy.AddMessage("  built from: %s (Python %d.%d)" % (base_exe, ver[0], ver[1]))
+    arcpy.AddMessage("ArcGIS Pro's own Python is not modified.")
+
+    try:
+        os.makedirs(os.path.dirname(env_dir), exist_ok=True)
+    except OSError as exc:
+        arcpy.AddError("Cannot create %s (%s)." % (os.path.dirname(env_dir), exc))
+        raise arcpy.ExecuteError
+
+    if stream([base_exe, "-m", "venv", env_dir], timeout=600)[0] != 0:
+        arcpy.AddError("Could not create the environment. " + _manual_steps())
         raise arcpy.ExecuteError
 
     exe = _env_python(env_dir)
@@ -220,10 +307,22 @@ def build_environment(base_exe, env_dir):
     arcpy.AddMessage("Installing basinkit and its dependencies.")
     arcpy.AddMessage("This downloads about 150 MB and takes a few minutes.")
     stream([exe, "-m", "pip", "install", "--upgrade", "pip", "--quiet"], timeout=900)
-    if stream([exe, "-m", "pip", "install", "basinkit[all]"], timeout=3600) != 0:
-        arcpy.AddError(
-            "The install did not finish. The usual cause is no route to "
-            "pypi.org -- a proxy or a firewall. The guide has the manual steps.")
+    code, text = stream([exe, "-m", "pip", "install", "basinkit[all]"], timeout=3600)
+    if code != 0:
+        low = text.lower()
+        if "requires-python" in low or "different python version" in low:
+            arcpy.AddError(
+                "pip refused every basinkit version because this interpreter is "
+                "too old. basinkit needs Python %d.%d or newer."
+                % (MIN_PYTHON[0], MIN_PYTHON[1]))
+        elif ("could not find a version" in low or "no matching distribution" in low
+              or "connection" in low or "timed out" in low or "proxy" in low):
+            arcpy.AddError(
+                "pip could not fetch basinkit. The message above says why -- "
+                "usually no route to pypi.org, or a proxy in the way.")
+        else:
+            arcpy.AddError("The install did not finish. The message above says why.")
+        arcpy.AddError(_manual_steps())
         raise arcpy.ExecuteError
     return exe
 
@@ -482,8 +581,19 @@ class Configure(BaseTool):
             if exe:
                 self._save(exe)
             elif auto:
-                arcpy.AddMessage("None found.")
-                exe = build_environment(base_python(), _managed_env_dir())
+                arcpy.AddMessage("None found. Looking for a Python to build one from.")
+                base, seen = base_python()
+                if base is None:
+                    if seen is None:
+                        arcpy.AddError("No Python interpreter was found at all.")
+                    else:
+                        arcpy.AddError(
+                            "The newest Python found is %d.%d, and basinkit needs "
+                            "%d.%d or newer." % (seen[0], seen[1],
+                                                 MIN_PYTHON[0], MIN_PYTHON[1]))
+                    arcpy.AddError(_manual_steps())
+                    raise arcpy.ExecuteError
+                exe = build_environment(base, _managed_env_dir())
                 ver = probe(exe)
                 if ver is None:
                     arcpy.AddError("The environment was built but basinkit "
