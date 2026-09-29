@@ -189,6 +189,9 @@ def landscape(lat: float, lon: float, backend: str, min_area_km2: float,
         import rasterio
 
         os.makedirs(out, exist_ok=True)
+        # The completion message is built from this list rather than written by
+        # hand, so it cannot come to name a file the run did not produce.
+        written = []
         dem = b.dem()
         for name in ("chi", "ksn"):
             arr = np.asarray(r["rasters"][name], dtype="float32")
@@ -199,6 +202,7 @@ def landscape(lat: float, lon: float, backend: str, min_area_km2: float,
                 nodata=float("nan"), compress="deflate",
             ) as dst:
                 dst.write(arr, 1)
+            written.append(name + ".tif")
         t = r["trunk"]
         with open(os.path.join(out, "trunk_profile.csv"), "w", newline="",
                   encoding="utf-8") as fh:
@@ -208,14 +212,26 @@ def landscape(lat: float, lon: float, backend: str, min_area_km2: float,
                 w.writerow([round(float(t["chi_m"][i]), 2),
                             round(float(t["elevation_m"][i]), 2),
                             round(float(t["distance_to_outlet_m"][i]), 1)])
+        written.append("trunk_profile.csv")
+        fields = ["chi_m", "elevation_m", "step_m", "excess_gradient_sigma"]
+        with open(os.path.join(out, "knickpoints.csv"), "w", newline="",
+                  encoding="utf-8") as fh:
+            w = csv.DictWriter(fh, fields)
+            w.writeheader()
+            for k in r["knickpoints"]:
+                w.writerow({"chi_m": round(float(k["chi"]), 2),
+                            "elevation_m": k["elevation_m"],
+                            "step_m": k["step_m"],
+                            "excess_gradient_sigma": k["excess_gradient_sigma"]})
+        written.append("knickpoints.csv")
         try:
             ls.figure(r, path=os.path.join(out, "landscape_form.png"),
                       title=f"Outlet {lat:.5f}, {lon:.5f}")
+            written.append("landscape_form.png")
         except Exception as exc:                        # noqa: BLE001
             click.echo(f"The figure could not be drawn ({exc.__class__.__name__}"
                        f": {exc}). Every number above is unaffected.", err=True)
-        click.echo(f"Wrote chi.tif, ksn.tif, trunk_profile.csv, knickpoints.csv "
-                   f"and landscape_form.png to {out}")
+        click.echo(f"Wrote {', '.join(written)} to {out}")
     for w in ls.limits(r):
         click.echo("limit: " + w, err=True)
 
