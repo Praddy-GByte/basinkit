@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Landscape form: chi, channel steepness, concavity and knickpoints.
 
 These answer a question the shape indices cannot: is this landscape still
@@ -21,6 +20,7 @@ Nothing here is an uplift rate. chi, k_sn and knickpoint counts describe form
 and transience; turning them into rates needs independent calibration.
 """
 from __future__ import annotations
+
 import numpy as np
 
 THETA_REF = 0.45
@@ -335,7 +335,7 @@ def _as_values(dem):
         v = v[0]
     if v.ndim != 2:
         raise ValueError("landscape analysis needs a single 2-D elevation grid, "
-                         "and this one has shape %s" % (v.shape,))
+                         f"and this one has shape {v.shape}")
     return v
 
 
@@ -351,8 +351,8 @@ def figure(result, *, path=None, title="", figsize=(11.0, 7.5), dpi=150):
 
     Returns the figure. Saves it if ``path`` is given.
     """
-    import numpy as np
     import matplotlib
+    import numpy as np
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
@@ -370,14 +370,14 @@ def figure(result, *, path=None, title="", figsize=(11.0, 7.5), dpi=150):
     for k in result["knickpoints"]:
         i = int(np.argmin(np.abs(chi - k["chi"])))
         ax.plot(chi[i] / 1000.0, z[i], "o", ms=9, mfc="none", mec="#c0392b", mew=2.0)
-        ax.annotate("%.0f m step\n%.1fσ" % (k["step_m"],
-                                                k["excess_gradient_sigma"]),
+        ax.annotate(f"{k['step_m']:.0f} m step\n"
+                    f"{k['excess_gradient_sigma']:.1f}σ",
                     (chi[i] / 1000.0, z[i]), textcoords="offset points",
                     xytext=(10, 12), fontsize=8, color="#c0392b")
-    ax.set_xlabel("χ (km)   —   θref = %g, A₀ = %g km²"
-                  % (s["theta_ref"], s["A0_km2"]))
+    ax.set_xlabel(f"χ (km)   —   θref = {s['theta_ref']:g}, "
+                  f"A₀ = {s['A0_km2']:g} km²")
     ax.set_ylabel("elevation (m)")
-    ax.set_title(("%s\n" % title if title else "")
+    ax.set_title((f"{title}\n" if title else "")
                  + "Trunk in χ–elevation space. A river at equilibrium "
                    "plots as a straight line; a break is a knickpoint.",
                  fontsize=10, loc="left")
@@ -398,7 +398,7 @@ def figure(result, *, path=None, title="", figsize=(11.0, 7.5), dpi=150):
         ax3.plot(bx, by, "o", ms=4, color="#555555", label="median per area bin")
         line = -fit["theta"] * bx + np.log10(fit["ks"])
         ax3.plot(bx, line, "-", lw=1.6, color="#c0392b",
-                 label="θ = %.3f, R² = %.2f" % (fit["theta"], fit["r2"]))
+                 label=f"θ = {fit['theta']:.3f}, R² = {fit['r2']:.2f}")
         ax3.legend(fontsize=7, frameon=False)
         if fit["r2"] < 0.7:
             ax3.text(0.03, 0.06, "weak fit — treat θ with caution",
@@ -412,10 +412,10 @@ def figure(result, *, path=None, title="", figsize=(11.0, 7.5), dpi=150):
                   fontsize=9, loc="left")
     ax3.grid(alpha=0.25)
 
-    foot = ("k_sn median %s, 90th %s   •   %d knickpoints   •   "
-            "%.0f%% of channel cells have no gradient and are excluded from k_sn"
-            % (s["ksn_median"], s["ksn_p90"], s["knickpoints"],
-               100.0 * (s["zero_gradient_channel_fraction"] or 0.0)))
+    flat_pct = 100.0 * (s["zero_gradient_channel_fraction"] or 0.0)
+    foot = (f"k_sn median {s['ksn_median']}, 90th {s['ksn_p90']}   •   "
+            f"{s['knickpoints']} knickpoints   •   {flat_pct:.0f}% of "
+            "channel cells have no gradient and are excluded from k_sn")
     fig.text(0.01, 0.005, foot + "   •   not an uplift rate", fontsize=7.5,
              color="#444444")
     if path:
@@ -440,32 +440,31 @@ def confidence(result):
     out = {}
 
     out["ksn"] = (
-        "Measured on the %.0f%% of channel cells that have a downstream "
-        "gradient. Cross-checked cell by cell against TopoToolbox: within 6%% at "
-        "every quantile, and its median moves under 2%% across a fourfold change "
-        "in cell size. Quotable as it stands." % (100 * (1 - zf)))
+        f"Measured on the {100 * (1 - zf):.0f}% of channel cells that have a "
+        "downstream gradient. Cross-checked cell by cell against TopoToolbox: "
+        "within 6% at every quantile, and its median moves under 2% across a "
+        "fourfold change in cell size. Quotable as it stands.")
     if zf >= 0.4:
         out["ksn"] += (
-            " The excluded %.0f%% is high: much of this network is lake, flat or "
-            "DEM artifact, so k_sn speaks for less of the basin than usual."
-            % (100 * zf))
+            f" The excluded {100 * zf:.0f}% is high: much of this network is "
+            "lake, flat or DEM artifact, so k_sn speaks for less of the basin "
+            "than usual.")
 
     if not fit:
         out["fitted_concavity"] = ("Not fitted: too few channel cells above the "
                                    "threshold to bin by drainage area.")
     elif fit["r2"] >= 0.8:
         out["fitted_concavity"] = (
-            "Fitted with R2 = %.2f. Quotable as it stands." % fit["r2"])
+            f"Fitted with R2 = {fit['r2']:.2f}. Quotable as it stands.")
     elif fit["r2"] >= 0.7:
         out["fitted_concavity"] = (
-            "Fitted with R2 = %.2f. Quote the R2 beside it." % fit["r2"])
+            f"Fitted with R2 = {fit['r2']:.2f}. Quote the R2 beside it.")
     else:
         out["fitted_concavity"] = (
-            "Fitted with R2 = %.2f, which is weak. The slope-area relation in "
-            "this basin is scattered, so theta = %.3f is a measurement rather "
-            "than a result; quote it with its R2 or not at all. k_sn is "
-            "unaffected -- it does not use the fitted theta."
-            % (fit["r2"], fit["theta"]))
+            f"Fitted with R2 = {fit['r2']:.2f}, which is weak. The slope-area "
+            f"relation in this basin is scattered, so theta = {fit['theta']:.3f} "
+            "is a measurement rather than a result; quote it with its R2 or not "
+            "at all. k_sn is unaffected -- it does not use the fitted theta.")
 
     if s.get("knickpoints"):
         out["knickpoints"] = (
@@ -501,18 +500,19 @@ def limits(result):
     out = []
     if fit and fit["r2"] < 0.5:
         out.append(
-            "The concavity fit is too scattered to use (R2 = %.2f). theta is in "
-            "the output because it was measured, but nothing should be concluded "
-            "from it. k_sn does not depend on it and is unaffected." % fit["r2"])
+            f"The concavity fit is too scattered to use (R2 = {fit['r2']:.2f}). "
+            "theta is in the output because it was measured, but nothing should "
+            "be concluded from it. k_sn does not depend on it and is "
+            "unaffected.")
     if zf >= 0.5:
         out.append(
-            "%.0f%% of this channel network has no downstream gradient, so k_sn "
-            "describes less than half of it. Check whether the basin is largely "
-            "lake or floodplain before comparing its k_sn with anything."
-            % (100 * zf))
+            f"{100 * zf:.0f}% of this channel network has no downstream "
+            "gradient, so k_sn describes less than half of it. Check whether the "
+            "basin is largely lake or floodplain before comparing its k_sn with "
+            "anything.")
     if s.get("channel_cells", 0) < 500:
         out.append(
-            "Only %d channel cells above the %g km2 threshold. Quantiles on a "
-            "network this small are unstable; lower the threshold or use a finer "
-            "DEM." % (s["channel_cells"], s["min_channel_area_km2"]))
+            f"Only {s['channel_cells']} channel cells above the "
+            f"{s['min_channel_area_km2']:g} km2 threshold. Quantiles on a network "
+            "this small are unstable; lower the threshold or use a finer DEM.")
     return out
