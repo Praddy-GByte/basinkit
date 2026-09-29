@@ -37,33 +37,37 @@ ArcGIS Pro  ──►  BasinKit.pyt  ──►  subprocess  ──►  basinkit_
 
 ## Install
 
-**1. Get a Python that has basinkit.** Any Python 3.10 or newer that is *not*
-Pro's. Miniconda, python.org, or the `uv` tool all work.
+**1. Put these three files in the same folder.** They must stay together:
+
+```
+BasinKit.pyt
+basinkit_runner.py
+basinkit_everything.py
+```
+
+**2. Add the toolbox.** In ArcGIS Pro: Catalog pane → right-click **Toolboxes**
+→ **Add Toolbox** → pick `BasinKit.pyt`.
+
+**3. Run Set Up BasinKit.** Open **0 Configuration → Set Up BasinKit**, leave
+every parameter empty, and run it. It looks for an interpreter that already has
+basinkit; if it finds none it builds its own environment in
+`%LOCALAPPDATA%\BasinKit\env` and installs basinkit there. You do not need to
+install Python first. It then reports the basinkit version and every dependency
+it found, and warns about any that are missing.
+
+ArcGIS Pro's own Python is never modified. That is the whole design: Pro's
+Python has `arcpy` with pinned GDAL and PROJ, and installing scientific packages
+into it is the standard way to break ArcGIS Pro.
+
+**Prefer to do it yourself?** Install basinkit into any Python 3.10 or newer
+that is not Pro's, and put that `python.exe` in the tool's first parameter:
 
 ```
 python -m pip install "basinkit[all]"
 ```
 
-**2. Put these two files in the same folder.** They must stay together:
-
-```
-BasinKit.pyt
-basinkit_runner.py
-```
-
-**3. Add the toolbox.** In ArcGIS Pro: Catalog pane → right-click **Toolboxes**
-→ **Add Toolbox** → pick `BasinKit.pyt`.
-
-**4. Point it at that Python.** Run **0 Configuration → Configure BasinKit**, browse to the
-interpreter (`python.exe` on Windows), and run it. It reports the basinkit
-version and every dependency it found, and warns about any that are missing.
-
-You can also set the environment variable `BASINKIT_PYTHON` instead, which takes
-priority over the saved setting. If neither is set, the toolbox falls back to the
-interpreter running Pro — which works only if you installed basinkit into a
-cloned Pro environment. Supported, but not what we recommend.
-
----
+The environment variable `BASINKIT_PYTHON` works too, and takes priority over
+the saved setting.
 
 ---
 
@@ -129,7 +133,7 @@ the main lever: lower them for a first look, raise them for the final run.
 
 | Group | Tool | What it gives you |
 |---|---|---|
-| 0 Configuration | Configure BasinKit | Points at the interpreter and checks it |
+| 0 Configuration | Set Up BasinKit | Finds an interpreter with basinkit, or builds one and installs it |
 | **1 Comprehensive Analysis** | **Complete Basin Analysis** | **All 70, plus collage, PDF report and manifest** |
 | 2 Basin Delineation | Delineate Basin | The upstream catchment polygon of one coordinate |
 | 2 Basin Delineation | Sub-Catchments | The units it is assembled from, each with `NEXT_DOWN` |

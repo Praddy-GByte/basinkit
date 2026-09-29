@@ -20,11 +20,13 @@ shows the whole picture.
 """
 
 from . import (
+               archydro,
                cache,
                catalog,
                climate,
                clip,
                delineate,
+               landscape,
                quality,
                report,
                sources,
@@ -57,6 +59,7 @@ __all__ = [
     "climate",
     "Confluence",
     "catalog", "cache", "clip", "delineate", "sources",
+    "landscape", "archydro",
     "BasinkitError", "DelineationError", "OutletSnapError",
     "DataSourceError", "LicenseError", "MissingDependency",
     "NotImplementedSource",

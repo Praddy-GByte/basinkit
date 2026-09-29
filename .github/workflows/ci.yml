@@ -26,6 +26,15 @@ jobs:
       - name: Offline tests
         run: pytest -q -m "not network" --cov=basinkit --cov-report=term-missing
 
+      # The ArcGIS Pro toolbox and the runner it drives are two files that have
+      # to agree. A tool that reads the wrong parameter, or sends a flag the
+      # runner does not define, otherwise fails only once someone clicks Run
+      # inside ArcGIS Pro. This loads the toolbox against a stub arcpy and parses
+      # every tool's command line with the runner's own parser. No licence, no
+      # network, no arcpy.
+      - name: ArcGIS Pro toolbox wiring
+        run: python verify/run_toolbox_wiring.py
+
   # The plugin's API usage against a real QGIS. Enum names move between QGIS
   # releases, and a name that resolves on one version can be absent on another,
   # which only shows when an algorithm is imported. Reading metadata.txt, which

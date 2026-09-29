@@ -27,6 +27,22 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 RUNNER = os.path.join(HERE, "basinkit_runner.py")
 PYTHON_SETTING = os.path.join(HERE, "basinkit_python.txt")
 
+def _managed_env_dir():
+    """Where BasinKit keeps the environment it creates for itself."""
+    if os.name == "nt":
+        base = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~")
+    else:
+        base = os.environ.get("XDG_DATA_HOME") or os.path.join(
+            os.path.expanduser("~"), ".local", "share")
+    return os.path.join(base, "BasinKit", "env")
+
+
+def _env_python(env_dir):
+    """The interpreter inside a virtual environment."""
+    if os.name == "nt":
+        return os.path.join(env_dir, "Scripts", "python.exe")
+    return os.path.join(env_dir, "bin", "python")
+
 BACKENDS = ["auto", "hydrobasins", "dem", "api", "tdx"]
 DEM_PRODUCTS = ["cop30", "cop90", "nasadem", "srtm30"]
 SURFACES = ["hillshade", "slope", "aspect", "curvature", "tpi", "tri", "roughness",
@@ -57,7 +73,159 @@ def resolve_python():
                 return saved
         except OSError:
             pass
+    managed = _env_python(_managed_env_dir())
+    if os.path.exists(managed):
+        return managed
     return sys.executable
+
+
+def base_python():
+    """A real python.exe to build an environment from.
+
+    Inside ArcGIS Pro the toolbox runs in Pro's own process, so sys.executable
+    is ArcGISPro.exe, not an interpreter. sys.prefix still points at Pro's
+    conda environment, which is where its python.exe lives.
+    """
+    exe = sys.executable or ""
+    stem = os.path.splitext(os.path.basename(exe))[0].lower()
+    if stem in ("python", "python3", "pythonw"):
+        return exe
+
+    names = ["python.exe"] if os.name == "nt" else ["bin/python3", "bin/python"]
+    roots = [sys.prefix, getattr(sys, "base_prefix", sys.prefix)]
+    if os.name == "nt":
+        for pf in (os.environ.get("ProgramFiles", r"C:\Program Files"),
+                   os.environ.get("ProgramFiles(x86)", "")):
+            if pf:
+                roots.append(os.path.join(pf, "ArcGIS", "Pro", "bin", "Python",
+                                          "envs", "arcgispro-py3"))
+    for root in roots:
+        for name in names:
+            cand = os.path.join(root, *name.split("/"))
+            if os.path.exists(cand):
+                return cand
+
+    try:
+        import shutil
+        for name in ("python3", "python"):
+            found = shutil.which(name)
+            if found:
+                return found
+    except Exception:                                        # noqa: BLE001
+        pass
+    return exe
+
+
+def probe(exe, timeout=60):
+    """Return basinkit's version reported by this interpreter, or None."""
+    if not exe:
+        return None
+    try:
+        out = subprocess.check_output(
+            [exe, "-c", "import basinkit,sys;sys.stdout.write(basinkit.__version__)"],
+            stderr=subprocess.STDOUT, universal_newlines=True,
+            encoding="utf-8", errors="replace", timeout=timeout,
+            startupinfo=_no_console())
+    except Exception:                                        # noqa: BLE001
+        return None
+    out = (out or "").strip().splitlines()
+    return out[-1].strip() if out else None
+
+
+def _no_console():
+    """Keep a console window from flashing on Windows."""
+    if os.name != "nt":
+        return None
+    st = subprocess.STARTUPINFO()
+    st.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    return st
+
+
+def candidates():
+    """Interpreters worth testing, best first. No side effects."""
+    seen, out = set(), []
+
+    def add(exe):
+        if exe and exe not in seen:
+            seen.add(exe)
+            out.append(exe)
+
+    add(os.environ.get("BASINKIT_PYTHON", "").strip())
+    if os.path.exists(PYTHON_SETTING):
+        try:
+            with open(PYTHON_SETTING, "r", encoding="utf-8") as fh:
+                add(fh.read().strip())
+        except OSError:
+            pass
+    add(_env_python(_managed_env_dir()))
+    try:
+        import shutil
+        for name in ("python3", "python"):
+            add(shutil.which(name))
+    except Exception:                                        # noqa: BLE001
+        pass
+    add(sys.executable)
+    return [e for e in out if e]
+
+
+def stream(cmd, timeout=3600):
+    """Run a command, relay every line into the messages pane.
+
+    Returns the exit code. Used for environment creation and pip, which are
+    slow enough that silence would look like a hang.
+    """
+    proc = subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        universal_newlines=True, encoding="utf-8", errors="replace",
+        startupinfo=_no_console())
+    for line in proc.stdout:
+        line = line.rstrip()
+        if line:
+            arcpy.AddMessage("    " + line)
+    proc.wait(timeout=timeout)
+    return proc.returncode
+
+
+def build_environment(base_exe, env_dir):
+    """Create a virtual environment and install basinkit into it.
+
+    The environment is separate from ArcGIS Pro's own, which is the whole
+    point: Pro's Python has arcpy with pinned GDAL and PROJ, and installing
+    scientific packages into it is the documented way to break ArcGIS Pro.
+    Returns the path of the interpreter inside it.
+    """
+    arcpy.AddMessage("Creating an environment for BasinKit")
+    arcpy.AddMessage("  location: %s" % env_dir)
+    arcpy.AddMessage("  built from: %s" % base_exe)
+    arcpy.AddMessage("ArcGIS Pro's own Python is not modified.")
+
+    parent = os.path.dirname(env_dir)
+    try:
+        os.makedirs(parent, exist_ok=True)
+    except OSError as exc:
+        arcpy.AddError("Cannot create %s (%s)." % (parent, exc))
+        raise arcpy.ExecuteError
+
+    if stream([base_exe, "-m", "venv", env_dir], timeout=600) != 0:
+        arcpy.AddError(
+            "Could not create the environment. Install Python yourself and "
+            "point this tool at it instead -- the guide has the steps.")
+        raise arcpy.ExecuteError
+
+    exe = _env_python(env_dir)
+    if not os.path.exists(exe):
+        arcpy.AddError("The environment was created but %s is missing." % exe)
+        raise arcpy.ExecuteError
+
+    arcpy.AddMessage("Installing basinkit and its dependencies.")
+    arcpy.AddMessage("This downloads about 150 MB and takes a few minutes.")
+    stream([exe, "-m", "pip", "install", "--upgrade", "pip", "--quiet"], timeout=900)
+    if stream([exe, "-m", "pip", "install", "basinkit[all]"], timeout=3600) != 0:
+        arcpy.AddError(
+            "The install did not finish. The usual cause is no route to "
+            "pypi.org -- a proxy or a firewall. The guide has the manual steps.")
+        raise arcpy.ExecuteError
+    return exe
 
 
 def run(argv, messages=None):
@@ -85,7 +253,7 @@ def run(argv, messages=None):
             startupinfo=startup)
     except FileNotFoundError:
         arcpy.AddError("Could not start '%s'. Set the interpreter with the "
-                       "'Configure BasinKit' tool, or set the BASINKIT_PYTHON "
+                       "'Set Up BasinKit' tool, or set the BASINKIT_PYTHON "
                        "environment variable." % exe)
         raise arcpy.ExecuteError
 
@@ -106,6 +274,8 @@ def run(argv, messages=None):
                 result = json.loads(parts[1])
             except ValueError:
                 arcpy.AddWarning("Could not read the result line.")
+        elif tag == "WARN" and len(parts) > 1:
+            arcpy.AddWarning(parts[1])
         elif tag == "ERROR" and len(parts) > 1:
             failed = parts[1]
         else:
@@ -125,7 +295,7 @@ def run(argv, messages=None):
         arcpy.AddError(
             "basinkit_runner exited with code %d. If the message above says a "
             "module is missing, that interpreter does not have basinkit "
-            "installed -- run 'Configure BasinKit' to point at one that does."
+            "installed -- run 'Set Up BasinKit', which will build one."
             % code)
         raise arcpy.ExecuteError
     return outputs, result
@@ -191,8 +361,8 @@ def add_to_map(outputs, add_layers=True):
         if m is None:
             return added
         for item in added:
-            if str(item).lower().endswith(".csv"):
-                continue                                # a table, not a layer
+            if str(item).lower().endswith((".csv", ".png")):
+                continue                    # a table or a figure, not a layer
             try:
                 m.addDataFromPath(item)
             except Exception:                           # noqa: BLE001
@@ -258,24 +428,76 @@ class BaseTool(object):
 
 class Configure(BaseTool):
     def __init__(self):
-        self.label = "Configure BasinKit"
-        self.description = ("Point the toolbox at a Python interpreter that has "
-                            "basinkit installed, and check that it works.")
+        self.label = "Set Up BasinKit"
+        self.description = (
+            "Find a Python interpreter that has basinkit, or build one. Leave "
+            "every parameter empty and run it: BasinKit looks for a suitable "
+            "interpreter and, if it finds none, creates its own environment "
+            "and installs basinkit into it. ArcGIS Pro's own Python is never "
+            "modified.")
         self.category = "0 Configuration"
 
     def getParameterInfo(self):
-        return [p("Python executable with basinkit installed", "python", "DEFile",
-                  ptype="Optional"),
+        return [p("Python executable (leave empty to set one up)", "python",
+                  "DEFile", ptype="Optional"),
+                p("Build an environment if none is found", "auto", "GPBoolean",
+                  ptype="Optional", default=True),
                 p("Only test the current setting", "test_only", "GPBoolean",
                   ptype="Optional", default=False)]
 
+    def _save(self, exe):
+        with open(PYTHON_SETTING, "w", encoding="utf-8") as fh:
+            fh.write(exe)
+        arcpy.AddMessage("Saved: %s" % exe)
+
     def execute(self, parameters, messages):
         chosen = parameters[0].valueAsText
-        if chosen and not parameters[1].value:
-            with open(PYTHON_SETTING, "w", encoding="utf-8") as fh:
-                fh.write(chosen)
-            arcpy.AddMessage("Saved: %s" % chosen)
-        exe = chosen or resolve_python()
+        auto = parameters[1].value if parameters[1].value is not None else True
+        test_only = bool(parameters[2].value)
+
+        if test_only:
+            exe = resolve_python()
+        elif chosen:
+            arcpy.AddMessage("Checking %s" % chosen)
+            ver = probe(chosen)
+            if ver is None:
+                arcpy.AddError(
+                    "That interpreter does not have basinkit. Run "
+                    "'pip install \"basinkit[all]\"' with it, or leave this "
+                    "parameter empty and let BasinKit build its own.")
+                raise arcpy.ExecuteError
+            arcpy.AddMessage("  basinkit %s" % ver)
+            self._save(chosen)
+            exe = chosen
+        else:
+            exe = None
+            arcpy.AddMessage("Looking for an interpreter that has basinkit.")
+            for cand in candidates():
+                ver = probe(cand)
+                arcpy.AddMessage("  %s  %s"
+                                 % (cand, ("basinkit " + ver) if ver else "no"))
+                if ver:
+                    exe = cand
+                    break
+            if exe:
+                self._save(exe)
+            elif auto:
+                arcpy.AddMessage("None found.")
+                exe = build_environment(base_python(), _managed_env_dir())
+                ver = probe(exe)
+                if ver is None:
+                    arcpy.AddError("The environment was built but basinkit "
+                                   "still does not import from it.")
+                    raise arcpy.ExecuteError
+                arcpy.AddMessage("basinkit %s is installed." % ver)
+                self._save(exe)
+            else:
+                arcpy.AddError(
+                    "No interpreter with basinkit was found. Tick 'Build an "
+                    "environment if none is found', or install basinkit "
+                    "yourself and point this tool at that python.exe.")
+                raise arcpy.ExecuteError
+
         arcpy.AddMessage("Testing %s" % exe)
         old = os.environ.get("BASINKIT_PYTHON")
         os.environ["BASINKIT_PYTHON"] = exe
@@ -288,11 +510,19 @@ class Configure(BaseTool):
                 os.environ["BASINKIT_PYTHON"] = old
         arcpy.AddMessage("basinkit %s on Python %s"
                          % (res.get("basinkit"), res.get("python")))
+        missing = []
         for mod, ver in (res.get("dependencies") or {}).items():
             if str(ver).startswith("MISSING"):
                 arcpy.AddWarning("  %s: %s" % (mod, ver))
+                missing.append(mod)
             else:
                 arcpy.AddMessage("  %s %s" % (mod, ver))
+        if missing:
+            arcpy.AddWarning(
+                "Install the missing packages with: \"%s\" -m pip install %s"
+                % (exe, " ".join(missing)))
+        else:
+            arcpy.AddMessage("Ready. Open 1 Comprehensive Analysis to run.")
 
 
 class Delineate(BaseTool):
@@ -640,6 +870,66 @@ class Everything(BaseTool):
                 arcpy.AddMessage("%-9s %s" % (label + ":", res[key]))
 
 
+class Landscape(BaseTool):
+    def __init__(self):
+        self.label = "Landscape Form (Chi and Channel Steepness)"
+        self.description = (
+            "chi, normalised channel steepness, concavity and knickpoints. "
+            "Whether the landscape is still adjusting, or has settled. "
+            "k_sn agrees with TopoToolbox to within 6% at every quantile.")
+        self.category = "5 Morphometry and Drainage Network"
+
+    def getParameterInfo(self):
+        prm = point_params()
+        prm.insert(3, p("Channel-initiation area (km2)", "min_area_km2", "GPDouble",
+                        ptype="Optional", default=1.0))
+        prm.insert(4, p("Reference concavity", "theta_ref", "GPDouble",
+                        ptype="Optional", default=0.45))
+        prm.insert(5, p("Smoothing window for the concavity fit (m)", "smooth_m",
+                        "GPDouble", ptype="Optional", default=500.0))
+        prm.insert(6, p("Pixel budget for the DEM", "max_pixels", "GPLong",
+                        ptype="Optional", default=0))
+        return prm
+
+    def execute(self, parameters, messages):
+        args = ["landscape", "--lat", parameters[0].value, "--lon", parameters[1].value,
+                "--backend", parameters[2].valueAsText or "auto",
+                "--min-area-km2", parameters[3].value or 1.0,
+                "--theta-ref", parameters[4].value or 0.45,
+                "--smooth-m", 500.0 if parameters[5].value is None
+                else parameters[5].value,
+                "--max-pixels", parameters[6].value or 0,
+                "--out", parameters[7].valueAsText]
+        outs, res = run(args, messages)
+        add_to_map(outs)
+
+
+class ArcHydro(BaseTool):
+    def __init__(self):
+        self.label = "Export for Arc Hydro"
+        self.description = (
+            "The sub-catchments and river reaches with Arc Hydro field names: "
+            "HydroID, HydroCode, NextDownID, AreaSqKm. A GeoPackage with "
+            "Catchment and DrainageLine layers, plus the same two tables as CSV. "
+            "A renaming, not a computation -- every value is one basinkit "
+            "already holds.")
+        self.category = "8 Model Coupling"
+
+    def getParameterInfo(self):
+        prm = point_params()
+        prm.insert(3, p("Minimum stream order", "min_order", "GPLong",
+                        ptype="Optional", default=0))
+        return prm
+
+    def execute(self, parameters, messages):
+        args = ["archydro", "--lat", parameters[0].value, "--lon", parameters[1].value,
+                "--backend", parameters[2].valueAsText or "auto",
+                "--min-order", parameters[3].value or 0,
+                "--out", parameters[4].valueAsText]
+        outs, res = run(args, messages)
+        add_to_map(outs)
+
+
 class Toolbox(object):
     def __init__(self):
         self.label = "BasinKit"
@@ -649,4 +939,5 @@ class Toolbox(object):
             "package. Nineteen open datasets, no account, no API key. "
             "Not affiliated with or endorsed by Esri.")
         self.tools = [Configure, Everything, Delineate, SubBasins, RiversLakes, Terrain,
-                      Layers, Morphometry, Zonal, Suitability, DataQuality, Report]
+                      Layers, Morphometry, Landscape, Zonal, Suitability, DataQuality,
+                      Report, ArcHydro]

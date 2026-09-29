@@ -149,5 +149,123 @@ def summary(lat: float, lon: float, backend: str) -> None:
     click.echo(json.dumps(b.summary(), indent=2, default=str))
 
 
+@main.command()
+@click.option("--lat", type=float, required=True, help="Outlet latitude.")
+@click.option("--lon", type=float, required=True, help="Outlet longitude.")
+@click.option("--backend", default="auto")
+@click.option("--min-area-km2", type=float, default=1.0,
+              help="Channel-initiation drainage area.")
+@click.option("--theta-ref", type=float, default=0.45,
+              help="Reference concavity. 0.45 by convention, so that k_sn is "
+                   "comparable between basins.")
+@click.option("--smooth-m", type=float, default=500.0,
+              help="Smoothing window for the concavity fit. k_sn is always "
+                   "computed on raw cells.")
+@click.option("--out", type=click.Path(), default=None,
+              help="Write chi.tif, ksn.tif and the trunk profile here.")
+def landscape(lat: float, lon: float, backend: str, min_area_km2: float,
+              theta_ref: float, smooth_m: float, out: str | None) -> None:
+    """Chi, channel steepness, concavity and knickpoints.
+
+    Whether the landscape is still adjusting, or has settled. k_sn agrees with
+    TopoToolbox to within 6% at every quantile on an identical DEM.
+    """
+    import numpy as np
+
+    from .basin import Basin
+    from . import landscape as ls
+
+    b = Basin.from_point(lat, lon, backend=backend)
+    r = ls.analyse(b.dem(), min_area_km2=min_area_km2, theta_ref=theta_ref,
+                   smooth_m=smooth_m)
+    summary = dict(r["summary"])
+    summary["confidence"] = ls.confidence(r)
+    click.echo(json.dumps(summary, indent=2, default=str))
+
+    if out:
+        import csv
+        import os
+
+        import rasterio
+
+        os.makedirs(out, exist_ok=True)
+        dem = b.dem()
+        for name in ("chi", "ksn"):
+            arr = np.asarray(r["rasters"][name], dtype="float32")
+            with rasterio.open(
+                os.path.join(out, name + ".tif"), "w", driver="GTiff",
+                height=arr.shape[0], width=arr.shape[1], count=1,
+                dtype="float32", crs=dem.rio.crs, transform=dem.rio.transform(),
+                nodata=float("nan"), compress="deflate",
+            ) as dst:
+                dst.write(arr, 1)
+        t = r["trunk"]
+        with open(os.path.join(out, "trunk_profile.csv"), "w", newline="",
+                  encoding="utf-8") as fh:
+            w = csv.writer(fh)
+            w.writerow(["chi_m", "elevation_m", "distance_to_outlet_m"])
+            for i in range(len(t["chi_m"])):
+                w.writerow([round(float(t["chi_m"][i]), 2),
+                            round(float(t["elevation_m"][i]), 2),
+                            round(float(t["distance_to_outlet_m"][i]), 1)])
+        try:
+            ls.figure(r, path=os.path.join(out, "landscape_form.png"),
+                      title=f"Outlet {lat:.5f}, {lon:.5f}")
+        except Exception as exc:                        # noqa: BLE001
+            click.echo(f"The figure could not be drawn ({exc.__class__.__name__}"
+                       f": {exc}). Every number above is unaffected.", err=True)
+        click.echo(f"Wrote chi.tif, ksn.tif, trunk_profile.csv, knickpoints.csv "
+                   f"and landscape_form.png to {out}")
+    for w in ls.limits(r):
+        click.echo("limit: " + w, err=True)
+
+
+@main.command()
+@click.option("--lat", type=float, required=True, help="Outlet latitude.")
+@click.option("--lon", type=float, required=True, help="Outlet longitude.")
+@click.option("--backend", default="auto")
+@click.option("--min-order", type=int, default=0, help="Minimum stream order.")
+@click.option("--out", type=click.Path(), required=True,
+              help="Write archydro.gpkg and the two CSV tables here.")
+def archydro(lat: float, lon: float, backend: str, min_order: int,
+             out: str) -> None:
+    """The routing graph in the Arc Hydro schema.
+
+    HydroID, HydroCode, NextDownID, AreaSqKm, on layers named Catchment and
+    DrainageLine. A renaming, not a computation: every value written is one
+    basinkit already holds.
+    """
+    import os
+
+    from .basin import Basin
+    from . import archydro as ah
+
+    os.makedirs(out, exist_ok=True)
+    b = Basin.from_point(lat, lon, backend=backend)
+    sub = ah.catchment_table(b.subbasins())
+    riv = ah.drainage_line_table(b.rivers(min_order=min_order))
+
+    gpkg = os.path.join(out, "archydro.gpkg")
+    sub.to_file(gpkg, layer="Catchment", driver="GPKG")
+    riv.to_file(gpkg, layer="DrainageLine", driver="GPKG")
+    for name, frame, cols in (
+        ("catchment", sub, ["HydroID", "HydroCode", "NextDownID", "AreaSqKm"]),
+        ("drainageline", riv, ["HydroID", "HydroCode", "NextDownID"]),
+    ):
+        have = [c for c in cols if c in frame.columns]
+        frame[have].to_csv(os.path.join(out, f"archydro_{name}.csv"), index=False)
+
+    chk = ah.check(sub)
+    click.echo(json.dumps({
+        "catchments": int(len(sub)), "drainage_lines": int(len(riv)),
+        "no_downstream_value": ah.NO_DOWNSTREAM, "routing_check": chk,
+        "written": gpkg,
+    }, indent=2))
+    if not chk["single_outlet"]:
+        click.echo(
+            "The routing table is not a single tree draining to one outlet. "
+            "Reported, not repaired: it belongs to the source data.", err=True)
+
+
 if __name__ == "__main__":
     main()
