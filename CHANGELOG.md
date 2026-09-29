@@ -80,8 +80,8 @@ leaving a reader to assume the whole run is soft.
 Separate from that, and deliberately rare, a run can print a **limit**: the short
 list of cases where a number should not be used at all — a concavity fit below
 R² 0.5, a network more than half flat, fewer than 500 channel cells. An ordinary
-run prints none, and a test pins that. A caution printed on every run is not a
-caution.
+run prints none, and a test enforces that. A caution raised on every run carries
+no information.
 
 ### A figure, so the numbers can be seen
 
@@ -109,7 +109,8 @@ line to the catchment containing it; basinkit does not hold that link, and
 deriving it with a spatial join would be a guess. Arc Hydro's own tools populate
 it.
 
-Every export reports whether the graph is a single tree draining to one outlet --
+`archydro_routing.png` draws the table so it can be checked by eye. Every export
+also reports whether the graph is a single tree draining to one outlet --
 terminal units, pointers to units that are not in the table, units in a cycle --
 and a table that fails is written anyway, with the failure named. It belongs to
 the source data.

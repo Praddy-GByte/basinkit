@@ -149,3 +149,39 @@ def test_geometry_is_untouched():
     c = AH.catchment_table(src)
     assert c.crs == src.crs
     assert all(a.equals(b) for a, b in zip(c.geometry, src.geometry))
+
+
+def test_the_routing_figure_draws_and_marks_the_outlet():
+    pytest.importorskip("matplotlib")
+    import matplotlib
+    matplotlib.use("Agg")
+
+    c = AH.catchment_table(_catchments())
+    r = AH.drainage_line_table(_rivers())
+    fig = AH.figure(c, r, title="test")
+    ax = fig.axes[0]
+    assert "4 units, 1 outlet" in ax.get_title(loc="left")
+    # one square marker for the single terminal unit
+    squares = [ln for ln in ax.lines if ln.get_marker() == "s"]
+    assert len(squares) == 1
+    import matplotlib.pyplot as plt
+    plt.close(fig)
+
+
+def test_the_routing_figure_says_so_when_the_table_is_not_a_single_tree():
+    pytest.importorskip("matplotlib")
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    src = _catchments()
+    src.loc[3, "NEXT_DOWN"] = 0                     # a second terminal unit
+    fig = AH.figure(AH.catchment_table(src), title="test")
+    assert "2 outlets" in fig.axes[0].get_title(loc="left")
+    plt.close(fig)
+
+
+def test_the_figure_refuses_a_frame_that_has_not_been_through_catchment_table():
+    pytest.importorskip("matplotlib")
+    with pytest.raises(ValueError, match="HydroID"):
+        AH.figure(_catchments())

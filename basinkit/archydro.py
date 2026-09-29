@@ -119,3 +119,72 @@ def check(catchments):
     return {"units": len(hid), "terminal_units": len(terminal),
             "dangling_next_down": len(dangling), "units_in_a_cycle": cycles,
             "single_outlet": len(terminal) == 1 and not dangling and not cycles}
+
+
+def figure(catchments, drainage_lines=None, *, path=None, title="",
+           figsize=(7.2, 6.4), dpi=150):
+    """The routing table drawn, so that it can be checked by eye.
+
+    Each catchment is filled, and a line runs from its centroid to the centroid
+    of the catchment its ``NextDownID`` names. A routing table that is a single
+    tree draining to one outlet looks like one; a table with two outlets, a
+    cycle or a pointer into nothing does not, and that is visible here before
+    anything downstream consumes it.
+
+    Returns the figure. Saves it if ``path`` is given.
+    """
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    need = {"HydroID", "NextDownID"}
+    missing = need - set(catchments.columns)
+    if missing:
+        raise ValueError("catchment_table() must be run first; %s missing"
+                         % sorted(missing))
+
+    fig, ax = plt.subplots(figsize=figsize)
+    catchments.plot(ax=ax, facecolor="#dce7f0", edgecolor="#7f9db9", linewidth=0.6)
+    if drainage_lines is not None and len(drainage_lines):
+        drainage_lines.plot(ax=ax, color="#1f4e79", linewidth=0.8)
+
+    pts = catchments.geometry.representative_point()
+    by_id = {int(h): (p.x, p.y) for h, p in zip(catchments["HydroID"], pts)}
+    outlets = 0
+    for hid, nxt in zip(catchments["HydroID"], catchments["NextDownID"]):
+        a = by_id.get(int(hid))
+        b = by_id.get(int(nxt))
+        if a is None:
+            continue
+        if b is None:
+            outlets += 1
+            ax.plot([a[0]], [a[1]], marker="s", ms=9, mfc="#c0392b",
+                    mec="white", mew=1.2, zorder=5)
+            continue
+        ax.annotate("", xy=b, xytext=a, zorder=4,
+                    arrowprops=dict(arrowstyle="-|>", color="#444444",
+                                    lw=1.0, shrinkA=2, shrinkB=2))
+        ax.plot([a[0]], [a[1]], marker="o", ms=3.2, color="#444444", zorder=5)
+
+    chk = check(catchments)
+    ax.set_title((title + "\n" if title else "")
+                 + "Catchment routing: %d units, %d outlet%s"
+                 % (chk["units"], chk["terminal_units"],
+                    "" if chk["terminal_units"] == 1 else "s"),
+                 fontsize=10, loc="left")
+    ax.set_xlabel("longitude" if (catchments.crs and catchments.crs.is_geographic)
+                  else "easting")
+    ax.set_ylabel("latitude" if (catchments.crs and catchments.crs.is_geographic)
+                  else "northing")
+    ax.set_aspect("equal", adjustable="datalim")
+    foot = ("HydroID, HydroCode, NextDownID, AreaSqKm  •  "
+            "no downstream feature = %d  •  " % NO_DOWNSTREAM
+            + ("single tree, no cycles, no dangling pointers"
+               if chk["single_outlet"] else
+               "%d dangling pointers, %d units in a cycle"
+               % (chk["dangling_next_down"], chk["units_in_a_cycle"])))
+    fig.text(0.01, 0.005, foot, fontsize=7.5, color="#444444")
+    fig.tight_layout()
+    if path:
+        fig.savefig(path, dpi=dpi, bbox_inches="tight")
+    return fig

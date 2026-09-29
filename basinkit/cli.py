@@ -255,6 +255,14 @@ def archydro(lat: float, lon: float, backend: str, min_order: int,
         have = [c for c in cols if c in frame.columns]
         frame[have].to_csv(os.path.join(out, f"archydro_{name}.csv"), index=False)
 
+    try:
+        ah.figure(sub, riv, path=os.path.join(out, "archydro_routing.png"),
+                  title=f"Outlet {lat:.5f}, {lon:.5f}")
+    except Exception as exc:                            # noqa: BLE001
+        click.echo(f"The routing figure could not be drawn "
+                   f"({exc.__class__.__name__}: {exc}). Every table is "
+                   f"unaffected.", err=True)
+
     chk = ah.check(sub)
     click.echo(json.dumps({
         "catchments": int(len(sub)), "drainage_lines": int(len(riv)),
