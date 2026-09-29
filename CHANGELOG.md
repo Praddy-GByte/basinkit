@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.8.0 -- unreleased
+## 0.8.0 -- 2026-09-29
 
 ### Is this landscape still changing? A new module that answers it
 
