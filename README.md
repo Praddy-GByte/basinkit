@@ -383,7 +383,7 @@ A few things basinkit handles that trip up hand-rolled pipelines:
 
 ## QGIS
 
-`qgis_plugin/` is a Processing provider with nine algorithms: delineate a
+`qgis_plugin/` is a Processing provider with eleven algorithms: delineate a
 basin from a canvas click, hand back the sub-catchments it was assembled from
 with their routing, fetch layers clipped to it, compute the terrain surfaces,
 grade whether the elevation model can carry them, grade every other layer

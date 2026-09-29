@@ -312,3 +312,42 @@ def test_every_text_file_read_or_written_states_its_encoding():
     assert not offenders, (
         "read_text/write_text without an explicit encoding breaks on Windows:\n"
         + "\n".join(offenders))
+
+
+def test_the_trunk_and_its_knickpoints_carry_map_coordinates():
+    """A knickpoint belongs on a map, not only in a table.
+
+    QGIS and ArcGIS Pro both want a point layer. Without coordinates travelling
+    with the result, every caller would have to re-derive the trunk to place
+    them, which is the kind of duplication that drifts.
+    """
+    pytest.importorskip("rioxarray")
+    import xarray as xr
+    from rasterio.transform import from_origin
+
+    z, _ = _v_valley()
+    # rioxarray derives the transform from the coordinates when they exist, so
+    # the coordinates are built to match the grid the test is asserting about.
+    x0, y0, cell = 500000.0, 4000000.0, 100.0
+    xs = x0 + cell * (np.arange(z.shape[1]) + 0.5)
+    ys = y0 - cell * (np.arange(z.shape[0]) + 0.5)
+    da = xr.DataArray(z, dims=("y", "x"), coords={"y": ys, "x": xs})
+    da = da.rio.write_transform(from_origin(x0, y0, cell, cell))
+    da = da.rio.write_crs("EPSG:32612")
+
+    r = L.analyse(da, min_area_km2=0.05)
+    t = r["trunk"]
+    assert {"x", "y", "crs"} <= set(t)
+    assert len(t["x"]) == len(t["chi_m"]) == len(t["y"])
+    assert str(t["crs"]) == "EPSG:32612"
+
+    # the coordinates are inside the grid the transform describes
+    assert t["x"].min() >= x0
+    assert t["x"].max() <= x0 + cell * z.shape[1]
+    assert t["y"].max() <= y0
+    assert t["y"].min() >= y0 - cell * z.shape[0]
+
+    for k in r["knickpoints"]:
+        assert {"x", "y", "distance_to_outlet_m"} <= set(k)
+        assert t["x"].min() <= k["x"] <= t["x"].max()
+        assert t["y"].min() <= k["y"] <= t["y"].max()

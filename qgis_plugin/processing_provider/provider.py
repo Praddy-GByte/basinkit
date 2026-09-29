@@ -7,9 +7,11 @@ import os
 from qgis.core import QgsProcessingProvider
 from qgis.PyQt.QtGui import QIcon
 
+from .algorithms.archydro import ArcHydroExportAlgorithm
 from .algorithms.data_quality import DataQualityAlgorithm
 from .algorithms.delineate import DelineateBasinAlgorithm
 from .algorithms.fetch_layers import FetchBasinLayersAlgorithm
+from .algorithms.landscape import LandscapeFormAlgorithm
 from .algorithms.morphometry import BasinMorphometryAlgorithm
 from .algorithms.report import BasinReportAlgorithm
 from .algorithms.statistics import BasinStatisticsAlgorithm
@@ -31,7 +33,9 @@ class BasinkitProvider(QgsProcessingProvider):
             DataQualityAlgorithm(),
             BasinStatisticsAlgorithm(),
             BasinMorphometryAlgorithm(),
+            LandscapeFormAlgorithm(),
             BasinReportAlgorithm(),
+            ArcHydroExportAlgorithm(),
         ):
             self.addAlgorithm(algorithm)
 

@@ -287,11 +287,22 @@ def analyse(dem, *, min_area_km2: float = 1.0, theta_ref: float = THETA_REF,
     c = r["chi"].ravel()[idx]
     zz = z[idx]
     dd = r["dist_out"].ravel()[idx]
+    # The trunk's coordinates travel with it, so a knickpoint can be put on a
+    # map rather than only in a table. Cell centres, in the grid's own CRS.
+    rows, cols = np.divmod(idx, grid.shape[1])
+    xs = transform.c + transform.a * (cols + 0.5) + transform.b * (rows + 0.5)
+    ys = transform.f + transform.d * (cols + 0.5) + transform.e * (rows + 0.5)
     ok = np.isfinite(c) & np.isfinite(zz)
-    c, zz, dd = c[ok], zz[ok], dd[ok]
+    c, zz, dd, xs, ys = c[ok], zz[ok], dd[ok], xs[ok], ys[ok]
     order = np.argsort(c)
-    c, zz, dd = c[order], zz[order], dd[order]
+    c, zz, dd, xs, ys = c[order], zz[order], dd[order], xs[order], ys[order]
     kp = knickpoints(c, zz, min_drop_m=40.0)
+    # and each knickpoint carries the point it sits on
+    for k in kp:
+        j = int(np.argmin(np.abs(c - k["chi"])))
+        k["x"] = float(xs[j])
+        k["y"] = float(ys[j])
+        k["distance_to_outlet_m"] = round(float(dd[j]), 1)
 
     k = r["ksn"].ravel()
     fin = k[np.isfinite(k)]
@@ -320,7 +331,8 @@ def analyse(dem, *, min_area_km2: float = 1.0, theta_ref: float = THETA_REF,
                  "rates needs independent calibration."),
     }
     return {"rasters": r, "concavity_fit": fit, "concavity_fit_unsmoothed": fit_raw,
-            "trunk": {"chi_m": c, "elevation_m": zz, "distance_to_outlet_m": dd},
+            "trunk": {"chi_m": c, "elevation_m": zz, "distance_to_outlet_m": dd,
+                      "x": xs, "y": ys, "crs": crs},
             "knickpoints": kp, "summary": summary,
             "upstream_area_m2": upa_m2, "channels": chan}
 
