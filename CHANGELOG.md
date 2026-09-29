@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.8.2 -- 2026-09-29
+
+### The two new analyses reach QGIS
+
+The QGIS plugin goes to 0.8.0 with both of them, so it now carries eleven
+algorithms rather than nine.
+
+**Landscape form** returns its knickpoints as a **point layer** rather than a
+table, which is what a GIS wants. That needed something from the package: the
+trunk profile now carries the map coordinates of every point on it, in the
+grid's own CRS, and each knickpoint carries the point it sits on together with
+its distance to the outlet. Without that, every caller would have had to
+re-derive the trunk just to place a marker.
+
+**Export for Arc Hydro** returns `Catchment` and `DrainageLine` as two feature
+layers with the Arc Hydro field names, and reports in the log whether the
+routing table is a single tree draining to one outlet.
+
+Both algorithms print, in the Processing log, what each number is worth and the
+rare cases where a number should not be used at all -- the same `confidence`
+and `limits` the command line and the ArcGIS Pro toolbox already printed.
+
 ## 0.8.1 -- 2026-09-29
 
 ### Fixed

@@ -201,7 +201,7 @@ python basinkit_runner.py everything --lat 45.11188 --lon -110.79438 --out yello
 `basinkit_runner.py` is in the same zip as the toolbox, and also in
 `arcgis_toolbox/` in the repository.
 
-In QGIS, basinkit is a Processing provider with nine algorithms — a different,
+In QGIS, basinkit is a Processing provider with eleven algorithms — a different,
 lighter set, not this 70-analysis run. See the
 [QGIS plugin](https://plugins.qgis.org/plugins/basinkit_qgis/).
 
