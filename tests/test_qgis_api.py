@@ -133,8 +133,14 @@ def test_basin_from_layer_reprojects_a_projected_layer(qgis_app):
     a northing of 7,793,981 as a latitude. That failed twice over, in
     basin_area_km2 and again in morphometry.
     """
-    from qgis.core import (QgsCoordinateReferenceSystem, QgsCoordinateTransform,
-                           QgsFeature, QgsGeometry, QgsProject, QgsVectorLayer)
+    from qgis.core import (
+        QgsCoordinateReferenceSystem,
+        QgsCoordinateTransform,
+        QgsFeature,
+        QgsGeometry,
+        QgsProject,
+        QgsVectorLayer,
+    )
 
     import basinkit as bk
     from qgis_plugin.processing_provider.algorithms.base import BasinkitAlgorithm
