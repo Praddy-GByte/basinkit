@@ -1,0 +1,1595 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Point to river basin to every open Earth observation layer">
+      
+      
+      
+        <link rel="canonical" href="https://praddy-gbyte.github.io/basinkit/arcgis-pro/">
+      
+      
+        <link rel="prev" href="../tutorial/">
+      
+      
+        <link rel="next" href="../delineation/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/logo-32.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>ArcGIS Pro - basinkit</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../assets/byline.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#basinkit-for-arcgis-pro" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+            
+  <div class="bk-byline">
+    <span class="bk-byline__name">Created by Dr. Pradeepika (Praddy) Kaushik</span>
+    <span class="bk-byline__role">Geospatial and Data Visualization Expert &middot; GeoAI &middot; EO Expert</span>
+    <span class="bk-byline__links">
+      <a href="https://github.com/Praddy-GByte" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/dr-pradeepika-kaushik/" rel="noopener">LinkedIn</a>
+      <a href="https://doi.org/10.5281/zenodo.22181933" rel="noopener">Zenodo DOI</a>
+    </span>
+  </div>
+
+          </div>
+          
+        </aside>
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="basinkit" class="md-header__button md-logo" aria-label="basinkit" data-md-component="logo">
+      
+  <img src="../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            basinkit
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ArcGIS Pro
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Praddy-GByte/basinkit" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="basinkit" class="md-nav__button md-logo" aria-label="basinkit" data-md-component="logo">
+      
+  <img src="../assets/logo.svg" alt="logo">
+
+    </a>
+    basinkit
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Praddy-GByte/basinkit" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../why/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Why basinkit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ArcGIS Pro
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ArcGIS Pro
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-you-need-basinkit-in-arcgis-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why you need BasinKit in ArcGIS Pro
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#before-you-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before you start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-add-the-toolbox-to-arcgis-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1 — Add the toolbox to ArcGIS Pro
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-run-set-up-basinkit-once" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2 — Run Set Up BasinKit, once
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2 — Run Set Up BasinKit, once">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#if-you-would-rather-do-it-yourself" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If you would rather do it yourself
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-run-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3 — Run it
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3 — Run it">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-lands-on-your-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What lands on your map
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-lands-in-the-output-folder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What lands in the output folder
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-70-by-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 70, by group
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#without-arcgis-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Without ArcGIS Pro
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#which-tool-does-what" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Which tool does what
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-settings-that-actually-matter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The settings that actually matter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#if-something-goes-wrong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If something goes wrong
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-not-yet-proven" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is not yet proven
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../delineation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delineation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../landscape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Landscape form
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model-coupling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Handing off to a model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../related-work/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Related work
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../catalogue/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data catalogue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-quality/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data quality
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notebooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Notebooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../notebooks/01_quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    basinkit quickstartFrom an outlet coordinate to a fully characterised river basin, with no accountanywhere in the chain.We'll use the Sapta Koshi at Chatara (26.87 N, 87.15 E) -- a Himalayan basinthat drains Everest and empties onto the Gangetic plain. It is a good test casebecause its area is independently published, so we can check the answer.
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-you-need-basinkit-in-arcgis-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why you need BasinKit in ArcGIS Pro
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#before-you-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before you start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-add-the-toolbox-to-arcgis-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1 — Add the toolbox to ArcGIS Pro
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-run-set-up-basinkit-once" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2 — Run Set Up BasinKit, once
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2 — Run Set Up BasinKit, once">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#if-you-would-rather-do-it-yourself" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If you would rather do it yourself
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-run-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3 — Run it
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3 — Run it">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-lands-on-your-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What lands on your map
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-lands-in-the-output-folder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What lands in the output folder
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-70-by-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 70, by group
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#without-arcgis-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Without ArcGIS Pro
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#which-tool-does-what" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Which tool does what
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-settings-that-actually-matter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The settings that actually matter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#if-something-goes-wrong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If something goes wrong
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-not-yet-proven" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is not yet proven
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="basinkit-for-arcgis-pro">BasinKit for ArcGIS Pro<a class="headerlink" href="#basinkit-for-arcgis-pro" title="Permanent link">&para;</a></h1>
+<p>Click a river anywhere on Earth and get the basin draining into it: <strong>70 analyses,
+a 72-page PDF and a full GIS layer set from one coordinate</strong>.</p>
+<p>This page is the whole setup, start to finish, and then the same run without
+ArcGIS Pro at all.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Analyses in one run</td>
+<td>70</td>
+</tr>
+<tr>
+<td>Tools in the toolbox</td>
+<td>14</td>
+</tr>
+<tr>
+<td>Open datasets reached</td>
+<td>19</td>
+</tr>
+<tr>
+<td>Accounts or API keys needed</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Licence</td>
+<td>MIT</td>
+</tr>
+</tbody>
+</table>
+<p>Not affiliated with, endorsed by, or sponsored by Esri.</p>
+<hr />
+<h2 id="why-you-need-basinkit-in-arcgis-pro">Why you need BasinKit in ArcGIS Pro<a class="headerlink" href="#why-you-need-basinkit-in-arcgis-pro" title="Permanent link">&para;</a></h2>
+<p><strong>It brings the data.</strong> Nineteen open datasets arrive already clipped and masked
+to the basin polygon — elevation, land cover, soil to two metres, rainfall,
+surface water, rivers, lakes, satellite imagery. No account, no API key, nothing
+downloaded by hand, nothing stitched together from tiles.</p>
+<p><strong>It starts from a coordinate.</strong> One latitude and longitude. The basin, its
+sub-catchments carrying <code>NEXT_DOWN</code>, its rivers with Strahler order and mean
+discharge, and its lakes — without needing a DEM that covers an upstream area
+you have not measured yet.</p>
+<p><strong>Forty-two morphometric parameters, with their references.</strong> Linear, areal and
+relief, plus the channel network by Strahler order. Streams are counted as
+Strahler streams, not as the raw reaches in the river layer.</p>
+<p><strong>Landscape form, not just shape.</strong> Chi, normalised channel steepness, concavity
+and knickpoints — whether the landscape is still adjusting or has settled. k_sn
+agrees with TopoToolbox to within 6% at every quantile on an identical DEM, and
+its median moves under 2% across a fourfold change in cell size.</p>
+<p><strong>A grade for every layer.</strong> <code>data_quality()</code> measures elevation, land cover,
+soil, rainfall, surface water and the delineation itself against an
+independently produced source, and says which of them can carry the weight your
+study puts on it. Where it cannot judge, it says so rather than guessing.</p>
+<p><strong>Seventy analyses from one click.</strong> Each one a figure and a set of
+measurements, written out as a 72-page PDF, a collage, one CSV row per number,
+and a manifest recording every choice, version and licence the run used — enough
+to run it again and get the same numbers.</p>
+<p><strong>It hands off to your model.</strong> The sub-catchments and reaches export with Arc
+Hydro's own field names — <code>HydroID</code>, <code>HydroCode</code>, <code>NextDownID</code>, <code>AreaSqKm</code>, on
+layers called Catchment and DrainageLine — so Arc Hydro's tools read them
+without being told anything about basinkit. It is a renaming, not a computation:
+every value written is one basinkit already holds.</p>
+<p><strong>Layers on your map.</strong> Basin, sub-catchments, rivers and lakes as feature
+classes; elevation, hillshade and land cover as rasters. Every tool works in
+ModelBuilder, and nothing here needs the Spatial Analyst extension.</p>
+<p>MIT licence.</p>
+<hr />
+<h2 id="before-you-start">Before you start<a class="headerlink" href="#before-you-start" title="Permanent link">&para;</a></h2>
+<p><strong>ArcGIS Pro on Windows.</strong> ArcGIS Pro does not run on macOS. Esri's own supported
+route for a Mac is Parallels Desktop with Windows 11 ARM installed as the guest
+operating system — see
+<a href="https://doc.esri.com/en/arcgis-pro/latest/get-started/run-pro-on-a-mac.html">Run ArcGIS Pro on a Mac</a>.</p>
+<p><strong>You do not need the Spatial Analyst extension.</strong> basinkit does its own
+computation and never calls Esri's Hydrology tools.</p>
+<p><strong>No ArcGIS Pro at all?</strong> Skip to <a href="#without-arcgis-pro">Without ArcGIS Pro</a>. The
+engine is plain Python and produces the identical 70 analyses, report and
+manifest.</p>
+<p><strong>You do not need to install Python first.</strong> Step 2 sets one up for you.</p>
+<hr />
+<h2 id="step-1-add-the-toolbox-to-arcgis-pro">Step 1 — Add the toolbox to ArcGIS Pro<a class="headerlink" href="#step-1-add-the-toolbox-to-arcgis-pro" title="Permanent link">&para;</a></h2>
+<p>Unzip <code>BasinKit-for-ArcGIS-Pro.zip</code> anywhere, for example <code>C:\Tools\BasinKit\</code>.
+Three files must sit side by side in that folder. If they get separated, the
+toolbox names the missing one.</p>
+<div class="highlight"><pre><span></span><code>BasinKit.pyt
+basinkit_runner.py
+basinkit_everything.py
+</code></pre></div>
+<ol>
+<li>Open ArcGIS Pro and open or create a project.</li>
+<li>In the <strong>Catalog</strong> pane, right-click <strong>Toolboxes</strong> and choose <strong>Add Toolbox</strong>.</li>
+<li>Browse to <code>BasinKit.pyt</code> and click OK.</li>
+</ol>
+<p><strong>BasinKit</strong> now appears in the Catalog pane with its toolsets inside.</p>
+<hr />
+<h2 id="step-2-run-set-up-basinkit-once">Step 2 — Run Set Up BasinKit, once<a class="headerlink" href="#step-2-run-set-up-basinkit-once" title="Permanent link">&para;</a></h2>
+<p>Open <strong>BasinKit → 0 Configuration → Set Up BasinKit</strong>, leave every parameter
+empty, and click Run.</p>
+<p>It looks for an interpreter that already has basinkit. If it finds none, it
+builds its own environment and installs basinkit into it. Nothing to download
+first, and no Python to install by hand.</p>
+<p><strong>ArcGIS Pro's own Python is never modified.</strong> That separation is the whole
+design: Pro's Python ships <code>arcpy</code> with pinned GDAL and PROJ, and installing
+scientific packages into it is the documented way to break ArcGIS Pro. BasinKit
+builds a separate environment and talks to it as another process.</p>
+<p>The environment goes in <code>%LOCALAPPDATA%\BasinKit\env</code>. The install downloads
+about 150 MB and takes a few minutes; every line appears in the messages pane,
+so you can see it working.</p>
+<p>When it finishes it reports the basinkit version and every dependency it found.</p>
+<h3 id="if-you-would-rather-do-it-yourself">If you would rather do it yourself<a class="headerlink" href="#if-you-would-rather-do-it-yourself" title="Permanent link">&para;</a></h3>
+<p>Install Python 3.12 from <a href="https://www.python.org/downloads/windows/">python.org</a>,
+ticking <strong>Add python.exe to PATH</strong>, then:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"basinkit[all]"</span>
+where<span class="w"> </span>python
+</code></pre></div>
+<p>Put that <code>python.exe</code> path into the tool's first parameter instead. Setting a
+Windows environment variable <code>BASINKIT_PYTHON</code> to the same path works too, and
+takes priority over the saved setting.</p>
+<hr />
+<h2 id="step-3-run-it">Step 3 — Run it<a class="headerlink" href="#step-3-run-it" title="Permanent link">&para;</a></h2>
+<p>Open <strong>BasinKit → 1 Comprehensive Analysis → Complete Basin Analysis</strong> and fill
+in three things. Leave the rest on default.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>What to put</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Outlet latitude</td>
+<td><code>45.11188</code></td>
+</tr>
+<tr>
+<td>Outlet longitude</td>
+<td><code>-110.79438</code></td>
+</tr>
+<tr>
+<td>Output folder</td>
+<td>an <strong>empty</strong> folder, e.g. <code>C:\Work\yellowstone</code></td>
+</tr>
+</tbody>
+</table>
+<p>Progress appears in the messages pane as each of the 70 analyses finishes. A run
+takes twenty minutes to about an hour. A 6,800 km² basin at a 3,000,000-pixel
+budget took roughly an hour and a half with satellite imagery included. It is not
+frozen — each analysis prints a line when it completes.</p>
+<h3 id="what-lands-on-your-map">What lands on your map<a class="headerlink" href="#what-lands-on-your-map" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>basin · subbasins · rivers · lakes     feature classes
+dem · hillshade · landcover            rasters
+</code></pre></div>
+<h3 id="what-lands-in-the-output-folder">What lands in the output folder<a class="headerlink" href="#what-lands-in-the-output-folder" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basin_report.pdf</code></td>
+<td>A page per analysis: the code that ran, the picture, the numbers</td>
+</tr>
+<tr>
+<td><code>basinkit_collage.png</code></td>
+<td>All 70 figures in one image</td>
+</tr>
+<tr>
+<td><code>figures/</code></td>
+<td>One PNG per analysis</td>
+</tr>
+<tr>
+<td><code>tables/analyses.csv</code></td>
+<td>Every number, one row each</td>
+</tr>
+<tr>
+<td><code>manifest.json</code></td>
+<td>Everything needed to reproduce the run — versions, choices, licences</td>
+</tr>
+<tr>
+<td><code>records.json</code></td>
+<td>What ran, and the code that ran it</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-70-by-group">The 70, by group<a class="headerlink" href="#the-70-by-group" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Analyses</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Delineation</td>
+<td>6</td>
+</tr>
+<tr>
+<td>Terrain</td>
+<td>14</td>
+</tr>
+<tr>
+<td>Shape and network</td>
+<td>6</td>
+</tr>
+<tr>
+<td>River</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Climate</td>
+<td>7</td>
+</tr>
+<tr>
+<td>Land, soil and water</td>
+<td>21</td>
+</tr>
+<tr>
+<td>Satellite</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Does the data support the answer</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="without-arcgis-pro">Without ArcGIS Pro<a class="headerlink" href="#without-arcgis-pro" title="Permanent link">&para;</a></h2>
+<p>The engine never imports <code>arcpy</code>. If you only want to check the science, or you
+have no ArcGIS licence, run the same thing from a terminal — same 70 analyses,
+same report, same manifest.</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"basinkit[all]"</span>
+python<span class="w"> </span>basinkit_runner.py<span class="w"> </span>everything<span class="w"> </span>--lat<span class="w"> </span><span class="m">45</span>.11188<span class="w"> </span>--lon<span class="w"> </span>-110.79438<span class="w"> </span>--out<span class="w"> </span>yellowstone
+</code></pre></div>
+<p><code>basinkit_runner.py</code> is in the same zip as the toolbox, and also in
+<code>arcgis_toolbox/</code> in the repository.</p>
+<p>In QGIS, basinkit is a Processing provider with eleven algorithms — a different,
+lighter set, not this 70-analysis run. See the
+<a href="https://plugins.qgis.org/plugins/basinkit_qgis/">QGIS plugin</a>.</p>
+<hr />
+<h2 id="which-tool-does-what">Which tool does what<a class="headerlink" href="#which-tool-does-what" title="Permanent link">&para;</a></h2>
+<p>Fourteen tools. One of them does everything; the other thirteen exist so you can take
+a single piece into your own model, batch or script. All of them work in
+ModelBuilder.</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Category</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Complete Basin Analysis</td>
+<td>1 Comprehensive Analysis</td>
+<td>One coordinate in. Seventy analyses out, plus a collage, an illustrated PDF and a manifest that re-runs the whole thing. Start here.</td>
+</tr>
+<tr>
+<td>Set Up BasinKit</td>
+<td>0 Configuration</td>
+<td>Finds an interpreter with basinkit, or builds one and installs it. Run this once, before anything else.</td>
+</tr>
+<tr>
+<td>Delineate Basin</td>
+<td>2 Basin Delineation</td>
+<td>The upstream catchment of one coordinate, as a polygon.</td>
+</tr>
+<tr>
+<td>Sub-Catchments</td>
+<td>2 Basin Delineation</td>
+<td>The units the basin is assembled from, each carrying <code>NEXT_DOWN</code> — the routing table a hydrological model wants.</td>
+</tr>
+<tr>
+<td>Rivers and Lakes</td>
+<td>2 Basin Delineation</td>
+<td>River reaches with Strahler order and mean discharge, and the lakes inside the basin.</td>
+</tr>
+<tr>
+<td>Terrain Surfaces</td>
+<td>3 Surface Derivatives</td>
+<td>One elevation download, twelve surfaces derived from it: hillshade, slope, aspect, curvature, TPI, TRI, roughness, landform, flow accumulation, channels, wetness index and height above nearest drainage.</td>
+</tr>
+<tr>
+<td>Land Cover, Soil and Surface Water</td>
+<td>4 Thematic Rasters</td>
+<td>Open Earth-observation layers clipped and masked to the basin polygon — not to its bounding box.</td>
+</tr>
+<tr>
+<td>Morphometric Parameters</td>
+<td>5 Morphometry and Drainage Network</td>
+<td>Forty-two named parameters in three sets — linear, areal and relief — plus the network by Strahler order. Streams are counted as Strahler streams, not as the raw reaches in the river layer.</td>
+</tr>
+<tr>
+<td>Zonal Statistics</td>
+<td>5 Morphometry and Drainage Network</td>
+<td>Any raster summarised inside any other raster's classes.</td>
+</tr>
+<tr>
+<td>DEM Suitability Assessment</td>
+<td>6 Quality Assessment</td>
+<td>Five tests against the elevation model's own stated vertical error, with a per-cell map of where the answer is supported and where it is not.</td>
+</tr>
+<tr>
+<td>Data Quality Report</td>
+<td>6 Quality Assessment</td>
+<td>New in 0.7.0. Grades elevation, land cover, soil, rainfall, surface water and the delineation itself — each against an independently produced source rather than against itself.</td>
+</tr>
+<tr>
+<td>Landscape Form (Chi and Channel Steepness)</td>
+<td>5 Morphometry and Drainage Network</td>
+<td>Chi, normalised channel steepness, concavity and knickpoints. Whether the landscape is still adjusting, or has settled. k_sn was checked cell by cell against TopoToolbox on two basins and agrees to within 6% at every quantile.</td>
+</tr>
+<tr>
+<td>Basin Report (PDF)</td>
+<td>7 Report Generation</td>
+<td>An eight-page PDF: the suitability grade on the cover, every morphometric parameter with its symbol and original reference, and the channel network against Horton's laws.</td>
+</tr>
+<tr>
+<td>Export for Arc Hydro</td>
+<td>8 Model Coupling</td>
+<td>The sub-catchments and reaches with Arc Hydro field names: <code>HydroID</code>, <code>HydroCode</code>, <code>NextDownID</code>, <code>AreaSqKm</code>. A GeoPackage with Catchment and DrainageLine layers, plus the same two tables as CSV. <code>DrainID</code> is deliberately left out: it needs a reach-to-catchment link basinkit does not hold, and a spatial join would be a guess.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="the-settings-that-actually-matter">The settings that actually matter<a class="headerlink" href="#the-settings-that-actually-matter" title="Permanent link">&para;</a></h2>
+<p>Everything else can stay on default.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Change it when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pixel budget for the DEM</td>
+<td>4,000,000</td>
+<td>Lower it (say 1,000,000) for a quick first look. Raise it for a final run on a small basin.</td>
+</tr>
+<tr>
+<td>Channel-initiation threshold</td>
+<td>5.0 km²</td>
+<td>This single choice changes drainage density and stream counts more than anything else. The run reports the whole curve, so you can see what your choice cost.</td>
+</tr>
+<tr>
+<td>Skip satellite imagery</td>
+<td>off</td>
+<td>Tick it to cut the run by about a third.</td>
+</tr>
+<tr>
+<td>Climate window</td>
+<td>2000–2024</td>
+<td>Match it to whatever period you need to defend.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="if-something-goes-wrong">If something goes wrong<a class="headerlink" href="#if-something-goes-wrong" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Message</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Could not start …"</td>
+<td>The Python path is wrong. Re-run Set Up BasinKit.</td>
+</tr>
+<tr>
+<td>A missing-module error</td>
+<td>That interpreter does not have basinkit. Re-run Set Up BasinKit and let it build its own environment.</td>
+</tr>
+<tr>
+<td>One analysis says "incomplete"</td>
+<td>A data server was busy. The run retries once and carries on; the reason is recorded in <code>manifest.json</code> and printed on the report's methods page. Run it again later and that layer usually fills in.</td>
+</tr>
+<tr>
+<td>Nothing appears on the map</td>
+<td>Check the output folder. Files are written first and added to the map second — if the files are there, only the map step failed and nothing is lost.</td>
+</tr>
+<tr>
+<td>Odd behaviour with paths</td>
+<td>Spaces in paths are handled, but try an output folder without spaces first. That is the classic failure in this corner of GIS.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="what-is-not-yet-proven">What is not yet proven<a class="headerlink" href="#what-is-not-yet-proven" title="Permanent link">&para;</a></h2>
+<p><strong>What has been run inside ArcGIS Pro.</strong> The toolbox loads and lists all of its
+toolsets in the Catalog pane, and <strong>Set Up BasinKit</strong> has been run there — where
+it correctly reported that ArcGIS Pro's own Python 3.9 is below the 3.10 that
+basinkit requires, and named that as the reason rather than guessing at a
+firewall.</p>
+<p><strong>What has not.</strong> No complete analysis run inside ArcGIS Pro has been reported
+yet, so the GeoJSON-to-feature-class conversion and the step that adds layers to
+the map are still unproven in Pro itself.</p>
+<p>What <em>is</em> tested: every one of the 70 analyses has run on real data; every tool's
+parameters and command line are checked on every commit by
+<a href="https://github.com/Praddy-GByte/basinkit/blob/main/verify/run_toolbox_wiring.py"><code>verify/run_toolbox_wiring.py</code></a>,
+which loads the toolbox against a stub <code>arcpy</code> and parses each tool's command
+line with the runner's own parser; and every <code>arcpy</code> call is checked against
+Esri's documentation. The run was cross-checked against CAMELS-US, GAGES-II and
+USGS StreamStats on USGS gauge 06191500, the Yellowstone River at Corwin Springs
+— mean elevation within 0.01%, basin area within 0.13%. Channel steepness was
+cross-checked cell by cell against TopoToolbox. See
+<a href="../verification/">Verification</a>.</p>
+<p>If any of those misbehave, ArcGIS Pro prints the reason in the messages pane.
+Send that message — as a comment, a direct message, or a
+<a href="https://github.com/Praddy-GByte/basinkit/issues">GitHub issue</a> — and it gets
+fixed. A report that it simply worked is just as useful, and slower to come by.</p>
+<hr />
+<p>MIT licence. ArcGIS and ArcGIS Pro are trademarks of Esri. Dataset licences are
+recorded per-run in <code>manifest.json</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.sections", "content.code.copy", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
