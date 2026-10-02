@@ -41,8 +41,8 @@ changelog=0.8.3
       about 130 km2, not a routed elevation model, so its boundary follows
       unit edges rather than the terrain divide.
     - Needs basinkit 0.8.3 or newer.
-
-0.8.0
+    
+    0.8.0
     - New algorithm: Landscape form. chi, normalised channel steepness,
       concavity and knickpoints -- whether a river is still adjusting or has
       settled, which the shape indices cannot tell you. Knickpoints come back
