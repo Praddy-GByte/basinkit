@@ -53,6 +53,7 @@ def merge_tiles(
     from rasterio.merge import merge
 
     srcs = [rasterio.open(p) for p in paths]
+    crs_assumed = False
     try:
         native_res = abs(srcs[0].transform.a)
         want = estimate_pixels(bounds, native_res)
@@ -97,6 +98,15 @@ def merge_tiles(
             **merge_kwargs,
         )
         crs = srcs[0].crs
+        if crs is None:
+            # rasterio returns None when it cannot read the file's CRS at all,
+            # which a PROJ installation missing its data directory will do --
+            # QGIS's bundled stack among them. Every tile source here is
+            # lon/lat, so say so rather than let an array with no CRS travel
+            # on and fail later inside rioxarray, where the message names the
+            # symptom and not the cause.
+            crs = "EPSG:4326"
+            crs_assumed = True
     finally:
         for handle in srcs:
             handle.close()
@@ -122,4 +132,5 @@ def merge_tiles(
         "basinkit_output_res_m": round(res * 111_320, 1),
         "basinkit_coarsen_factor": factor,
         "basinkit_tiles_merged": len(paths),
+        "basinkit_crs_assumed": crs_assumed,
     }

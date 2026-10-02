@@ -1,5 +1,51 @@
 # Changelog
 
+## 0.8.3 -- 2026-10-02
+
+### A basin's CRS is now checked rather than assumed
+
+basinkit works in lon/lat throughout, and nothing verified that the geometry it
+was handed was in lon/lat. `Basin.from_file` reprojected; `Basin.from_geometry`
+did not, and the QGIS plugin uses `from_geometry`. A polygon in a projected CRS
+therefore reached the equal-area projection as metres, and a northing of
+7,793,981 was passed as a latitude -- once in `basin_area_km2`, once in
+`morphometry`, with two different error messages that looked like two separate
+bugs.
+
+`clip.laea_crs()` is now the only place that projection is built. It refuses a
+centre that is not in degrees, with a message that names the real cause rather
+than PROJ's internal one, and it builds the CRS from a dict instead of a proj4
+string, which QGIS's bundled PROJ does not reliably parse. `morphometry._laea`
+delegates to it. `Basin.from_geometry` accepts `crs=` and reprojects; the
+default is unchanged, so existing callers are unaffected. The QGIS plugin
+transforms the layer through `source.sourceCrs()` on the way in and says so in
+the log, which fixes all seven algorithms at once rather than the three that
+were reported.
+
+`mosaic.merge_tiles` took its CRS straight from the first tile. rasterio
+returns `None` there when it cannot read a file's CRS at all, which a PROJ
+installation missing its data directory does, and the array then travelled on
+and failed much later inside rioxarray with "CRS not found" -- the symptom, not
+the cause. It now falls back to EPSG:4326, since every tile source is lon/lat,
+and records `basinkit_crs_assumed` in the mosaic metadata so the assumption is
+visible rather than silent. `Basin.dem()` keeps a second guard at the exit.
+
+### `auto` refines on the DEM below 2,000 km2, not below 25
+
+The default backend assembles a basin from whole HydroBASINS level-12 units of
+about 130 km2 each, so its boundary follows unit edges rather than the terrain
+divide and will not match a DEM-derived basin along the margins. Three numbers
+described where that stops being good enough: `backend="auto"` escaped to the
+DEM below 25 km2, the QGIS plugin warned below 500, and the blind check at
+2,550 gauges in `docs/verification.md` puts the crossover near 2,000. A
+catchment between 500 and 2,000 km2 got the coarse answer and no warning at
+all.
+
+The threshold is now `delineate.DEM_REFINE_BELOW_KM2`, set from that
+measurement and carrying both the evidence and the cost in a comment. The
+plugin's warning fires on the same number and explains what the coarse polygon
+is instead of only recommending an alternative.
+
 ## 0.8.2 -- 2026-09-29
 
 ### The two new analyses reach QGIS

@@ -64,8 +64,21 @@ class Basin:
         return cls(geom, prov)
 
     @classmethod
-    def from_geometry(cls, geometry, provenance: dict | None = None) -> Basin:
-        """Wrap a polygon you already have (a gauge basin, an official boundary)."""
+    def from_geometry(cls, geometry, provenance: dict | None = None,
+                      crs: str | None = None) -> Basin:
+        """Wrap a polygon you already have (a gauge basin, an official boundary).
+
+        ``crs`` is the CRS the geometry arrives in. Anything other than
+        EPSG:4326 is reprojected, because every step downstream of here works
+        in lon/lat. Leaving it out keeps the old behaviour and takes the
+        geometry as EPSG:4326 already, so existing callers are unaffected.
+        """
+        if crs is not None:
+            import geopandas as gpd
+
+            gs = gpd.GeoSeries([geometry], crs=crs)
+            if gs.crs is not None and gs.crs.to_epsg() != 4326:
+                geometry = gs.to_crs("EPSG:4326").iloc[0]
         return cls(geometry, provenance or {"backend": "user-supplied"})
 
     @classmethod
@@ -125,7 +138,14 @@ class Basin:
         """Elevation, clipped and masked to the basin."""
         from .sources.dem import dem
 
-        return dem(self.geometry, product=product, **kwargs)
+        out = dem(self.geometry, product=product, **kwargs)
+        # Some GDAL/PROJ combinations -- QGIS's bundled stack among them --
+        # open a GeoTIFF and hand back no CRS at all. Everything downstream
+        # then fails with rioxarray's "CRS not found", naming the symptom
+        # rather than the cause. The source is lon/lat, so say so.
+        if getattr(getattr(out, "rio", None), "crs", None) is None:
+            out = out.rio.write_crs("EPSG:4326")
+        return out
 
     def landcover(self, year: int | None = None, source: str = "worldcover",
                   **kwargs):

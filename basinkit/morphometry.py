@@ -46,9 +46,10 @@ from typing import Any
 import numpy as np
 
 
-def _laea(lat: float, lon: float) -> str:
-    return (f"+proj=laea +lat_0={lat} +lon_0={lon} "
-            "+x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs")
+def _laea(lat: float, lon: float):
+    from .clip import laea_crs
+
+    return laea_crs(lat, lon)
 
 
 def _streams_per_order(ids, next_down, orders) -> dict[int, int]:
