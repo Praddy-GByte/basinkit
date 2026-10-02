@@ -30,7 +30,19 @@ server=False
 
 tags=hydrology,watershed,catchment,basin,delineation,dem,terrain,slope,hand,morphometry,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
 
-changelog=0.8.0
+changelog=0.8.3
+    - A projected basin layer is now reprojected to EPSG:4326 on the way in.
+      basinkit works in lon/lat throughout, so a UTM layer used to arrive as
+      metres and PROJ rejected a northing of 7,793,981 as a latitude. This
+      failed in Fetch basin data layers and in Basin morphometry; all seven
+      algorithms share the same entry point and all seven are fixed.
+    - Delineate river basin now warns below 2,000 km2 rather than 500, and
+      says what the coarse polygon is: whole HydroBASINS level-12 units of
+      about 130 km2, not a routed elevation model, so its boundary follows
+      unit edges rather than the terrain divide.
+    - Needs basinkit 0.8.3 or newer.
+
+0.8.0
     - New algorithm: Landscape form. chi, normalised channel steepness,
       concavity and knickpoints -- whether a river is still adjusting or has
       settled, which the shape indices cannot tell you. Knickpoints come back
