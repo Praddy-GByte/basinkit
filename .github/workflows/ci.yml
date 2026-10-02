@@ -58,5 +58,7 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          python3 -m pip install --break-system-packages pytest
+          # basin_from_layer imports shapely directly, so the stubbed
+          # basinkit is not enough to exercise it.
+          python3 -m pip install --break-system-packages pytest shapely
           python3 -m pytest tests/test_qgis_api.py -q

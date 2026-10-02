@@ -2462,7 +2462,7 @@ def test_projected_basin_without_a_crs_names_the_real_mistake():
            .to_crs("EPSG:32645").iloc[0])
 
     with pytest.raises(ValueError, match="projected CRS"):
-        bk.Basin.from_geometry(utm).area_km2
+        _ = bk.Basin.from_geometry(utm).area_km2
 
 
 def test_laea_crs_refuses_a_centre_that_is_not_in_degrees():
