@@ -89,6 +89,11 @@ def delineate(lat: float, lon: float, backend: str = "auto", **kwargs):
     return fn(lat, lon, **kwargs)
 
 
+#: Catchments smaller than this are re-run on the DEM by ``backend="auto"``.
+#: Argued from docs/verification.md rather than chosen; see ``_auto``.
+DEM_REFINE_BELOW_KM2 = 2000.0
+
+
 def _auto(lat: float, lon: float, **kwargs):
     """HydroBASINS first, with the resolution range covered at both ends.
 
@@ -119,7 +124,18 @@ def _auto(lat: float, lon: float, **kwargs):
 
     from ..exceptions import DelineationError
 
-    min_area = kwargs.pop("min_area_km2", 25.0)
+    # Where "auto" stops trusting HydroBASINS and routes on the DEM instead.
+    #
+    # This is set from the blind check in docs/verification.md -- 2,740
+    # delineations at 2,550 gauges -- which puts the median area error at
+    # 1.7% between 2,000 and 10,000 km2 and 8.9% between 500 and 2,000. The
+    # old default of 25 km2 refined only the single-unit case and left the
+    # whole band where the measurement says the coarse answer is weakest.
+    #
+    # The cost is real: the DEM backend needs a 30 m window and is slower.
+    # Lower it to 500.0 to keep more of the old speed, or pass
+    # min_area_km2= per call.
+    min_area = kwargs.pop("min_area_km2", DEM_REFINE_BELOW_KM2)
     # True checks only when the river network is already on disk; 'download'
     # fetches it if needed; False skips the check entirely.
     verify = kwargs.pop("verify", True)
