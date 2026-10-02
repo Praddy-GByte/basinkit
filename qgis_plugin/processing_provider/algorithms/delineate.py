@@ -222,15 +222,18 @@ class DelineateBasinAlgorithm(BasinkitAlgorithm):
 
         provenance = basin.provenance
         feedback.pushInfo(f"Basin area: {basin.area_km2:,.1f} km2")
-        if provenance.get("backend") == "hydrobasins" and basin.area_km2 < 500:
+        if provenance.get("backend") == "hydrobasins" and basin.area_km2 < 2000:
             feedback.pushWarning(
-                "This catchment is at the scale where the 'dem' backend is the "
-                "right tool: it routes flow on a 30 m elevation model and "
-                "resolves catchments down to a single pixel, while the default "
-                "backend works from sub-basins averaging about 130 km2. "
-                "Validation across 2,550 gauges puts the crossover near "
-                "2,000 km2. Re-run with backend 'dem' for a result at this "
-                "scale."
+                "This polygon is assembled from whole HydroBASINS level-12 "
+                "units, about 130 km2 each. It is not routed on an elevation "
+                "model, so its boundary follows unit edges rather than the "
+                "terrain divide, and it will not match a DEM-derived basin "
+                "along the margins.\n"
+                "At this catchment size that matters: validation across 2,550 "
+                "gauges puts the median area error at 8.9% between 500 and "
+                "2,000 km2 and 30% between 100 and 500, against 1.7% above "
+                "2,000. Re-run with backend 'dem', which routes flow on a 30 m "
+                "model and resolves a divide to one pixel."
             )
         feedback.pushInfo(
             f"Bounding-box efficiency: {basin.bbox_efficiency:.0%} "
