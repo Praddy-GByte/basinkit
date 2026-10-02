@@ -2504,3 +2504,28 @@ def test_a_tile_with_no_readable_crs_still_mosaics(tmp_path):
     assert da.rio.crs is not None
     assert da.rio.crs.to_epsg() == 4326
     assert meta["basinkit_crs_assumed"] is True
+
+
+def test_every_place_that_states_a_version_states_the_same_one():
+    """A release that bumps pyproject.toml and forgets __init__.py ships a
+    package whose own __version__ lies, and nothing catches it until someone
+    reads a provenance record or a citation and finds the wrong number.
+    """
+    import pathlib
+    import re
+
+    root = pathlib.Path(__file__).resolve().parents[1]
+
+    def find(relative, pattern):
+        text = (root / relative).read_text(encoding="utf-8")
+        match = re.search(pattern, text, re.M)
+        assert match, f"no version found in {relative}"
+        return match.group(1)
+
+    declared = {
+        "pyproject.toml": find("pyproject.toml", r'^version = "([^"]+)"'),
+        "basinkit/__init__.py": find("basinkit/__init__.py", r'^__version__ = "([^"]+)"'),
+        "CITATION.cff": find("CITATION.cff", r'^version: (\S+)'),
+        "qgis_plugin/metadata.txt": find("qgis_plugin/metadata.txt", r'^version=(\S+)'),
+    }
+    assert len(set(declared.values())) == 1, declared
