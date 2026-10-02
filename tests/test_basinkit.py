@@ -2422,3 +2422,85 @@ def test_the_noise_floor_follows_the_cell_the_split_was_measured_on():
     decimated = _noise_floor_deg(error, 60.0)
     assert decimated < full
     assert full == pytest.approx(math.degrees(math.atan(error / 30.0)))
+
+
+# -- a basin's CRS is checked, not assumed -------------------------------------
+#
+# Two failures were reported from the QGIS plugin: basin.area_km2 raising inside
+# pyproj, and morphometry raising "Invalid value for lat_0". Both came from the
+# same place -- a polygon in a projected CRS reaching an equal-area projection
+# that assumed lon/lat, so a northing in metres was passed as a latitude.
+
+
+def _square_basin():
+    """A degree-ish square over Nepal, as a plain lon/lat polygon."""
+    from shapely.geometry import box
+
+    return box(87.0, 26.6, 87.4, 27.0)
+
+
+def test_projected_basin_gives_the_same_area_as_its_lonlat_twin():
+    import geopandas as gpd
+
+    import basinkit as bk
+
+    wgs = _square_basin()
+    utm = gpd.GeoSeries([wgs], crs="EPSG:4326").to_crs("EPSG:32645").iloc[0]
+
+    from_wgs = bk.Basin.from_geometry(wgs).area_km2
+    from_utm = bk.Basin.from_geometry(utm, crs="EPSG:32645").area_km2
+
+    assert from_utm == pytest.approx(from_wgs, rel=1e-6)
+
+
+def test_projected_basin_without_a_crs_names_the_real_mistake():
+    import geopandas as gpd
+
+    import basinkit as bk
+
+    utm = (gpd.GeoSeries([_square_basin()], crs="EPSG:4326")
+           .to_crs("EPSG:32645").iloc[0])
+
+    with pytest.raises(ValueError, match="projected CRS"):
+        bk.Basin.from_geometry(utm).area_km2
+
+
+def test_laea_crs_refuses_a_centre_that_is_not_in_degrees():
+    from basinkit.clip import laea_crs
+
+    assert laea_crs(26.8, 87.2).is_projected
+    with pytest.raises(ValueError, match="metres, not degrees"):
+        laea_crs(7793981.35, 501997.3)
+
+
+def test_a_tile_with_no_readable_crs_still_mosaics(tmp_path):
+    """A DEM must never leave the mosaic without a CRS.
+
+    rasterio returns None for a file whose CRS it cannot read, which a PROJ
+    installation missing its data directory does. The array then travelled on
+    and failed much later inside rioxarray, reporting "CRS not found" two
+    minutes into a run and naming the symptom rather than the cause.
+    """
+    import numpy as np
+    import rasterio
+    from rasterio.transform import from_origin
+
+    from basinkit.mosaic import merge_tiles
+
+    path = tmp_path / "no_crs.tif"
+    with rasterio.open(
+        path, "w", driver="GTiff", height=8, width=8, count=1,
+        dtype="float32", transform=from_origin(87.0, 27.0, 0.01, 0.01),
+        crs=None,                                   # the whole point
+    ) as dst:
+        dst.write(np.ones((8, 8), dtype="float32"), 1)
+
+    with rasterio.open(path) as src:
+        assert src.crs is None, "the fixture must have no CRS to be a test"
+
+    da, meta = merge_tiles([str(path)], (87.0, 26.9, 87.08, 27.0),
+                           max_pixels=10_000, categorical=False)
+
+    assert da.rio.crs is not None
+    assert da.rio.crs.to_epsg() == 4326
+    assert meta["basinkit_crs_assumed"] is True

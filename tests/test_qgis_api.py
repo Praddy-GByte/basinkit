@@ -122,3 +122,53 @@ def test_the_reassurance_line_is_gone(qgis_app):
 
     source = __import__("pathlib").Path(delineate.__file__).read_text(encoding="utf-8")
     assert "from the computed area)" not in source
+
+
+def test_basin_from_layer_reprojects_a_projected_layer(qgis_app):
+    """A projected basin layer must reach basinkit in lon/lat.
+
+    The plugin read each feature's WKT in the layer's own CRS and handed it to
+    Basin.from_geometry, which assumes EPSG:4326. A UTM layer therefore arrived
+    as metres, and the equal-area projection built from its centroid was given
+    a northing of 7,793,981 as a latitude. That failed twice over, in
+    basin_area_km2 and again in morphometry.
+    """
+    from qgis.core import (QgsCoordinateReferenceSystem, QgsCoordinateTransform,
+                           QgsFeature, QgsGeometry, QgsProject, QgsVectorLayer)
+
+    import basinkit as bk
+    from qgis_plugin.processing_provider.algorithms.base import BasinkitAlgorithm
+
+    captured = {}
+
+    def from_geometry(geometry, provenance=None, crs=None):
+        captured["geometry"] = geometry
+        captured["crs"] = crs
+        return object()
+
+    bk.Basin = type("Basin", (), {"from_geometry": staticmethod(from_geometry)})
+
+    # A square over eastern Nepal, held in UTM 45N: exactly the shape of layer
+    # that broke, where every coordinate is a six- or seven-figure number.
+    utm = QgsGeometry.fromWkt(
+        "POLYGON((87.0 26.6, 87.4 26.6, 87.4 27.0, 87.0 27.0, 87.0 26.6))")
+    utm.transform(QgsCoordinateTransform(
+        QgsCoordinateReferenceSystem("EPSG:4326"),
+        QgsCoordinateReferenceSystem("EPSG:32645"),
+        QgsProject.instance()))
+
+    layer = QgsVectorLayer("Polygon?crs=EPSG:32645", "basin", "memory")
+    feature = QgsFeature()
+    feature.setGeometry(utm)
+    layer.dataProvider().addFeatures([feature])
+
+    BasinkitAlgorithm.basin_from_layer(layer)
+
+    assert captured["crs"] == "EPSG:4326"
+    minx, miny, maxx, maxy = captured["geometry"].bounds
+    assert -180 <= minx <= 180 and -90 <= miny <= 90, (
+        f"geometry reached basinkit as {captured['geometry'].bounds}, "
+        "which is metres, not degrees"
+    )
+    assert minx == pytest.approx(87.0, abs=1e-3)
+    assert miny == pytest.approx(26.6, abs=1e-3)

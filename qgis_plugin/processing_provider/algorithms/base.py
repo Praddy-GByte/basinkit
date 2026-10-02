@@ -43,17 +43,39 @@ class BasinkitAlgorithm(QgsProcessingAlgorithm):
 
     @staticmethod
     def basin_from_layer(source, feedback=None):
-        """Build a basinkit Basin from the first polygon feature of a layer."""
+        """Build a basinkit Basin from the polygon features of a layer.
+
+        The layer is transformed to EPSG:4326 first. basinkit works in lon/lat
+        throughout, and a projected layer used to arrive here as metres, which
+        PROJ then rejected as a latitude.
+        """
+        from qgis.core import (QgsCoordinateReferenceSystem,
+                               QgsCoordinateTransform, QgsGeometry, QgsProject)
         from shapely import wkt
         from shapely.ops import unary_union
 
         import basinkit as bk
+
+        wgs84 = QgsCoordinateReferenceSystem("EPSG:4326")
+        source_crs = source.sourceCrs()
+        transform = None
+        if source_crs.isValid() and source_crs != wgs84:
+            transform = QgsCoordinateTransform(source_crs, wgs84,
+                                               QgsProject.instance())
+            if feedback is not None:
+                feedback.pushInfo(
+                    f"Basin layer is {source_crs.authid()}; reprojecting to "
+                    "EPSG:4326, which is what basinkit works in."
+                )
 
         geometries = []
         for feature in source.getFeatures():
             geometry = feature.geometry()
             if geometry is None or geometry.isEmpty():
                 continue
+            if transform is not None:
+                geometry = QgsGeometry(geometry)
+                geometry.transform(transform)
             geometries.append(wkt.loads(geometry.asWkt()))
 
         if not geometries:
@@ -67,4 +89,4 @@ class BasinkitAlgorithm(QgsProcessingAlgorithm):
             feedback.pushInfo(
                 f"Merged {len(geometries)} features into one basin."
             )
-        return bk.Basin.from_geometry(merged)
+        return bk.Basin.from_geometry(merged, crs="EPSG:4326")

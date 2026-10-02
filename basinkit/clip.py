@@ -184,6 +184,34 @@ def zonal_mean(da, geometry=None, *, dims: tuple[str, ...] = ("y", "x")):
     return da.mean(dim=[d for d in dims if d in da.dims], skipna=True)
 
 
+def laea_crs(lat: float, lon: float):
+    """A Lambert azimuthal equal-area CRS centred on a lon/lat point.
+
+    Two things this does that a bare proj4 string did not.
+
+    It refuses a centre that is not in degrees. A polygon in a projected CRS
+    has a centroid in metres, and passing a northing as ``lat_0`` produces an
+    internal PROJ error that says nothing about the real mistake.
+
+    It builds the CRS from a dict. The proj4-string path needs a PROJ able to
+    parse it, and inside QGIS that is not always the PROJ the rest of the
+    stack was built against.
+    """
+    from pyproj import CRS
+
+    if not (-90.0 <= lat <= 90.0 and -180.0 <= lon <= 180.0):
+        raise ValueError(
+            "An equal-area projection has to be centred on a lon/lat point, "
+            f"but this geometry's centroid is lat={lat:,.3f}, lon={lon:,.3f}. "
+            "Those are metres, not degrees, so the geometry is in a projected "
+            "CRS. Reproject it to EPSG:4326, or say which CRS it is in: "
+            "Basin.from_geometry(geom, crs='EPSG:32645')."
+        )
+    return CRS.from_dict({"proj": "laea", "lat_0": float(lat), "lon_0": float(lon),
+                          "x_0": 0, "y_0": 0, "datum": "WGS84", "units": "m",
+                          "no_defs": True})
+
+
 def basin_area_km2(geometry, crs: str = "EPSG:4326") -> float:
     """Area of a lon/lat polygon in km2, via an equal-area projection.
 
@@ -196,6 +224,7 @@ def basin_area_km2(geometry, crs: str = "EPSG:4326") -> float:
 
     geoms = [shape(g) for g in _as_geoms(geometry)]
     gdf = gpd.GeoDataFrame(geometry=geoms, crs=crs)
+    if gdf.crs is not None and gdf.crs.to_epsg() != 4326:
+        gdf = gdf.to_crs("EPSG:4326")
     cx, cy = gdf.union_all().centroid.x, gdf.union_all().centroid.y
-    aea = f"+proj=laea +lat_0={cy} +lon_0={cx} +datum=WGS84 +units=m +no_defs"
-    return float(gdf.to_crs(aea).area.sum() / 1e6)
+    return float(gdf.to_crs(laea_crs(cy, cx)).area.sum() / 1e6)
