@@ -111,7 +111,17 @@ def cmd_delineate(args):
 
 
 def cmd_subbasins(args):
-    b = _basin(args)
+    import basinkit as bk
+
+    # Sub-catchments are HydroBASINS level-12 units, so they come from that
+    # traversal rather than from a DEM-routed polygon. auto refines anything
+    # under 2,000 km2 on the DEM, so asking the auto basin for them failed on
+    # every small catchment. Delineate with the backend that has them.
+    if getattr(args, "backend", None) in (None, "", "auto"):
+        info("Sub-catchments come from HydroBASINS, so this uses that backend.")
+        b = bk.Basin.from_point(args.lat, args.lon, backend="hydrobasins")
+    else:
+        b = _basin(args)
     sb = b.subbasins()
     info(f"{len(sb):,} sub-catchments")
     _write_vector(sb, os.path.join(args.out, "subbasins.geojson"))
