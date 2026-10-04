@@ -45,8 +45,6 @@ backend          grid               source              conditioned
 ===============  =================  ==================  ====================
 """
 
-import warnings
-
 from .api import delineate_api
 from .dem import delineate_dem
 from .hydrobasins import delineate_hydrobasins
@@ -189,7 +187,7 @@ def _auto(lat: float, lon: float, **kwargs):
                 "unit edges rather than the terrain divide and which is "
                 f"typically the larger of the two. {exc}"
             )
-            warnings.warn(prov["note"], stacklevel=2)
+            _warnings.warn(prov["note"], stacklevel=2)
         except Exception:
             prov["refinement_skipped"] = "dem-failed"
             prov["note"] = (
