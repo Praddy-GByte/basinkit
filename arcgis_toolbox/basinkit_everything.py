@@ -874,7 +874,15 @@ def s_quality_why(C):
 
 @step(55, "Delineation", "The basin's own HydroATLAS attributes", "basin.attributes()")
 def s_attrs(C):
-    at = C["basin"].attributes()
+    import basinkit as bk
+
+    # BasinATLAS is keyed by HydroBASINS id, which only that backend records.
+    # auto refines anything under 2,000 km2 on the DEM, so the auto basin
+    # carries no id to look up. Ask for the HydroBASINS delineation instead.
+    basin = C["basin"]
+    if (getattr(basin, "provenance", None) or {}).get("backend") != "hydrobasins":
+        basin = bk.Basin.from_point(C["lat"], C["lon"], backend="hydrobasins")
+    at = basin.attributes()
     if hasattr(at, "to_dict"):
         at = at.to_dict()
     items = [(k, v) for k, v in list(at.items()) if not isinstance(v, (dict, list))][:11]
@@ -1267,7 +1275,7 @@ def build_report(records, path, C, manifest):
     with PdfPages(path) as pdf:
         # --- cover
         fig = plt.figure(figsize=(8.27, 11.69)); fig.patch.set_facecolor(SURF)
-        fig.text(0.08, 0.93, "BASINKIT 0.7.0  ·  COMPLETE BASIN ANALYSIS",
+        fig.text(0.08, 0.93, f"BASINKIT {manifest['basinkit_version']}  ·  COMPLETE BASIN ANALYSIS",
                  fontsize=10.5, color=INK2, weight="bold")
         fig.text(0.08, 0.875, "One click.", fontsize=34, color=INK, weight="bold")
         fig.text(0.08, 0.828, f"{len(ok)} analyses.", fontsize=34, color=INK, weight="bold")
