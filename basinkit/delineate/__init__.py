@@ -45,6 +45,8 @@ backend          grid               source              conditioned
 ===============  =================  ==================  ====================
 """
 
+import warnings
+
 from .api import delineate_api
 from .dem import delineate_dem
 from .hydrobasins import delineate_hydrobasins
@@ -122,7 +124,7 @@ def _auto(lat: float, lon: float, **kwargs):
     """
     import warnings as _warnings
 
-    from ..exceptions import DelineationError
+    from ..exceptions import DelineationError, MissingDependency
 
     # Where "auto" stops trusting HydroBASINS and routes on the DEM instead.
     #
@@ -168,7 +170,28 @@ def _auto(lat: float, lon: float, **kwargs):
         # finer than the sub-basin grid resolves. Refine on the DEM.
         try:
             return delineate_dem(lat, lon, **kwargs)
+        except MissingDependency as exc:
+            # Below this threshold the refinement is the whole reason auto
+            # exists, and the polygon handed back instead can be half as large
+            # again -- 383 km2 where the DEM resolves 249. Returning that
+            # quietly leaves the difference to be found by comparing against a
+            # published area, if it is found at all. The cause is also not the
+            # one the fallback note below describes: nothing is wrong with the
+            # location or its DEM window, a package is simply not installed,
+            # and the message has to say so or the reader goes looking in the
+            # wrong place.
+            prov["refinement_skipped"] = "missing-dependency"
+            prov["note"] = (
+                f"A catchment of {area:,.0f} km2 is below the "
+                f"{min_area:,.0f} km2 threshold at which auto refines on the "
+                "DEM, and that backend is unavailable. The polygon returned "
+                "is the HydroBASINS level-12 assembly, whose boundary follows "
+                "unit edges rather than the terrain divide and which is "
+                f"typically the larger of the two. {exc}"
+            )
+            warnings.warn(prov["note"], stacklevel=2)
         except Exception:
+            prov["refinement_skipped"] = "dem-failed"
             prov["note"] = (
                 "This catchment is at the scale of a single level-12 sub-basin, "
                 "so the polygon is that unit. The DEM backend resolves finer "
