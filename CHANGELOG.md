@@ -31,6 +31,28 @@ package is fully imported; reading it at import time cannot work, because
 `__init__.py` imports `cache` on its way to defining the name. Providers
 rate-limit by User-Agent, so a stale one is not only a cosmetic lie.
 
+### One requester-pays scene no longer fails a whole Sentinel-2 mosaic
+
+Sentinel-2 is taken from Earth Search because its assets are public COGs on
+`sentinel-cogs`, needing no account. A few items in that collection still point
+at `s3://sentinel-s2-l2a`, the requester-pays bucket of JP2s this package
+avoids for Landsat for the same reason. Over the Koshi at Chatara, one scene in
+six was such an item, and it failed the entire composite with "The AWS Access
+Key Id you provided does not exist in our records" -- an error that names
+neither the scene nor the bucket, and that widening the date range does not
+explain.
+
+`stac_stack` now leaves those scenes out and says how many it dropped, raising
+only if every scene found is behind requester-pays.
+
+### A step whose input never arrived says so
+
+Analysis 47 reads the Sentinel-2 composite that analysis 46 produces. When 46
+failed, 47 raised `KeyError: 's2'`, which the sweep recorded against 47, so the
+report blamed the consumer for the producer's failure. The same held for the
+sub-catchments shared by analyses 2 and 56. Both now report which analysis is
+missing.
+
 ### Landscape form no longer fails on a basin with knickpoints
 
 It asked the output sink for its field list. `QgsFeatureSink` has no `fields()`,

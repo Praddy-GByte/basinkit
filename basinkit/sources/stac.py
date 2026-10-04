@@ -283,6 +283,47 @@ def _budget_resolution(geometry, items, bands, max_pixels: int):
     }
 
 
+def _drop_requester_pays(items, bands):
+    """Drop items whose requested bands are not plain HTTP(S).
+
+    Earth Search's ``sentinel-2-l2a`` is almost entirely public COGs on the
+    ``sentinel-cogs`` bucket, which is why Sentinel-2 is taken from there. A
+    few items in it still point at ``s3://sentinel-s2-l2a``, the requester-pays
+    bucket of JP2s this module avoids for Landsat for exactly the same reason.
+    One such item anywhere in a stack fails the whole mosaic with "The AWS
+    Access Key Id you provided does not exist in our records", which names
+    neither the item nor the bucket, and which no amount of widening the date
+    range explains.
+    """
+    kept, dropped = [], []
+    for item in items:
+        hrefs = [
+            asset.href
+            for name, asset in item.assets.items()
+            if bands is None or name in bands
+        ]
+        if any(h and not h.startswith(("http://", "https://")) for h in hrefs):
+            dropped.append(item.id)
+        else:
+            kept.append(item)
+
+    if dropped and not kept:
+        raise DataSourceError(
+            f"Every one of the {len(dropped)} scenes found is published only on "
+            "a requester-pays bucket, which needs AWS credentials and bills the "
+            "reader. Widen the date range to pick up scenes on the public "
+            "bucket."
+        )
+    if dropped:
+        warnings.warn(
+            f"{len(dropped)} of {len(dropped) + len(kept)} scenes are published "
+            "only on a requester-pays bucket and were left out; "
+            f"{len(kept)} public ones remain. First dropped: {dropped[0]}.",
+            stacklevel=2,
+        )
+    return kept
+
+
 def stac_stack(
     items,
     geometry=None,
@@ -332,6 +373,8 @@ def stac_stack(
         raise DataSourceError(
             "No STAC items to stack. Widen the date range or relax cloud_cover."
         )
+
+    items = _drop_requester_pays(items, bands)
 
     scaling = asset_scaling(items, bands)
     if nodata is None:

@@ -55,6 +55,22 @@ def _fig(w=4.2, h=4.2):
     return fig, ax
 
 
+def _from_earlier_step(C, key, step_no, what):
+    """Fetch something an earlier analysis left on the context.
+
+    A step that reads C["s2"] after the step producing it has failed used to
+    raise KeyError: 's2'. The sweep records that message against *this* step,
+    so the report blamed the consumer for the producer's failure. Say which
+    analysis is actually missing instead.
+    """
+    try:
+        return C[key]
+    except KeyError:
+        raise RuntimeError(
+            f"needs {what} from analysis {step_no}, which did not complete"
+        ) from None
+
+
 def _bare(ax):
     ax.set_xticks([]); ax.set_yticks([])
     for s in ax.spines.values():
@@ -755,7 +771,7 @@ def s_s2(C):
 @step(47, "Satellite", "Vegetation index from the same scene",
       "(nir - red) / (nir + red)")
 def s_ndvi(C):
-    ds = C["s2"]
+    ds = _from_earlier_step(C, "s2", 46, "the Sentinel-2 composite")
     nir = ds["nir"].compute().values.astype("float32")
     red = ds["red"].compute().values.astype("float32")
     ndvi = (nir - red) / np.where((nir + red) == 0, np.nan, nir + red)
@@ -895,7 +911,7 @@ def s_attrs(C):
 @step(56, "Delineation", "This basin against its own largest sub-basins",
       'bk.compare([(lat1, lon1), (lat2, lon2), ...])')
 def s_compare(C):
-    sb = C["subbasins"].copy()
+    sb = _from_earlier_step(C, "subbasins", 2, "the sub-catchments").copy()
     col = "SUB_AREA" if "SUB_AREA" in sb.columns else None
     if col is None:
         sb["SUB_AREA"] = sb.to_crs(6933).area / 1e6; col = "SUB_AREA"
