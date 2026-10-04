@@ -154,7 +154,17 @@ def s_basin(C):
 
 @step(2, "Delineation", "Sub-catchments, each carrying NEXT_DOWN", "basin.subbasins()")
 def s_subbasins(C):
-    sb = C["basin"].subbasins(); C["subbasins"] = sb
+    # Sub-catchments are HydroBASINS level-12 units, so they come from that
+    # traversal and not from a DEM-routed polygon. Since auto now refines
+    # anything under 2,000 km2 on the DEM, asking C["basin"] for them fails on
+    # every small catchment. Ask for the HydroBASINS delineation instead --
+    # which is what the QGIS Sub-catchments tool has always done.
+    import basinkit as bk
+
+    basin = C["basin"]
+    if (getattr(basin, "provenance", None) or {}).get("backend") != "hydrobasins":
+        basin = bk.Basin.from_point(C["lat"], C["lon"], backend="hydrobasins")
+    sb = basin.subbasins(); C["subbasins"] = sb
     col = "SUB_AREA"
     if col not in sb.columns:
         sb = sb.copy(); sb["SUB_AREA"] = sb.to_crs(6933).area / 1e6
