@@ -49,8 +49,12 @@ class BasinkitAlgorithm(QgsProcessingAlgorithm):
         throughout, and a projected layer used to arrive here as metres, which
         PROJ then rejected as a latitude.
         """
-        from qgis.core import (QgsCoordinateReferenceSystem,
-                               QgsCoordinateTransform, QgsGeometry, QgsProject)
+        from qgis.core import (
+            QgsCoordinateReferenceSystem,
+            QgsCoordinateTransform,
+            QgsGeometry,
+            QgsProject,
+        )
         from shapely import wkt
         from shapely.ops import unary_union
 

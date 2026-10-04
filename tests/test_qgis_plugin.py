@@ -226,3 +226,24 @@ def test_no_unscoped_qt_enums():
                 bad.append(f"{path.relative_to(root)}:{line}  "
                            f"{hit.group(0)}  -> use {fix}")
     assert not bad, "unscoped enums break QGIS 4 (Qt6):\n  " + "\n  ".join(bad)
+
+
+def test_no_algorithm_asks_a_sink_for_its_fields():
+    """QgsFeatureSink has no fields(); the fields object the algorithm built
+    for parameterAsSink is what QgsFeature needs.
+
+    Landscape form asked the sink, which worked only while a basin happened to
+    have no knickpoints to write. Five small sub-basins of the Koshi, run
+    through all eleven tools, failed on three of them for this reason.
+    """
+    import pathlib
+    import re
+
+    algorithms = (pathlib.Path(__file__).resolve().parents[1]
+                  / "qgis_plugin" / "processing_provider" / "algorithms")
+    offenders = []
+    for path in sorted(algorithms.glob("*.py")):
+        for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if re.search(r"\bsink\w*\.fields\(\)", line):
+                offenders.append(f"{path.name}:{n}: {line.strip()}")
+    assert not offenders, offenders

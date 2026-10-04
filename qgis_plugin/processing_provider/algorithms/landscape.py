@@ -180,9 +180,9 @@ class LandscapeFormAlgorithm(BasinkitAlgorithm):
         written = self._write_outputs(result, dem, folder, context, feedback)
         feedback.setProgress(90)
 
-        sink, dest_id = self._knickpoint_sink(parameters, context, dem)
+        sink, dest_id, fields = self._knickpoint_sink(parameters, context, dem)
         for point in result["knickpoints"]:
-            feature = QgsFeature(sink.fields())
+            feature = QgsFeature(fields)
             feature.setGeometry(
                 QgsGeometry.fromPointXY(QgsPointXY(point["x"], point["y"])))
             feature.setAttributes([
@@ -215,7 +215,10 @@ class LandscapeFormAlgorithm(BasinkitAlgorithm):
         if sink is None:
             raise QgsProcessingException(
                 self.invalidSinkError(parameters, self.KNICKPOINTS))
-        return sink, dest_id
+        # The fields travel back with the sink. QgsFeatureSink has no fields()
+        # of its own, so asking it for them crashed on any basin that actually
+        # had a knickpoint to write -- which is most of them.
+        return sink, dest_id, fields
 
     def _write_outputs(self, result, dem, folder, context, feedback):
         """Rasters, the trunk profile and the figure. Each failure is its own."""
