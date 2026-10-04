@@ -25,7 +25,21 @@ import requests
 from .exceptions import DataSourceError
 
 _CHUNK = 1 << 20  # 1 MiB
-_USER_AGENT = "basinkit/0.1.0 (+https://praddy-gbyte.github.io/basinkit)"
+_UA_TEMPLATE = "basinkit/{} (+https://praddy-gbyte.github.io/basinkit)"
+
+
+def _user_agent() -> str:
+    """The User-Agent every request carries, built from the package version.
+
+    The version is read when a request is made, not when this module is
+    imported: ``basinkit/__init__.py`` imports this module on its way to
+    defining ``__version__``, so the name does not exist yet at import time.
+    Hard-coding it here is what left every provider seeing 0.1.0 long after
+    0.1.0 had shipped.
+    """
+    from . import __version__
+
+    return _UA_TEMPLATE.format(__version__)
 
 
 def cache_dir() -> Path:
@@ -81,7 +95,7 @@ def download(
         return dest
 
     tmp = dest.with_suffix(dest.suffix + ".part")
-    hdrs = {"User-Agent": _USER_AGENT, **(headers or {})}
+    hdrs = {"User-Agent": _user_agent(), **(headers or {})}
 
     try:
         with requests.get(url, stream=True, timeout=timeout, headers=hdrs) as r:
@@ -127,7 +141,7 @@ def get_json(url: str, *, timeout: int = 60, params: dict | None = None) -> dict
     """GET a JSON document with basinkit's user agent and error translation."""
     try:
         r = requests.get(
-            url, timeout=timeout, params=params, headers={"User-Agent": _USER_AGENT}
+            url, timeout=timeout, params=params, headers={"User-Agent": _user_agent()}
         )
         r.raise_for_status()
         return r.json()

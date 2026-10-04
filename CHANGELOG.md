@@ -1,5 +1,50 @@
 # Changelog
 
+## 0.8.4 -- 2026-10-04
+
+### A basin delineated on the DEM carries no HydroBASINS id
+
+`backend="auto"` refines anything below 2,000 km2 on the elevation model, which
+0.8.3 made the default. Two things downstream still assumed the basin in hand
+had come from the HydroBASINS graph, because until that threshold moved it
+almost always had: `subbasins()` traverses the level-12 units inside a basin,
+and `attributes()` looks the basin up in BasinATLAS, which is keyed by
+HydroBASINS id. A DEM-derived polygon carries no such id, so both raised an
+error that named the backend rather than the request, and a small basin -- the
+case the threshold change was meant to serve -- could not reach either.
+
+Both now ask for the HydroBASINS delineation when the basin they were handed
+does not have one, and record in the log why the backend changed. The ArcGIS
+Sub-Catchments tool does the same, so the toolbox and the full sweep agree.
+
+### Every request now says which version made it
+
+`cache._USER_AGENT` was the string `basinkit/0.1.0`, written when 0.1.0 was
+current and never derived from anything, so every provider basinkit talks to --
+ISRIC, Copernicus, HydroSHEDS, the STAC endpoints -- had been seeing 0.1.0 for
+eight releases. `soil.soil_profile` carried a second copy of the same literal
+and did not go through the constant at all, so fixing one place would have left
+the other behind.
+
+Both now build the header from `__version__` at call time, which is when the
+package is fully imported; reading it at import time cannot work, because
+`__init__.py` imports `cache` on its way to defining the name. Providers
+rate-limit by User-Agent, so a stale one is not only a cosmetic lie.
+
+### Landscape form no longer fails on a basin with knickpoints
+
+It asked the output sink for its field list. `QgsFeatureSink` has no `fields()`,
+so the call only survived on basins where there was nothing to write. The fields
+now travel back from the algorithm that built them. Found by running all eleven
+tools over five small sub-catchments of the Koshi; three of the five hit it.
+
+### The report cover states the version that produced it
+
+The ArcGIS sweep's PDF had its version typed into the cover page, so a 0.8.3 run
+produced a report whose first page read 0.7.0 while the collage beside it, which
+takes the number from the run manifest, read 0.8.3. The cover now reads that
+same manifest.
+
 ## 0.8.3 -- 2026-10-02
 
 ### A basin's CRS is now checked rather than assumed

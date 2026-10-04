@@ -125,8 +125,10 @@ def soil_profile(lat: float, lon: float, properties: list[str] | None = None) ->
     import requests
 
     try:
+        from ..cache import _user_agent
+
         r = requests.get(REST, params=params, timeout=90,
-                         headers={"User-Agent": "basinkit/0.1.0"})
+                         headers={"User-Agent": _user_agent()})
         r.raise_for_status()
         return r.json()
     except requests.RequestException as exc:

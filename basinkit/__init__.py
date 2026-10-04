@@ -46,7 +46,7 @@ from .exceptions import (
 )
 from .river import Confluence, River
 
-__version__ = "0.8.3"
+__version__ = "0.8.4"
 
 __all__ = [
     "Basin",
