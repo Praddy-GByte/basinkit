@@ -22,7 +22,9 @@ jobs:
       - run: pip install -e ".[all,dev]"
       # gh-deploy commits to gh-pages. Without an identity the commit lands
       # with an empty author, which GitHub then attributes to nobody.
+      # The address must be one GitHub knows belongs to this account, or the
+      # deploy commit is credited to a different user than the repository's.
       - run: |
           git config user.name "Pradeepika Kaushik"
-          git config user.email "pradeepikakaushik4@gmail.com"
+          git config user.email "156111942+Praddy-GByte@users.noreply.github.com"
       - run: mkdocs gh-deploy --force
