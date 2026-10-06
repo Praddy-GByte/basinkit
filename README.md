@@ -412,6 +412,15 @@ terminal install must use the **OSGeo4W Shell**, not the ordinary Command
 Prompt. `!pip install` works only in Jupyter; the QGIS console does not
 understand it.
 
+## Acknowledgements
+
+**Vitor Castellar** — QA and testing. He ran the QGIS tools against his own
+reference delineations and reported three failures that no other user had hit:
+a basin that extended well past the topographic divide, a `pyproj` CRS
+initialisation error inside `basin.area_km2`, and a projected input layer whose
+northing reached `laea_crs` as a latitude. Each was reproduced and fixed, and he
+re-ran the full round afterwards to confirm the fixes held.
+
 ## Citation
 
 If basinkit is useful in published work, please cite it *and* the underlying
