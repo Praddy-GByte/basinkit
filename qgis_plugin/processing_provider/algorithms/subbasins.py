@@ -41,7 +41,7 @@ class SubBasinsAlgorithm(BasinkitAlgorithm):
     def shortDescription(self) -> str:     # noqa: N802  (QGIS API name)
         return "The pieces the basin is made of, each pointing at the one it drains into."
 
-    def shortHelpString(self) -> str:      # noqa: N802  (QGIS API name)
+    def help_body(self) -> str:
         return (
             "<p>'Delineate river basin' dissolves the sub-catchments it walked "
             "into a single polygon. This hands back the pieces instead, each "

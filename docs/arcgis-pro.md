@@ -12,7 +12,7 @@ ArcGIS Pro at all.
 | Tools in the toolbox | 14 |
 | Open datasets reached | 19 |
 | Accounts or API keys needed | none |
-| Licence | MIT |
+| Licence | Apache-2.0 |
 
 Not affiliated with, endorsed by, or sponsored by Esri.
 
@@ -59,7 +59,7 @@ every value written is one basinkit already holds.
 classes; elevation, hillshade and land cover as rasters. Every tool works in
 ModelBuilder, and nothing here needs the Spatial Analyst extension.
 
-MIT licence.
+Apache-2.0 licence.
 
 ---
 
@@ -287,5 +287,5 @@ fixed. A report that it simply worked is just as useful, and slower to come by.
 
 ---
 
-MIT licence. ArcGIS and ArcGIS Pro are trademarks of Esri. Dataset licences are
+Apache-2.0 licence. ArcGIS and ArcGIS Pro are trademarks of Esri. Dataset licences are
 recorded per-run in `manifest.json`.

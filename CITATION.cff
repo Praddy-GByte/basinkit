@@ -24,14 +24,16 @@ authors:
   - given-names: Pradeepika
     family-names: Kaushik
     # orcid: "https://orcid.org/0000-0000-0000-0000"   # add yours
-version: 0.8.4
-doi: "10.5281/zenodo.23112260"
+version: 0.9.0
+# Until the 0.9.0 record exists on Zenodo this is the concept DOI, which
+# resolves to the newest release. Replace it with the 0.9.0 version DOI.
+doi: "10.5281/zenodo.22181933"
 identifiers:
   - type: doi
     value: "10.5281/zenodo.22181933"
     description: "Concept DOI -- always resolves to the latest version"
-date-released: 2026-10-04
-license: MIT
+date-released: 2026-10-07
+license: Apache-2.0
 repository-code: "https://github.com/Praddy-GByte/basinkit"
 url: "https://github.com/Praddy-GByte/basinkit"
 keywords:

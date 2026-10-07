@@ -8,7 +8,7 @@
 [![PyPI](https://img.shields.io/pypi/v/basinkit?logo=pypi&logoColor=white)](https://pypi.org/project/basinkit/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22181933.svg)](https://doi.org/10.5281/zenodo.22181933)
 [![Tests](https://github.com/Praddy-GByte/basinkit/actions/workflows/ci.yml/badge.svg)](https://github.com/Praddy-GByte/basinkit/actions)
-[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
 
 **Click a river anywhere on Earth. Get an analysis-ready basin package: the
 basin polygon, elevation, land cover, soil, rainfall, surface water and rivers
@@ -425,9 +425,45 @@ re-ran the full round afterwards to confirm the fixes held.
 
 If basinkit is useful in published work, please cite it *and* the underlying
 datasets. `Basin.license_report()` prints the citations for the layers you
-actually used.
+actually used, and `basinkit cite` prints the block below with the version you
+have installed.
+
+> Kaushik, P. (2026). *basinkit: basin-scale acquisition of open Earth
+> observation data* [Computer software]. https://doi.org/10.5281/zenodo.22181933
+
+```bibtex
+@software{kaushik_basinkit,
+  author = {Kaushik, Pradeepika},
+  title  = {basinkit: basin-scale acquisition of open Earth observation data},
+  year   = {2026},
+  doi    = {10.5281/zenodo.22181933},
+  url    = {https://github.com/Praddy-GByte/basinkit}
+}
+```
+
+That DOI is the concept DOI: it always resolves to the newest release. The DOI
+for one specific version, and the author ORCID, are in `CITATION.cff`.
 
 ## Licence
 
-MIT for the code. The data carries its own terms; see `LICENSE` and
-`basinkit catalog`.
+**Apache-2.0** for the Python package and the ArcGIS Pro toolbox.
+**GPL-3.0-or-later** for the QGIS plugin, because the QGIS plugin repository
+requires a licence compatible with the GPL version 2 or later. Releases up to
+and including 0.8.4 were published under MIT and remain under it; Apache-2.0
+applies from 0.9.0.
+
+You may use it, modify it and redistribute it, commercially included. Three
+things are conditions of the licence rather than courtesies: the copyright
+notice and the `NOTICE` file travel with every copy (section 4), files you
+change have to be marked as changed (section 4a), and the licence does not
+grant the name (section 6).
+
+The data carries its own terms, which are not Apache-2.0 and in several cases
+are stricter; see `LICENSE` and `basinkit catalog`.
+
+### The name
+
+*basinkit* and *BasinKit* name this project and its author's work on it. The
+licence covers the code; section 6 withholds the name. A fork, a redistribution
+or a derived product is free to exist and has to carry a name of its own -- not
+this one, and nothing that implies the author endorses it.

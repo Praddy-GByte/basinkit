@@ -172,5 +172,5 @@ step and why. Send that message and it can be fixed.
 
 ---
 
-MIT licence · Not affiliated with, endorsed by, or sponsored by Esri.
+Apache-2.0 licence · Not affiliated with, endorsed by, or sponsored by Esri.
 https://github.com/Praddy-GByte/basinkit · https://doi.org/10.5281/zenodo.22181933

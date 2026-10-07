@@ -4,12 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "basinkit"
-version = "0.8.4"
+version = "0.9.0"
 description = "Click a river anywhere on Earth; get its basin, its data layers and its morphometry, analysis-ready, with no account."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
-authors = [{ name = "Pradeepika Kaushik" }]
+license = { text = "Apache-2.0" }
+authors = [{ name = "Pradeepika Kaushik", email = "pradeepika.kaushik@gmail.com" }]
+maintainers = [{ name = "Pradeepika Kaushik", email = "pradeepika.kaushik@gmail.com" }]
 keywords = [
   "hydrology", "watershed", "catchment", "basin", "delineation",
   "remote-sensing", "satellite", "dem", "gis", "stac", "earth-observation",
@@ -17,7 +18,7 @@ keywords = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: MIT License",
+  "License :: OSI Approved :: Apache Software License",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -58,6 +59,12 @@ basinkit = "basinkit.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["basinkit"]
+
+# Apache-2.0 section 4(b) requires the NOTICE file to travel with every
+# redistribution, so it has to be inside the wheel, not only in the repo.
+[tool.hatch.build.targets.wheel.force-include]
+"NOTICE" = "basinkit/NOTICE"
+"LICENSE" = "basinkit/LICENSE"
 
 [tool.ruff]
 line-length = 100

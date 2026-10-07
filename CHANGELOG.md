@@ -1,5 +1,59 @@
 # Changelog
 
+## 0.9.0 -- 2026-10-07
+
+### Apache-2.0 for the package, GPL-3.0-or-later for the QGIS plugin
+
+MIT asks for one thing: that the copyright notice travels with every copy. It
+is silent on two others that matter to a scientific tool. It does not say
+anything about the name, so nothing in it stops a fork calling itself basinkit;
+and it does not ask a fork to say that it is a fork.
+
+Apache-2.0 says both. Section 4(b) makes the `NOTICE` file -- which now carries
+the citation and the statement about the name -- travel with every
+redistribution. Section 4(a) requires changed files to be marked as changed.
+Section 6 withholds the name outright: the licence grants the code and not the
+trademark. None of that costs anything in reach, because Apache-2.0 is
+permissive in exactly the way MIT is.
+
+The QGIS plugin is GPL-3.0-or-later instead. The official plugin repository
+requires a licence "compatible with the GPLv2 or later", and GPL-3.0-or-later
+is the unambiguous answer to that rule, where Apache-2.0 would leave a reviewer
+with a judgement to make. The two coexist cleanly: Apache-2.0 is compatible
+with GPLv3, so the GPL plugin may call the Apache package, and the split also
+removes the older question of a GPL-licensed script importing Esri's
+proprietary `arcpy` -- the toolbox is Apache-2.0, where that question does not
+arise.
+
+Releases up to and including 0.8.4 were published under MIT and remain under
+MIT. A licence cannot be withdrawn from a release already made, and this one is
+not being withdrawn from them.
+
+
+### Attribution travels with the software, not only with the repository
+
+The author's name and the DOI were in `LICENSE`, `CITATION.cff` and the README
+-- all of them things a user reads once, if at all, and none of them things
+that travel with a file. They are now in the places a user is actually standing
+when the question of credit comes up.
+
+`basinkit.__author__`, `__email__`, `__license__`, `__copyright__`, `__doi__`
+and `__citation__` ship with every install, so a script can print the citation
+without going to look for it. `basinkit cite` prints the reference, and
+`basinkit cite --bibtex` the BibTeX entry, with the version actually installed.
+Every Processing algorithm's help panel in QGIS now ends with the citation; it
+is appended once in `BasinkitAlgorithm.shortHelpString`, so no algorithm can
+ship without it, and each algorithm supplies its own text through `help_body`.
+Both PDF writers set the document's `Author` and `Keywords` metadata, which
+survives the file being renamed, forwarded or attached, and both covers name
+the author and the DOI.
+
+The README now carries the reference and a BibTeX block rather than an
+instruction to cite with nothing to copy, and says plainly that attribution is
+a condition of the licence and not a courtesy. It also states what the
+licence does not grant: the name. A fork is free to exist and has to carry a
+name of its own.
+
 ## 0.8.4 -- 2026-10-04
 
 ### A basin delineated on the DEM carries no HydroBASINS id

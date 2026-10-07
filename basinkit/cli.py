@@ -20,6 +20,7 @@ def main() -> None:
       basinkit basin --lat 26.87 --lon 87.15
       basinkit fetch --lat 26.87 --lon 87.15 --out koshi/
       basinkit catalog
+      basinkit cite
     """
 
 
@@ -289,6 +290,34 @@ def archydro(lat: float, lon: float, backend: str, min_order: int,
         click.echo(
             "The routing table is not a single tree draining to one outlet. "
             "Reported, not repaired: it belongs to the source data.", err=True)
+
+
+@main.command()
+@click.option("--bibtex", "as_bibtex", is_flag=True,
+              help="BibTeX entry instead of plain text.")
+def cite(as_bibtex: bool) -> None:
+    """How to cite basinkit in published work."""
+    from . import __citation__, __doi__, __version__
+
+    if as_bibtex:
+        click.echo(
+            "@software{kaushik_basinkit,\n"
+            "  author  = {Kaushik, Pradeepika},\n"
+            "  title   = {basinkit: basin-scale acquisition of open Earth "
+            "observation data},\n"
+            "  year    = {2026},\n"
+            f"  version = {{{__version__}}},\n"
+            f"  doi     = {{{__doi__}}},\n"
+            "  url     = {https://github.com/Praddy-GByte/basinkit}\n"
+            "}"
+        )
+        return
+
+    click.echo(__citation__)
+    click.echo("")
+    click.echo("Please cite the datasets as well. Basin.license_report() "
+               "prints the citation for every layer a run actually touched.")
+    click.echo("BibTeX: basinkit cite --bibtex")
 
 
 if __name__ == "__main__":

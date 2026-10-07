@@ -35,7 +35,7 @@ class DemSuitabilityAlgorithm(BasinkitAlgorithm):
     def shortDescription(self) -> str:     # noqa: N802  (QGIS API name)
         return "Grade whether the elevation model can carry this basin's terrain analysis."
 
-    def shortHelpString(self) -> str:      # noqa: N802  (QGIS API name)
+    def help_body(self) -> str:
         return (
             "<p>Slope, aspect, curvature, wetness, height above drainage and "
             "every relief parameter come from one elevation raster. Whether "

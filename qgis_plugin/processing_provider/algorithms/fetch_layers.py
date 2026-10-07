@@ -49,7 +49,7 @@ class FetchBasinLayersAlgorithm(BasinkitAlgorithm):
     def shortDescription(self) -> str:     # noqa: N802  (QGIS API name)
         return "Download open Earth observation layers clipped to a basin polygon."
 
-    def shortHelpString(self) -> str:      # noqa: N802  (QGIS API name)
+    def help_body(self) -> str:
         return (
             "<p>Takes a basin polygon -- typically the output of "
             "<i>Delineate river basin</i> -- and downloads open data clipped "

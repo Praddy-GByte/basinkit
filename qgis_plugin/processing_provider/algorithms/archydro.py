@@ -45,7 +45,7 @@ class ArcHydroExportAlgorithm(BasinkitAlgorithm):
     def shortDescription(self) -> str:     # noqa: N802  (QGIS API name)
         return "Sub-catchments and reaches with HydroID, HydroCode, NextDownID, AreaSqKm."
 
-    def shortHelpString(self) -> str:      # noqa: N802  (QGIS API name)
+    def help_body(self) -> str:
         return (
             "<p>A distributed hydrological model does not want a polygon. It "
             "wants sub-catchments and the links between them. basinkit already "

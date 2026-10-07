@@ -6,6 +6,18 @@ from qgis.core import QgsProcessingAlgorithm, QgsProcessingException
 
 from ... import deps
 
+# Appended to every algorithm help panel. The Processing dialog is where a
+# user stands at the moment they decide what to write in a methods section,
+# so the citation belongs there and not only in the README.
+CITATION_HTML = (
+    "<p><small>If basinkit contributes to published work, please cite "
+    "Kaushik, P. (2026). <i>basinkit: basin-scale acquisition of open "
+    "Earth observation data</i>. "
+    "<a href=\"https://doi.org/10.5281/zenodo.22181933\">"
+    "doi.org/10.5281/zenodo.22181933</a> -- and cite the datasets a run "
+    "actually used; Basin.license_report() lists them.</small></p>"
+)
+
 
 class BasinkitAlgorithm(QgsProcessingAlgorithm):
     """Base class: consistent grouping, and one place for the dependency check."""
@@ -15,6 +27,17 @@ class BasinkitAlgorithm(QgsProcessingAlgorithm):
 
     def groupId(self) -> str:              # noqa: N802  (QGIS API name)
         return "riverbasins"
+
+    def help_body(self) -> str:
+        """The algorithm's own help text. Subclasses override this."""
+        return ""
+
+    def shortHelpString(self) -> str:      # noqa: N802  (QGIS API name)
+        # Defined once here so no algorithm can ship without the citation.
+        return self.help_body() + CITATION_HTML
+
+    def helpUrl(self) -> str:              # noqa: N802  (QGIS API name)
+        return "https://praddy-gbyte.github.io/basinkit/"
 
     def createInstance(self):              # noqa: N802  (QGIS API name)
         # Must be a NEW object. Processing clones the algorithm for every run,

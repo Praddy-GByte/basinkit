@@ -49,7 +49,7 @@ class BasinMorphometryAlgorithm(BasinkitAlgorithm):
     def shortDescription(self) -> str:     # noqa: N802  (QGIS API name)
         return "Horton-Strahler-Schumm parameters, with the stream counts checked."
 
-    def shortHelpString(self) -> str:      # noqa: N802  (QGIS API name)
+    def help_body(self) -> str:
         return (
             "<p>Computes the classical morphometric parameters for a basin "
             "polygon: streams, lengths and bifurcation ratios per Strahler "

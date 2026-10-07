@@ -46,7 +46,22 @@ from .exceptions import (
 )
 from .river import Confluence, River
 
-__version__ = "0.8.4"
+__version__ = "0.9.0"
+
+# Authorship. These travel with every install, every wheel and every import, so
+# that the person a user credits is never a guess.
+__author__ = "Pradeepika Kaushik"
+__email__ = "pradeepika.kaushik@gmail.com"
+__license__ = "Apache-2.0"
+__copyright__ = "Copyright (c) 2026 Pradeepika Kaushik"
+# Concept DOI: always resolves to the newest release. The version DOI for this
+# release is in CITATION.cff.
+__doi__ = "10.5281/zenodo.22181933"
+__citation__ = (
+    f"Kaushik, P. (2026). basinkit: basin-scale acquisition of open Earth "
+    f"observation data (version {__version__}) [Computer software]. "
+    f"https://doi.org/{__doi__}"
+)
 
 __all__ = [
     "Basin",
@@ -64,4 +79,7 @@ __all__ = [
     "DataSourceError", "LicenseError", "MissingDependency",
     "NotImplementedSource",
     "__version__",
+    "__author__",
+    "__citation__",
+    "__doi__",
 ]

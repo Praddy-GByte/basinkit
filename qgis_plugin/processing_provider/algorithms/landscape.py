@@ -51,7 +51,7 @@ class LandscapeFormAlgorithm(BasinkitAlgorithm):
     def shortDescription(self) -> str:     # noqa: N802  (QGIS API name)
         return "Is this river still changing, or has it settled?"
 
-    def shortHelpString(self) -> str:      # noqa: N802  (QGIS API name)
+    def help_body(self) -> str:
         return (
             "<p>The shape indices describe what a basin looks like. None of "
             "them says whether that shape is still adjusting. This does.</p>"

@@ -12,7 +12,7 @@ come back. ArcGIS Pro's own Python environment is never modified, so arcpy's
 pinned GDAL and PROJ cannot be broken by installing this.
 
 Not affiliated with, endorsed by, or sponsored by Esri.
-MIT licence. https://github.com/Praddy-GByte/basinkit
+Apache-2.0 licence. https://github.com/Praddy-GByte/basinkit
 """
 from __future__ import annotations
 

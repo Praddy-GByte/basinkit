@@ -32,7 +32,7 @@ class BasinStatisticsAlgorithm(BasinkitAlgorithm):
     def shortDescription(self) -> str:     # noqa: N802  (QGIS API name)
         return "Area, relief, mean slope and land cover fractions for a basin."
 
-    def shortHelpString(self) -> str:      # noqa: N802  (QGIS API name)
+    def help_body(self) -> str:
         return (
             "<p>Summarises a basin polygon: area computed on an equal-area "
             "projection centred on the basin itself (not in degrees, which is "

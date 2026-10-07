@@ -35,7 +35,7 @@ class DataQualityAlgorithm(BasinkitAlgorithm):
     def shortDescription(self) -> str:     # noqa: N802  (QGIS API name)
         return "Grade every layer against something produced independently of it."
 
-    def shortHelpString(self) -> str:      # noqa: N802  (QGIS API name)
+    def help_body(self) -> str:
         return (
             "<p>The elevation suitability grade answers one question. This "
             "answers it for the rest of the stack, by measuring each layer "

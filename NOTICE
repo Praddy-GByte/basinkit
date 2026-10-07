@@ -1,0 +1,30 @@
+basinkit
+Copyright 2026 Pradeepika Kaushik
+
+This product includes software developed by Pradeepika Kaushik
+(https://github.com/Praddy-GByte/basinkit).
+
+CITATION
+
+If basinkit contributes to published work, please cite:
+
+  Kaushik, P. (2026). basinkit: basin-scale acquisition of open Earth
+  observation data. https://doi.org/10.5281/zenodo.22181933
+
+and cite the datasets the run actually used. Basin.license_report() prints the
+citation for every layer a run touched, and `basinkit cite --bibtex` prints the
+BibTeX entry for the version installed.
+
+NAME
+
+"basinkit" and "BasinKit" are names of this project. As section 6 of the
+Apache License 2.0 states, the licence does not grant permission to use the
+licensor's names or marks. A fork, a redistribution or a derived product is
+free to exist and must carry a name of its own, and must not present itself as
+basinkit or imply endorsement by the author.
+
+QGIS PLUGIN
+
+The QGIS plugin in qgis_plugin/ is licensed GPL-3.0-or-later, because the QGIS
+plugin repository requires a licence compatible with the GPL version 2 or
+later. See qgis_plugin/LICENSE.

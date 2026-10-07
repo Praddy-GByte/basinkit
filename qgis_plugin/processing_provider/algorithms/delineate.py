@@ -79,7 +79,7 @@ class DelineateBasinAlgorithm(BasinkitAlgorithm):
     def shortDescription(self) -> str:     # noqa: N802  (QGIS API name)
         return "Find the basin draining into a point, anywhere on Earth."
 
-    def shortHelpString(self) -> str:      # noqa: N802  (QGIS API name)
+    def help_body(self) -> str:
         return (
             "<p>Click a point on a river and get the basin that drains into "
             "it, as a polygon in EPSG:4326.</p>"

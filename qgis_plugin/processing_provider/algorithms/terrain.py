@@ -55,7 +55,7 @@ class TerrainSurfacesAlgorithm(BasinkitAlgorithm):
     def shortDescription(self) -> str:     # noqa: N802  (QGIS API name)
         return "Slope, aspect, curvature, wetness and height above drainage."
 
-    def shortHelpString(self) -> str:      # noqa: N802  (QGIS API name)
+    def help_body(self) -> str:
         return (
             "<p>Every surface here is computed from one elevation raster, "
             "downloaded once and clipped to the basin, so asking for ten of "

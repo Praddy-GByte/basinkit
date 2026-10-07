@@ -33,7 +33,7 @@ class BasinReportAlgorithm(BasinkitAlgorithm):
     def shortDescription(self) -> str:     # noqa: N802  (QGIS API name)
         return "Eight A4 pages: terrain, network, morphometry, and what it all rests on."
 
-    def shortHelpString(self) -> str:      # noqa: N802  (QGIS API name)
+    def help_body(self) -> str:
         return (
             "<p>Everything basinkit computes about a basin, on eight A4 pages a "
             "thesis chapter or a manuscript appendix can use directly.</p>"

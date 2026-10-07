@@ -1272,7 +1272,8 @@ def build_collage(records, path, title, subtitle, tiles, footer):
     fy = H - 70
     d.line([(PAD, fy - 16), (W - PAD, fy - 16)], fill=R, width=2)
     d.text((PAD, fy), "pip install basinkit      ·      ArcGIS Pro: BasinKit toolbox"
-                      "      ·      MIT      ·      doi.org/10.5281/zenodo.22181933",
+                      "      ·      Pradeepika Kaushik      ·      Apache-2.0"
+                      "      ·      doi.org/10.5281/zenodo.22181933",
            font=font(19), fill=I2)
     cv.save(path, optimize=True)
     return path
@@ -1293,6 +1294,8 @@ def build_report(records, path, C, manifest):
         fig = plt.figure(figsize=(8.27, 11.69)); fig.patch.set_facecolor(SURF)
         fig.text(0.08, 0.93, f"BASINKIT {manifest['basinkit_version']}  ·  COMPLETE BASIN ANALYSIS",
                  fontsize=10.5, color=INK2, weight="bold")
+        fig.text(0.08, 0.915, "Pradeepika Kaushik  ·  cite doi.org/10.5281/zenodo.22181933",
+                 fontsize=8, color=INK2)
         fig.text(0.08, 0.875, "One click.", fontsize=34, color=INK, weight="bold")
         fig.text(0.08, 0.828, f"{len(ok)} analyses.", fontsize=34, color=INK, weight="bold")
         fig.text(0.08, 0.752,
@@ -1323,7 +1326,7 @@ def build_report(records, path, C, manifest):
         if failed:
             fig.text(0.08, y - 0.02, f"{len(failed)} step(s) did not complete; they are "
                      "listed on the methods page with the reason.", fontsize=8.5, color=INK2)
-        fig.text(0.08, 0.06, "MIT licence  ·  Python 3.10+  ·  ArcGIS Pro 3.x\n"
+        fig.text(0.08, 0.06, "Apache-2.0 licence  ·  Python 3.10+  ·  ArcGIS Pro 3.x\n"
                  "doi.org/10.5281/zenodo.22181933", fontsize=9, color=INK2, linespacing=1.5)
         pdf.savefig(fig, facecolor=SURF); plt.close(fig)
 
@@ -1403,6 +1406,9 @@ def build_report(records, path, C, manifest):
 
         d = pdf.infodict()
         d["Title"] = "BasinKit complete basin analysis"
+        d["Author"] = "Pradeepika Kaushik"
         d["Subject"] = f"Outlet {C['lat']:.5f}, {C['lon']:.5f}"
         d["Creator"] = f"basinkit {manifest['basinkit_version']}"
+        d["Keywords"] = ("basinkit; hydrology; catchment; "
+                         "cite https://doi.org/10.5281/zenodo.22181933")
     return path

@@ -193,7 +193,10 @@ Everything lands in the output folder you choose, in formats Pro reads natively:
 
 ## Licence and citation
 
-MIT. If you use it in published work, please cite:
+Apache-2.0. Releases up to 0.8.4 were MIT and remain MIT. The licence does
+not grant the name: a fork must carry its own.
+
+If you use it in published work, please cite:
 
 > Kaushik, P. (2026). *basinkit: basin-scale acquisition of open Earth
 > observation data* (Version 0.8.2) [Computer software]. Zenodo.
