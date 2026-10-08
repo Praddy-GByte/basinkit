@@ -9,3 +9,13 @@ dist/
 htmlcov/
 site/
 .venv/
+
+# Release artifacts. These are built from the source in this repository and
+# published to PyPI, the QGIS plugin repository and ArcGIS Online; a copy in
+# git would be a second, divergent one that nothing rebuilds.
+*.zip
+*.tar.gz
+*.whl
+
+# Scratch directories used while staging a build or a run.
+_run*/
