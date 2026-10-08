@@ -358,7 +358,9 @@ def s_dems(C):
 
 @step(19, "Shape and network", "Forty-two morphometric parameters", "basin.morphometry()")
 def s_morph(C):
-    m = C["basin"].morphometry(); C["morph"] = m
+    # The elevation from analysis 5, not a second fetch: a budgeted grid
+    # and an unbudgeted one disagree about the basin's highest point.
+    m = C["basin"].morphometry(dem=C.get("dem")); C["morph"] = m
     L, A, R = m["linear"], m["areal"], m["relief"]
     rows = [["parameter", "value"],
             ["stream orders", L["stream_orders"]],
@@ -561,7 +563,7 @@ def s_lcchange(C):
 
 @step(28, "Land, soil and water", "Surface water, 1984 to 2021 (JRC)", "basin.surface_water()")
 def s_water(C):
-    sw = C["basin"].surface_water()
+    sw = C["basin"].surface_water(max_pixels=C["max_pixels"])
     s = np.asarray(sw, dtype="float32")
     base = np.where(np.isfinite(s), 1.0, np.nan)
     fig, ax = _fig()
@@ -591,7 +593,8 @@ def _soil_step(sid, prop, label, cmap, scale):
     @step(sid, "Land, soil and water", f"Soil {prop}, 0–5 cm",
           f'basin.soil(prop="{prop}", depth="0-5cm")')
     def _fn(C, _p=prop, _l=label, _c=cmap, _s=scale):
-        da = C["basin"].soil(prop=_p, depth="0-5cm")
+        da = C["basin"].soil(prop=_p, depth="0-5cm",
+                             max_pixels=C["max_pixels"])
         a = np.asarray(da, dtype="float32").copy()
         a[~np.isfinite(a)] = np.nan
         a[a == 0] = np.nan                    # SoilGrids writes 0 where it has nothing
@@ -612,7 +615,8 @@ for _i, (_p, _l, _c, _s) in enumerate(SOILS):
 
 @step(37, "Land, soil and water", "Soil pH, drawn about 7", 'basin.soil(prop="phh2o")')
 def s_ph(C):
-    da = C["basin"].soil(prop="phh2o", depth="0-5cm")
+    da = C["basin"].soil(prop="phh2o", depth="0-5cm",
+                         max_pixels=C["max_pixels"])
     a = np.asarray(da, dtype="float32").copy()
     a[~np.isfinite(a)] = np.nan; a[a == 0] = np.nan; a = a * 0.1
     out = da.copy(data=a); v = a[np.isfinite(a)]
@@ -641,7 +645,9 @@ def s_soildepth(C):
     depths = ("0-5cm", "5-15cm", "15-30cm", "30-60cm", "60-100cm", "100-200cm")
     med = []
     for d in depths:
-        a = np.asarray(C["basin"].soil(prop="clay", depth=d), dtype="float32")
+        a = np.asarray(C["basin"].soil(prop="clay", depth=d,
+                                       max_pixels=C["max_pixels"]),
+                       dtype="float32")
         a = a[np.isfinite(a) & (a > 0)] * 0.1
         med.append(round(float(np.median(a)), 1) if a.size else np.nan)
     fig, ax = _fig(4.4, 3.0); _chart(ax)
@@ -857,7 +863,7 @@ def s_suit_tests(C):
         {t["test"]: t["verdict"] for t in tests}
 
 
-@step(53, "Does the data support the answer", "A grade for every layer — new in 0.7.0",
+@step(53, "Does the data support the answer", "A grade for every layer",
       "basin.data_quality()")
 def s_quality(C):
     q = C["basin"].data_quality(); C["quality"] = q
@@ -1074,7 +1080,7 @@ def s_network_table(C):
 
 @step(69, "Shape and network", "Terrain in one table", "basin.terrain_stats()")
 def s_terrain_stats(C):
-    ts = C["basin"].terrain_stats()
+    ts = C["basin"].terrain_stats(dem=C.get("dem"))
     rows = [["statistic", "value"]]
     for k, v in list(ts.items())[:12]:
         rows.append([str(k)[:26], f"{v:,.3f}" if isinstance(v, float) else str(v)[:20]])
@@ -1107,6 +1113,28 @@ def _sha(path, cap=8 * 1024 * 1024):
     return h.hexdigest()[:16]
 
 
+def _season(basin, clim_end):
+    """Pick the satellite windows from the basin's own hemisphere.
+
+    November to March is the dry season north of the equator and the wet
+    season south of it. A window fixed to one hemisphere aims the cloud filter
+    at the cloudiest months of the other, and the search then comes back empty
+    on a basin that has perfectly good imagery three months either side.
+    """
+    lat = basin.centroid[0]
+    if lat < 0:                                   # southern hemisphere
+        return dict(
+            s2_start=f"{clim_end}-05-01", s2_end=f"{clim_end}-09-30",
+            ls_old_start="1991-05-01", ls_old_end="1991-09-30",
+            ls_new_start=f"{clim_end}-05-01", ls_new_end=f"{clim_end}-09-30",
+        )
+    return dict(
+        s2_start=f"{clim_end - 1}-11-01", s2_end=f"{clim_end}-02-28",
+        ls_old_start="1990-11-01", ls_old_end="1991-03-31",
+        ls_new_start=f"{clim_end - 1}-11-01", ls_new_end=f"{clim_end}-03-31",
+    )
+
+
 def run_everything(basin, lat, lon, out, *, max_pixels=4_000_000, sat_pixels=1_200_000,
                    stream_km2=5.0, clim_start=2000, clim_end=2024, spi_start=1985,
                    skip=(), emit=print):
@@ -1119,9 +1147,7 @@ def run_everything(basin, lat, lon, out, *, max_pixels=4_000_000, sat_pixels=1_2
     C = dict(basin=basin, lat=lat, lon=lon, max_pixels=max_pixels, sat_pixels=sat_pixels,
              stream_km2=stream_km2, clim_start=clim_start, clim_end=clim_end,
              spi_start=spi_start,
-             s2_start=f"{clim_end - 1}-11-01", s2_end=f"{clim_end}-02-28",
-             ls_old_start="1990-11-01", ls_old_end="1991-03-31",
-             ls_new_start=f"{clim_end - 1}-11-01", ls_new_end=f"{clim_end}-03-31")
+             **_season(basin, clim_end))
     _CTX.clear(); _CTX.update(C)
 
     records = []

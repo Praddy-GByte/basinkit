@@ -129,24 +129,30 @@ def _nearest_reach(lat: float, lon: float, snap_km: float, progress: bool):
             float(distances[pick]))
 
 
-def _upstream(link: int, vpu: int, progress: bool) -> set[int]:
-    """Every reach draining into ``link``, itself included.
+def _connectivity_cached(path: str):
+    """The unit's child-to-parent edges, inverted once and kept.
 
-    A processing unit is closed: no downstream pointer leaves it, so the walk
-    never needs a second file.
+    Choosing an outlet means walking upstream from several candidate reaches,
+    and re-reading and re-inverting the same parquet for each of them is the
+    whole cost of that choice. Inverted once, each walk is a few microseconds.
     """
     pd = _parquet_reader()
-
-    url = f"{BASE}/routing-configs/vpu={vpu}/connectivity.parquet"
-    path = download(url, namespace="tdx", progress=progress, timeout=300)
     edges = pd.read_parquet(path)
-
     upstream: dict[int, list[int]] = defaultdict(list)
     for child, parent in zip(edges["river_id"].to_numpy(),
                              edges["ds_river_id"].to_numpy(), strict=True):
         if parent != -1:
             upstream[int(parent)].append(int(child))
+    return upstream
 
+
+def _connectivity(vpu: int, progress: bool):
+    url = f"{BASE}/routing-configs/vpu={vpu}/connectivity.parquet"
+    path = download(url, namespace="tdx", progress=progress, timeout=300)
+    return _connectivity_cached(str(path))
+
+
+def _walk_up(link: int, upstream) -> set[int]:
     seen = {link}
     queue = deque([link])
     while queue:
@@ -155,6 +161,15 @@ def _upstream(link: int, vpu: int, progress: bool) -> set[int]:
                 seen.add(child)
                 queue.append(child)
     return seen
+
+
+def _upstream(link: int, vpu: int, progress: bool) -> set[int]:
+    """Every reach draining into ``link``, itself included.
+
+    A processing unit is closed: no downstream pointer leaves it, so the walk
+    never needs a second file.
+    """
+    return _walk_up(link, _connectivity(vpu, progress))
 
 
 def _catchments(vpu: int, wanted: set[int], progress: bool):
@@ -214,6 +229,7 @@ def delineate_tdx(lat: float, lon: float, *, snap_km: float = 2.0,
 
     link, vpu, snapped_km = _nearest_reach(lat, lon, snap_km, progress)
     wanted = _upstream(link, vpu, progress)
+
     units = _catchments(vpu, wanted, progress)
 
     if units.empty:
@@ -251,6 +267,24 @@ def delineate_tdx(lat: float, lon: float, *, snap_km: float = 2.0,
         "license": LICENSE,
         "citation": CITATION,
     }
+    # Every other backend's answer can be weighed against the river network
+    # at the outlet; this one's could not, so a reach picked badly by distance
+    # came back looking exactly like a reach picked well. The check is the same
+    # one `auto` uses, and it is skipped rather than started if HydroRIVERS is
+    # not already downloaded, so asking for this backend never silently pulls
+    # a few hundred megabytes.
+    try:
+        from ..verify import check_outlet
+
+        check = check_outlet(lat, lon, provenance["area_km2"],
+                             allow_download=False)
+        provenance["outlet_check"] = check.as_dict() if hasattr(check, "as_dict") \
+            else dict(vars(check))
+    except Exception as exc:                                # noqa: BLE001
+        provenance["outlet_check"] = {
+            "ok": True, "reason": "check-failed", "detail": str(exc)[:200],
+        }
+
     if len(units) < len(wanted):
         provenance["warning"] = (
             f"{len(wanted) - len(units)} of {len(wanted)} upstream reaches have "

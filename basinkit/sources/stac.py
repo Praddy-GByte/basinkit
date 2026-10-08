@@ -224,9 +224,40 @@ def stac_search(
         kwargs["max_items"] = limit
 
     try:
-        return list(client.search(**kwargs).items())
+        items = list(client.search(**kwargs).items())
     except Exception as exc:
         raise DataSourceError(f"STAC search failed for {cid}: {exc}") from exc
+
+    if not items and cloud_cover is not None:
+        # The cloud filter is evaluated by the API, so an empty result cannot
+        # tell the caller whether the window holds no scenes at all or only
+        # cloudy ones -- two different problems with two different fixes. Ask
+        # again without the filter so the message can say which it is.
+        probe = dict(kwargs)
+        rest = {k: v for k, v in filters.items() if k != "eo:cloud_cover"}
+        if rest:
+            probe["query"] = rest
+        else:
+            probe.pop("query", None)
+        probe["max_items"] = 50
+        try:
+            found = list(client.search(**probe).items())
+        except Exception:                                   # noqa: BLE001
+            found = []
+        if found:
+            clouds = sorted(
+                c for c in (i.properties.get("eo:cloud_cover") for i in found)
+                if c is not None
+            )
+            cleanest = f"{clouds[0]:.0f}%" if clouds else "unknown"
+            raise DataSourceError(
+                f"{len(found)} {cid} scenes cover this basin between "
+                f"{start or '..'} and {end or '..'}, but none is below the "
+                f"{cloud_cover:.0f}% cloud limit -- the cleanest is {cleanest}. "
+                "Raise cloud_cover, or move the window to the dry season of "
+                "this hemisphere."
+            )
+    return items
 
 
 def native_resolution(items, bands: list[str] | None = None) -> float | None:

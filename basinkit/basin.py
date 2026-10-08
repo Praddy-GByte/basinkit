@@ -526,11 +526,18 @@ class Basin:
             prov["region"], prov["outlet_hybas_id"], prov.get("level", 12), **kwargs
         )
 
-    def terrain_stats(self) -> dict:
-        """Elevation, relief and mean slope: the standard morphometry."""
+    def terrain_stats(self, *, dem=None, **kwargs) -> dict:
+        """Elevation, relief and mean slope: the standard morphometry.
+
+        Pass ``dem=`` the elevation you already hold. Fetching a second one
+        here is not only wasteful: if the first was coarsened to a pixel
+        budget and this one is not, the two disagree about the highest point
+        of the same basin, and a report that prints both looks wrong whichever
+        number the reader believes.
+        """
         import numpy as np
 
-        elev = self.dem()
+        elev = dem if dem is not None else self.dem(**kwargs)
         vals = np.asarray(elev.values, dtype="float64")
         vals = vals[np.isfinite(vals)]
         if vals.size == 0:

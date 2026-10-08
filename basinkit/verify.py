@@ -88,6 +88,10 @@ class OutletCheck:
     nearest_upland_km2: float | None = None
     nearest_distance_km: float | None = None
     ratio: float | None = None
+    #: basin area over the upland area of the river AT the outlet. The
+    #: ratio above is taken against the largest river in the search box,
+    #: which near a confluence is a different river entirely.
+    nearest_ratio: float | None = None
     suggested_area_km2: float | None = None
     notes: list[str] = field(default_factory=list)
 
@@ -205,6 +209,59 @@ def check_outlet(
         nearest_distance_km=round(float(near["km"]), 3),
         ratio=round(ratio, 2),
     )
+
+    # Under-capture is the mirror of over-capture, and until now nothing
+    # tested for it: a basin can be half of what drains to the river it sits
+    # on and still pass, because the ratio above is taken against the largest
+    # river in the search box -- near a confluence that is a different and far
+    # bigger river, so the ratio is legitimately small for a correct answer.
+    # Measured against the river actually at the outlet, the two cases
+    # separate cleanly: a correct delineation lands within a few percent of
+    # that river's upland area, a truncated one at a fraction of it.
+    near_upland = float(near["UPLAND_SKM"])
+    near_km = float(near["km"])
+    near_ratio = basin_area_km2 / near_upland if near_upland > 0 else float("inf")
+    common["nearest_ratio"] = round(near_ratio, 3)
+
+    # The other direction of the same blind spot. Over-capture is measured
+    # against the largest river in the search box, and at a confluence that is
+    # the river the outlet is NOT on, so a basin can be nine times the stream
+    # it sits on and still read as consistent. When the basin matches the
+    # larger river instead, the point is simply ambiguous: both answers are
+    # real catchments, and only the person who placed the point knows which
+    # one was meant.
+    if (near_km <= 0.1
+            and near_upland >= NETWORK_FLOOR_KM2
+            and near_ratio > ratio_limit
+            and abs(ratio - 1.0) <= 0.25
+            and largest > near_upland * ratio_limit):
+        return OutletCheck(
+            False, "confluence-ambiguous",
+            f"The outlet is within {max(near_km * 1000, 1):.0f} m of two "
+            f"channels: one "
+            f"draining {near_upland:,.1f} km2 and one draining {largest:,.1f} "
+            f"km2. The basin returned is {basin_area_km2:,.1f} km2, which is "
+            "the larger of the two. If the smaller stream was meant, move the "
+            "point a few hundred metres up that channel, away from the "
+            "junction.",
+            suggested_area_km2=round(near_upland, 2),
+            notes=["outlet sits at a confluence; two catchments are plausible"],
+            **common)
+
+    if (near_km <= 0.1
+            and near_upland >= NETWORK_FLOOR_KM2
+            and near_ratio < 1.0 / ratio_limit):
+        return OutletCheck(
+            False, "under-captured",
+            f"The delineated basin is {basin_area_km2:,.1f} km2 while the "
+            f"river at the outlet drains {near_upland:,.1f} km2, so "
+            f"{1 - near_ratio:.0%} of the catchment is missing. That points to "
+            "the delineation having started from a tributary or a truncated "
+            "reach rather than from the channel at the point. Try another "
+            "backend, or move the outlet onto the main channel.",
+            suggested_area_km2=round(near_upland, 2),
+            notes=["returned basin is much smaller than the river at the outlet"],
+            **common)
 
     if ratio <= ratio_limit:
         return OutletCheck(
