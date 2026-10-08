@@ -563,6 +563,8 @@ def s_lcchange(C):
 
 @step(28, "Land, soil and water", "Surface water, 1984 to 2021 (JRC)", "basin.surface_water()")
 def s_water(C):
+    # SoilGrids is served at 250 m for the basin bounds and needs no budget;
+    # this one is a 30 m global mosaic and does.
     sw = C["basin"].surface_water(max_pixels=C["max_pixels"])
     s = np.asarray(sw, dtype="float32")
     base = np.where(np.isfinite(s), 1.0, np.nan)
@@ -593,8 +595,7 @@ def _soil_step(sid, prop, label, cmap, scale):
     @step(sid, "Land, soil and water", f"Soil {prop}, 0–5 cm",
           f'basin.soil(prop="{prop}", depth="0-5cm")')
     def _fn(C, _p=prop, _l=label, _c=cmap, _s=scale):
-        da = C["basin"].soil(prop=_p, depth="0-5cm",
-                             max_pixels=C["max_pixels"])
+        da = C["basin"].soil(prop=_p, depth="0-5cm")
         a = np.asarray(da, dtype="float32").copy()
         a[~np.isfinite(a)] = np.nan
         a[a == 0] = np.nan                    # SoilGrids writes 0 where it has nothing
@@ -615,8 +616,7 @@ for _i, (_p, _l, _c, _s) in enumerate(SOILS):
 
 @step(37, "Land, soil and water", "Soil pH, drawn about 7", 'basin.soil(prop="phh2o")')
 def s_ph(C):
-    da = C["basin"].soil(prop="phh2o", depth="0-5cm",
-                         max_pixels=C["max_pixels"])
+    da = C["basin"].soil(prop="phh2o", depth="0-5cm")
     a = np.asarray(da, dtype="float32").copy()
     a[~np.isfinite(a)] = np.nan; a[a == 0] = np.nan; a = a * 0.1
     out = da.copy(data=a); v = a[np.isfinite(a)]
@@ -645,8 +645,7 @@ def s_soildepth(C):
     depths = ("0-5cm", "5-15cm", "15-30cm", "30-60cm", "60-100cm", "100-200cm")
     med = []
     for d in depths:
-        a = np.asarray(C["basin"].soil(prop="clay", depth=d,
-                                       max_pixels=C["max_pixels"]),
+        a = np.asarray(C["basin"].soil(prop="clay", depth=d),
                        dtype="float32")
         a = a[np.isfinite(a) & (a > 0)] * 0.1
         med.append(round(float(np.median(a)), 1) if a.size else np.nan)

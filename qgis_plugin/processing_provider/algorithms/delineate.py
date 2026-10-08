@@ -8,10 +8,12 @@ from qgis.core import (
     QgsFeatureSink,
     QgsFields,
     QgsGeometry,
+    QgsProcessing,
     QgsProcessingException,
     QgsProcessingParameterBoolean,
     QgsProcessingParameterEnum,
     QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
     QgsProcessingParameterNumber,
     QgsProcessingParameterPoint,
 )
@@ -68,6 +70,8 @@ class DelineateBasinAlgorithm(BasinkitAlgorithm):
     VERIFY = "VERIFY"
     SNAP_KM = "SNAP_KM"
     RIVER_SNAP_RATIO = "RIVER_SNAP_RATIO"
+    STREAMS = "STREAMS"
+    BURN_DEPTH = "BURN_DEPTH"
     OUTPUT = "OUTPUT"
 
     def name(self) -> str:
@@ -132,6 +136,33 @@ class DelineateBasinAlgorithm(BasinkitAlgorithm):
         ratio.setFlags(ratio.flags() | QgsProcessingParameterNumber.Flag.FlagAdvanced)
         self.addParameter(ratio)
 
+        streams = QgsProcessingParameterFeatureSource(
+            self.STREAMS,
+            "Known channels to force the flow along (optional, lines)",
+            types=[QgsProcessing.SourceType.TypeVectorLine],
+            optional=True,
+        )
+        streams.setHelp(
+            "Use this where the elevation model cannot see the channel: a "
+            "stream culverted under a city, a canal across a divide, a valley "
+            "the model dams with a road embankment. Draw the line yourself or "
+            "bring the network you already have. The flow path is then the one "
+            "you supplied rather than the one the terrain shows, which the "
+            "output records, because it changes what the answer means. Only "
+            "the DEM backend can use it."
+        )
+        self.addParameter(streams)
+
+        burn = QgsProcessingParameterNumber(
+            self.BURN_DEPTH,
+            "How deep to carve those channels (m)",
+            type=QgsProcessingParameterNumber.Type.Double,
+            defaultValue=20.0,
+            minValue=0.1,
+        )
+        burn.setFlags(burn.flags() | QgsProcessingParameterNumber.Flag.FlagAdvanced)
+        self.addParameter(burn)
+
         self.addParameter(
             QgsProcessingParameterBoolean(
                 self.VERIFY,
@@ -179,6 +210,16 @@ class DelineateBasinAlgorithm(BasinkitAlgorithm):
         snap_km = self.parameterAsDouble(parameters, self.SNAP_KM, context)
         verify = self.parameterAsBool(parameters, self.VERIFY, context)
         ratio = self.parameterAsDouble(parameters, self.RIVER_SNAP_RATIO, context)
+        burn_depth = self.parameterAsDouble(parameters, self.BURN_DEPTH, context)
+
+        streams = self.streams_from_layer(parameters, context, feedback)
+        if streams and backend not in ("dem", "auto"):
+            feedback.pushWarning(
+                "Channels were supplied but this backend cannot use them. "
+                "Only the DEM backend routes over the elevation model, so "
+                "only it can be told where a channel really runs. The lines "
+                "were ignored."
+            )
 
         lat, lon = point.y(), point.x()
         feedback.pushInfo(f"Outlet: {lat:.5f}, {lon:.5f}  (backend: {backend})")
@@ -210,6 +251,8 @@ class DelineateBasinAlgorithm(BasinkitAlgorithm):
                     # False skips the check. The parameter above says which,
                     # so nothing large is ever fetched without being asked for.
                     verify="download" if verify else False,
+                    streams=streams or None,
+                    burn_depth_m=burn_depth,
                     progress=False,
                 )
                 for warning in caught:

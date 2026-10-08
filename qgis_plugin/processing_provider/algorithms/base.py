@@ -64,6 +64,56 @@ class BasinkitAlgorithm(QgsProcessingAlgorithm):
         if feedback is not None and feedback.isCanceled():
             raise QgsProcessingException("Cancelled by the user.")
 
+    def streams_from_layer(self, parameters, context, feedback=None):
+        """Lines from an optional line layer, as shapely geometries in WGS84.
+
+        Returns an empty list when the parameter was left blank, so a caller
+        can pass the result straight through. The layer is transformed to
+        EPSG:4326 first: a projected layer used to arrive in metres, and PROJ
+        then read a northing as a latitude.
+        """
+        source = self.parameterAsSource(parameters, self.STREAMS, context)
+        if source is None:
+            return []
+
+        from qgis.core import (
+            QgsCoordinateReferenceSystem,
+            QgsCoordinateTransform,
+            QgsGeometry,
+            QgsProject,
+        )
+        from shapely import wkt
+
+        wgs84 = QgsCoordinateReferenceSystem("EPSG:4326")
+        source_crs = source.sourceCrs()
+        transform = None
+        if source_crs.isValid() and source_crs != wgs84:
+            transform = QgsCoordinateTransform(source_crs, wgs84,
+                                               QgsProject.instance())
+            if feedback is not None:
+                feedback.pushInfo(
+                    f"Channel layer is {source_crs.authid()}; reprojecting to "
+                    "EPSG:4326, which is what basinkit works in."
+                )
+
+        lines = []
+        for feature in source.getFeatures():
+            geometry = feature.geometry()
+            if geometry is None or geometry.isEmpty():
+                continue
+            if transform is not None:
+                geometry = QgsGeometry(geometry)
+                geometry.transform(transform)
+            lines.append(wkt.loads(geometry.asWkt()))
+
+        if feedback is not None and lines:
+            feedback.pushInfo(
+                f"{len(lines)} channel line(s) will be carved into the "
+                "elevation model. The basin returned is then the one those "
+                "lines imply, not the one the bare terrain implies."
+            )
+        return lines
+
     @staticmethod
     def basin_from_layer(source, feedback=None):
         """Build a basinkit Basin from the polygon features of a layer.

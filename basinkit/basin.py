@@ -526,6 +526,42 @@ class Basin:
             prov["region"], prov["outlet_hybas_id"], prov.get("level", 12), **kwargs
         )
 
+    def curve_number(self, *, cn_table=None, **kwargs) -> dict:
+        """The SCS curve number, composed from this basin's cover and soil.
+
+            cn = basin.curve_number()
+            cn["composite_cn"], cn["cn_amc_iii_wet"]
+
+        Nothing new is downloaded: the land cover and the soil texture are the
+        ones this package already fetches. Two judgements go into it -- the
+        hydrologic soil group from texture rather than a soil survey, and ESA
+        WorldCover classes matched to TR-55 cover types -- and both are
+        returned in ``assumptions`` and ``cover_mapping`` so the number can be
+        reproduced or disagreed with.
+        """
+        from .runoff import curve_number
+
+        return curve_number(self, cn_table=cn_table, **kwargs)
+
+    def concentration_time(self, *, morphometry=None, **kwargs) -> dict:
+        """How long the basin takes to respond to rain, by several formulas.
+
+            t = basin.concentration_time()
+            t["estimates"]["kirpich_min"]
+            t["spread_factor"]
+
+        Time of concentration is not measured; every value is an empirical
+        formula fitted to a particular landscape, and on one basin they
+        routinely disagree by a factor of two. All of them are returned, with
+        what each was fitted to, so the choice stays with the person making
+        it. Pass ``morphometry=`` the dict you already have to avoid
+        recomputing it.
+        """
+        from .response import concentration_time
+
+        m = morphometry if morphometry is not None else self.morphometry(**kwargs)
+        return concentration_time(m)
+
     def terrain_stats(self, *, dem=None, **kwargs) -> dict:
         """Elevation, relief and mean slope: the standard morphometry.
 

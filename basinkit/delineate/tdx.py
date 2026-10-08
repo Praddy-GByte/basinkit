@@ -213,6 +213,48 @@ def _catchments(vpu: int, wanted: set[int], progress: bool):
     return gpd.GeoDataFrame.from_arrow(pa.concat_tables(pieces))
 
 
+def _reach_containing(lat: float, lon: float, vpu: int, progress: bool):
+    """The reach whose unit catchment contains the point, or ``None``.
+
+    The index carries one recorded point per reach, so the nearest entry to a
+    coordinate is the nearest *point*, not the nearest channel. Beside a
+    confluence that lands on a stub: at the mouth of the Ribeirao Arrudas it
+    picked a reach carrying three upstream reaches where the catchment holds
+    eight, and returned 122 km2 of a 228 km2 basin as the answer.
+
+    A unit catchment is the ground draining to one reach, so the polygon that
+    contains the outlet names the reach the outlet drains into. That is the
+    question being asked, and it has one answer rather than a nearest one.
+
+    The scan reads the same file ``_catchments`` reads afterwards, in the same
+    batches and dropping each one, so it costs a pass over a file already on
+    disk -- about ten seconds for a unit of sixty thousand polygons.
+    """
+    import geopandas as gpd
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    from shapely.geometry import Point
+
+    _parquet_reader()
+    url = f"{BASE}/hydrography/vpu={vpu}/catchments_{vpu}.parquet"
+    path = download(url, namespace="tdx", progress=progress, timeout=1800,
+                    expected_min_bytes=1 << 20)
+
+    reader = pq.ParquetFile(path)
+    lookup = {name.lower(): name for name in reader.schema_arrow.names}
+    key = lookup.get("linkno")
+    if key is None:
+        return None
+
+    point = Point(lon, lat)
+    for batch in reader.iter_batches(batch_size=4096):
+        frame = gpd.GeoDataFrame.from_arrow(pa.Table.from_batches([batch]))
+        hit = frame[frame.geometry.covers(point)]
+        if len(hit):
+            return int(hit[key].iloc[0])
+    return None
+
+
 def delineate_tdx(lat: float, lon: float, *, snap_km: float = 2.0,
                   progress: bool = True, **_):
     """Delineate the upstream basin from TDX-Hydro unit catchments.
@@ -227,7 +269,14 @@ def delineate_tdx(lat: float, lon: float, *, snap_km: float = 2.0,
     """
     from ..clip import basin_area_km2
 
-    link, vpu, snapped_km = _nearest_reach(lat, lon, snap_km, progress)
+    # The index gives the processing unit reliably -- units are continental --
+    # and the catchment polygons give the reach. Distance only decides which
+    # unit to open.
+    near_link, vpu, snapped_km = _nearest_reach(lat, lon, snap_km, progress)
+    link = _reach_containing(lat, lon, vpu, progress)
+    chosen_by = "containing catchment"
+    if link is None:
+        link, chosen_by = near_link, "nearest recorded point"
     wanted = _upstream(link, vpu, progress)
 
     units = _catchments(vpu, wanted, progress)
@@ -263,6 +312,7 @@ def delineate_tdx(lat: float, lon: float, *, snap_km: float = 2.0,
         "n_reaches": len(wanted),
         "n_units": len(units),
         "snapped_km": round(snapped_km, 4),
+        "outlet_reach_chosen_by": chosen_by,
         "area_km2": round(basin_area_km2(geom), 2),
         "license": LICENSE,
         "citation": CITATION,
@@ -284,6 +334,14 @@ def delineate_tdx(lat: float, lon: float, *, snap_km: float = 2.0,
         provenance["outlet_check"] = {
             "ok": True, "reason": "check-failed", "detail": str(exc)[:200],
         }
+
+    if chosen_by == "nearest recorded point":
+        provenance["note"] = (
+            "No unit catchment contains this point, so the reach was taken as "
+            "the nearest recorded one. That is a weaker choice: the index "
+            "holds one point per reach, so the nearest point is not always on "
+            "the nearest channel. Check the area against another backend."
+        )
 
     if len(units) < len(wanted):
         provenance["warning"] = (

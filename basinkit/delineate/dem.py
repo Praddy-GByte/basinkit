@@ -77,6 +77,8 @@ def delineate_dem(
     snap_px: int = 12,
     min_uparea_km2: float = 1.0,
     max_window_deg: float = 4.0,
+    streams=None,
+    burn_depth_m: float = 20.0,
     progress: bool = True,
     **_,
 ):
@@ -89,6 +91,16 @@ def delineate_dem(
         the basin reaches the edge.
     snap_px
         Radius, in pixels, of the search for the true channel cell.
+    streams
+        Lines to force the flow along, in EPSG:4326: a vector file path, a
+        GeoDataFrame, or shapely geometries. Use it where the elevation model
+        cannot see the channel -- a culverted urban stream, a canal across a
+        divide, a valley the model dams with a road embankment. The flow path
+        is then the one supplied rather than the one found, which is recorded
+        in the provenance because it changes what the answer means.
+    burn_depth_m
+        How far the burned cells are lowered. Deeper than the relief it has to
+        beat, shallower than a trench the flow cannot leave.
     max_window_deg
         Stop growing at this half-width and raise instead of silently
         downloading the continent.
@@ -114,6 +126,13 @@ def delineate_dem(
         arr = np.where(np.isfinite(arr), arr, -9999.0)
 
         transform = elev.rio.transform()
+
+        burn_record = {"burned": False}
+        if streams is not None:
+            from ..condition import burn_streams
+
+            arr, burn_record = burn_streams(
+                arr, transform, streams, depth_m=burn_depth_m)
         # outlets='edge', not 'min'. With outlets='min' pyflwdir routes the
         # whole window toward its single lowest cell, which on a cropped DEM
         # drags the network away from the real channels -- a river with
@@ -175,6 +194,7 @@ def delineate_dem(
         "backend": "dem",
         "source_dataset": f"{product} via D8 routing (pyflwdir)",
         "outlet": (lat, lon),
+        "conditioning": burn_record,
         "snapped_outlet": (float(ys[row]), float(xs[col])),
         "snap_distance_px": snap_px_moved,
         "flow_accum_at_outlet_km2": round(float(snapped_area), 3),
