@@ -8,11 +8,40 @@ import sys
 import click
 
 from . import __version__, cache, catalog
+from .exceptions import BasinkitError
+
+#: The backends the CLI offers, kept in one place so that adding one does not
+#: leave it accepted by the Python API and refused here. tdx was missing from
+#: every --backend choice while basinkit.delineate had offered it for two
+#: releases.
+BACKENDS = ["auto", "hydrobasins", "dem", "api", "tdx"]
 
 
-@click.group()
+class _ReportingGroup(click.Group):
+    """Turn a basinkit error into a message rather than a traceback.
+
+    Every error this package raises is written to be read: it names the cause
+    and what to do. Letting it out as a traceback buries that under twenty
+    lines of frames from inside the library, and a user who passed a latitude
+    of 95 was shown the inside of geopandas rather than the sentence about
+    latitudes. A traceback is still available with --traceback for anyone
+    filing a bug, which is the one case where the frames are the point.
+    """
+
+    def invoke(self, ctx):
+        try:
+            return super().invoke(ctx)
+        except (BasinkitError, ValueError) as exc:
+            if ctx.params.get("traceback") or "--traceback" in sys.argv:
+                raise
+            raise click.ClickException(str(exc)) from None
+
+
+@click.group(cls=_ReportingGroup)
+@click.option("--traceback", is_flag=True,
+              help="Show the full Python traceback instead of a message.")
 @click.version_option(__version__, prog_name="basinkit")
-def main() -> None:
+def main(traceback: bool) -> None:
     """basinkit -- point to river basin to every open Earth observation layer.
 
     \b
@@ -27,8 +56,7 @@ def main() -> None:
 @main.command()
 @click.option("--lat", type=float, required=True, help="Outlet latitude.")
 @click.option("--lon", type=float, required=True, help="Outlet longitude.")
-@click.option("--backend", default="auto",
-              type=click.Choice(["auto", "hydrobasins", "dem", "api"]),
+@click.option("--backend", default="auto", type=click.Choice(BACKENDS),
               help="Delineation backend.")
 @click.option("--out", type=click.Path(), default=None, help="Write basin.geojson here.")
 @click.option("--json", "as_json", is_flag=True, help="Machine-readable output.")
@@ -104,6 +132,12 @@ def catalog_cmd(category: str | None, anonymous: bool, as_json: bool) -> None:
     """List every dataset basinkit knows, with licence and auth requirements."""
     rows = list(catalog.DATASETS.values())
     if category:
+        known = sorted({d.category for d in rows})
+        if category not in known:
+            raise click.BadParameter(
+                f"{category!r} is not a category. Choose from: "
+                f"{', '.join(known)}.",
+                param_hint="--category")
         rows = [d for d in rows if d.category == category]
     if anonymous:
         rows = [d for d in rows if d.auth == "none"]
@@ -141,7 +175,7 @@ main.add_command(cache_cmd, name="cache")
 @main.command()
 @click.option("--lat", type=float, required=True)
 @click.option("--lon", type=float, required=True)
-@click.option("--backend", default="auto")
+@click.option("--backend", default="auto", type=click.Choice(BACKENDS))
 def summary(lat: float, lon: float, backend: str) -> None:
     """Characterise a basin: area, terrain, land cover fractions."""
     from .basin import Basin
@@ -240,7 +274,13 @@ def landscape(lat: float, lon: float, backend: str, min_area_km2: float,
 @main.command()
 @click.option("--lat", type=float, required=True, help="Outlet latitude.")
 @click.option("--lon", type=float, required=True, help="Outlet longitude.")
-@click.option("--backend", default="auto")
+@click.option("--backend", default="hydrobasins", type=click.Choice(BACKENDS),
+              help="Delineation backend. The Arc Hydro export reads the "
+                   "sub-catchments the HydroBASINS traversal walked, so that "
+                   "is the default here: 'auto' refines small catchments onto "
+                   "the DEM, which has no sub-catchments to export, and the "
+                   "command then failed after the delineation rather than "
+                   "before it.")
 @click.option("--min-order", type=int, default=0, help="Minimum stream order.")
 @click.option("--out", type=click.Path(), required=True,
               help="Write archydro.gpkg and the two CSV tables here.")

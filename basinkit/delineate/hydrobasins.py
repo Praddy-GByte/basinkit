@@ -88,6 +88,77 @@ def fetch_region(region: str, level: int = 12, *, progress: bool = True) -> Path
     return shp
 
 
+def cached_region_shp(region: str, level: int = 12):
+    """The unpacked regional shapefile if it is already on disk, else ``None``.
+
+    Separated from :func:`fetch_region` so that a check can ask whether the
+    file is there without starting a download as a side effect. A check that
+    silently pulls a few hundred megabytes is one people turn off.
+    """
+    name = f"hybas_{region.lower()}_lev{level:02d}_v1c"
+    shp = subdir("hydrobasins") / name / f"{name}.shp"
+    return shp if shp.exists() else None
+
+
+def reported_upland_km2(lat: float, lon: float, *, level: int = 12,
+                        allow_download: bool = False, progress: bool = False):
+    """HydroBASINS' own published upstream area at this point, or ``None``.
+
+    Every regional file carries ``UP_AREA``: the area the dataset says drains
+    to each unit's outlet. That is an independent figure, already on disk for
+    anyone who has used the default backend, and it is the only reference this
+    package can consult without a network call.
+
+    It is coarse on purpose. The number belongs to the *unit's* outlet, not to
+    the clicked point, so for a point part-way up a unit it overstates by up to
+    that unit's own area -- about 130 km2 at level 12. It is therefore no use
+    for judging a few percent, and decisive for judging a factor of a hundred,
+    which is the error it exists to catch.
+
+    The unit is chosen the same way :func:`delineate_hydrobasins` chooses it,
+    main-stem snapping included, because a coordinate on a big river's bank
+    belongs to a small lateral unit whose ``UP_AREA`` describes the bank rather
+    than the river.
+    """
+    try:
+        regions = candidate_regions(lat, lon)
+    except DelineationError:
+        return None
+
+    for region in regions:
+        shp = cached_region_shp(region, level)
+        if shp is None:
+            if not allow_download:
+                continue
+            try:
+                shp = fetch_region(region, level, progress=progress)
+            except Exception:                                   # noqa: BLE001
+                continue
+        try:
+            # The main-stem snap warns, and rightly so when someone asked for
+            # a basin. Here the caller only wants the number, and its own
+            # message says where it came from, so the warning would be a
+            # second voice describing a decision nobody made.
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                unit, snap = _find_outlet_unit(shp, lat, lon, 5.0, 1.0, 10.0)
+        except Exception:                                       # noqa: BLE001
+            continue
+        if unit is None:
+            continue
+        up = float(unit.get("UP_AREA", 0) or 0)
+        if up <= 0:
+            continue
+        return {
+            "up_area_km2": up,
+            "sub_area_km2": float(unit.get("SUB_AREA", 0) or 0),
+            "hybas_id": int(unit.get("HYBAS_ID", 0) or 0),
+            "region": region,
+            "snapped": bool(snap),
+        }
+    return None
+
+
 # How far out to look when telling the user their point may be off-channel.
 # Kept inside the shapefile read window (0.25 deg ~ 25 km of longitude at
 # mid latitudes) so the check never sees a truncated view.

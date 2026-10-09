@@ -50,7 +50,8 @@ from .dem import delineate_dem
 from .hydrobasins import delineate_hydrobasins
 from .tdx import delineate_tdx
 
-__all__ = ["delineate_api", "delineate_dem", "delineate_hydrobasins", "delineate"]
+__all__ = ["delineate_api", "delineate_dem", "delineate_hydrobasins",
+           "delineate_tdx", "delineate"]
 
 _BACKENDS = {
     "hydrobasins": delineate_hydrobasins,
@@ -86,7 +87,88 @@ def delineate(lat: float, lon: float, backend: str = "auto", **kwargs):
             f"Unknown backend {backend!r}. Choose from: "
             f"{', '.join(_BACKENDS)} or 'auto'."
         ) from None
-    return fn(lat, lon, **kwargs)
+    geom, prov = fn(lat, lon, **kwargs)
+    _weigh(lat, lon, prov, verify=kwargs.get("verify", True))
+    return geom, prov
+
+
+def _weigh(lat: float, lon: float, prov: dict, *, verify=True) -> None:
+    """Weigh a named backend's answer the way ``auto`` weighs its own.
+
+    ``auto`` consulted the river network before returning; asking for a
+    backend by name skipped that entirely, so the two routes reported
+    differently on the same mistake. A 1.9 km2 Danube and a 73 km2 Thames both
+    came back from a named backend with nothing said about either.
+
+    Two references are used, for a reason. The river network is the better of
+    the two but is a separate few-hundred-megabyte download, and starting one
+    behind a request for a basin is not acceptable, so it is consulted only
+    when already cached. HydroBASINS' published ``UP_AREA`` is coarse and
+    cannot judge a boundary, but it is on disk for anyone who has used the
+    default backend and it settles a factor of a hundred, which is the error
+    that was getting through. Neither changes the geometry: both write into
+    provenance, and a failed check is a sentence the caller can read.
+    """
+    import warnings as _warnings
+
+    if verify is False:
+        return
+
+    from ..verify import check_magnitude, check_outlet
+
+    area = float(prov.get("area_km2") or 0.0)
+    if area <= 0:
+        return
+
+    allow = (verify == "download")
+    notes: list[str] = []
+
+    # tdx runs this itself before assembling its provenance; do not pay for it
+    # twice or overwrite what it recorded.
+    if "outlet_check" not in prov:
+        try:
+            check = check_outlet(lat, lon, area, allow_download=allow,
+                                 progress=bool(prov.get("progress", False)))
+            prov["outlet_check"] = {
+                "ok": check.ok, "reason": check.reason, "ratio": check.ratio,
+                "nearest_ratio": check.nearest_ratio,
+                "largest_river_upland_km2": check.largest_upland_km2,
+            }
+            if not check.ok or check.reason == "no-reach-large":
+                notes.append(check.message)
+        except Exception as exc:                                # noqa: BLE001
+            prov["outlet_check"] = {"ok": True, "reason": "check-failed",
+                                    "detail": str(exc)[:200]}
+
+    # The HydroBASINS backend reads UP_AREA itself and records it, so this
+    # check would be weighing that dataset against itself -- always the same
+    # order of magnitude, at the cost of reading the regional shapefile a
+    # second time.
+    if "reported_up_area_km2" in prov:
+        prov["magnitude_check"] = {
+            "ok": True, "reason": "self",
+            "reported_up_area_km2": prov["reported_up_area_km2"],
+        }
+    else:
+        try:
+            size = check_magnitude(lat, lon, area, allow_download=allow)
+            prov["magnitude_check"] = {
+                "ok": size.ok, "reason": size.reason,
+                "reported_up_area_km2": size.reported_up_area_km2,
+                "factor": size.factor,
+            }
+            if not size.ok:
+                notes.append(size.message)
+        except Exception as exc:                                # noqa: BLE001
+            prov["magnitude_check"] = {"ok": True, "reason": "check-failed",
+                                       "detail": str(exc)[:200]}
+
+    if not notes:
+        return
+    existing = prov.get("warning")
+    prov["warning"] = " ".join([existing, *notes]) if existing else " ".join(notes)
+    for note in notes:
+        _warnings.warn(note, stacklevel=3)
 
 
 #: Catchments smaller than this are re-run on the DEM by ``backend="auto"``.

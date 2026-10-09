@@ -748,8 +748,21 @@ def _elevation_source(elevation) -> str:
     return f"{name}, read at {float(res):.0f} m" if res not in (None, "") else name
 
 
+#: Pixel budget for the elevation grid the report is drawn from. An A4 figure
+#: is about 2,000 pixels across at 300 dpi, so ten megapixels is already more
+#: detail than any page here can show. The default elsewhere is 100 Mpx, and
+#: on a large basin that is what killed this function: the Koshi quick-start
+#: basin from the README reached about 5.9 GB and the process was killed, in
+#: Python and inside QGIS, where it takes QGIS down with it. Every figure and
+#: every terrain statistic in the report is computed from this grid, and the
+#: cover states the resolution it was read at, so the coarsening is on the
+#: page rather than hidden. Pass max_pixels= for a finer one.
+REPORT_MAX_PIXELS = 10_000_000
+
+
 def report(basin, path, *, title: str | None = None, dem=None, rivers=None,
-           morphometry=None, progress: bool = True) -> str:
+           morphometry=None, max_pixels: int | None = REPORT_MAX_PIXELS,
+           progress: bool = True) -> str:
     """Write the eight-page report for ``basin`` to ``path``.
 
     Parameters
@@ -759,7 +772,11 @@ def report(basin, path, *, title: str | None = None, dem=None, rivers=None,
     title
         Printed on the cover. Defaults to the basin's coordinates.
     dem, rivers, morphometry
-        Already-computed layers, to avoid fetching or recomputing them.
+        Already-computed layers, to avoid fetching or recomputing them. A grid
+        passed in is used as it stands, budget included -- the caller chose it.
+    max_pixels
+        Pixel budget for the elevation grid this report is built from. The
+        cover names the resolution that budget worked out to.
 
     Returns
     -------
@@ -772,7 +789,7 @@ def report(basin, path, *, title: str | None = None, dem=None, rivers=None,
     from .suitability import suitability
     from .terrain import drainage_density
 
-    elevation = basin.dem() if dem is None else dem
+    elevation = basin.dem(max_pixels=max_pixels) if dem is None else dem
     lat, lon = basin.centroid
     title = title or f"Catchment at {lat:.4f}, {lon:.4f}"
 

@@ -377,6 +377,14 @@ def morphometry(basin, *, min_order: int = 1, dem=None,
             "Drainage density, stream frequency and bifurcation ratio "
             "describe the river network used, not the basin alone, and are "
             "not comparable across networks.",
+            "The drainage density here is measured on the mapped reaches "
+            "supplied -- HydroRIVERS by default, which carries no channel "
+            "draining under about 10 km2. basinkit.terrain.drainage_density() "
+            "measures a different thing under the same name: channels "
+            "extracted from the DEM at a chosen initiation threshold, which "
+            "reaches far further up the hillslope. On the same basin the two "
+            "differed by a factor of 2.4 -- 0.378 against 0.914 km/km2 -- and "
+            "neither is wrong. Quote the network with the number.",
         ],
     }
 

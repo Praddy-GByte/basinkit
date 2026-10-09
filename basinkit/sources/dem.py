@@ -49,7 +49,33 @@ def tile_url(product: str, lat: int, lon: int) -> str:
         return f"{OT}/NASADEM/NASADEM_be/NASADEM_HGT_{ns}{ew}.tif"
     if product == "srtm30":
         return f"{OT}/SRTM_GL1/SRTM_GL1_srtm/{_ns(lat)}{_ew(lon)}.tif"
-    raise ValueError(f"Unknown DEM product {product!r}; choose from {PRODUCTS}")
+    _reject_product(product)
+
+
+def _reject_product(product: str):
+    """Raise for a product this module cannot fetch, saying which case it is.
+
+    The catalogue documents FABDEM and MERIT Hydro and marks both
+    ``implemented=False``, with the access route and the licence trap written
+    out, and ``catalog.require`` exists to raise exactly that text. This
+    module was not calling it, so ``dem(product='fabdem')`` answered "Unknown
+    DEM product" -- which is not what it is. It is a known product with a
+    manual route and a non-commercial ShareAlike licence, and the catalogue
+    already says so.
+    """
+    from ..catalog import DATASETS, require
+
+    if product in DATASETS:
+        require(product)            # raises NotImplementedSource, or returns
+        raise ValueError(
+            f"{product!r} is in the catalogue but is not an elevation model "
+            f"this function fetches. Elevation products: {', '.join(PRODUCTS)}."
+        )
+    raise ValueError(
+        f"Unknown DEM product {product!r}; choose from {', '.join(PRODUCTS)}. "
+        "basinkit.catalog.table() lists every dataset, including the ones that "
+        "have to be brought by hand."
+    )
 
 
 def _tile_corners(bounds: tuple[float, float, float, float]):

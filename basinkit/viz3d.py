@@ -483,6 +483,22 @@ def _facts_html(facts: dict[str, str] | None) -> str:
     return f"  <dl>\n{rows}  </dl>"
 
 
+def _outlet_text(outlet, lat: float, lon: float) -> str:
+    """The outlet for the subtitle, or the centroid when there is no outlet.
+
+    A basin built by ``Basin.from_file`` or ``Basin.from_geometry`` has no
+    outlet in its provenance -- there was no click. The code here defaulted to
+    the strings ``('?', '?')`` and then formatted them with ``%.4g``, which
+    raises "Unknown format code 'g' for object of type 'str'" and took the
+    whole export down over a line of subtitle. The coordinate is decoration;
+    the terrain is the deliverable.
+    """
+    try:
+        return f"{float(outlet[0]):.4g}, {float(outlet[1]):.4g}"
+    except (TypeError, ValueError, IndexError, KeyError):
+        return f"its outlet, near {lat:.4g}, {lon:.4g}"
+
+
 def export_3d(
     basin,
     path: str | Path,
@@ -535,17 +551,36 @@ def export_3d(
     heights, meta = _heights(dem, mesh_width)
 
     tex = ""
+    texture_failed = None
     if texture == "sentinel2":
-        s2 = basin.sentinel2(start, end, cloud_cover=cloud_cover,
-                             bands=["red", "green", "blue"], composite="median",
-                             max_pixels=budget)
-        matched = s2.rio.reproject_match(dem)
-        step = max(1, dem.rio.shape[1] // int(texture_width))
-        stack = np.stack(
-            [np.asarray(matched[c].values, dtype="float32")[::step, ::step]
-             for c in ("red", "green", "blue")], axis=-1)
-        valid = np.isfinite(stack).all(axis=-1)
-        tex = _texture(stack, valid, texture_width, high, gamma, lift)
+        # The imagery is a skin on the terrain, and the terrain is the thing
+        # being exported. One unreadable Sentinel-2 tile anywhere in the
+        # default window used to fail the whole call, so a basin with a single
+        # bad scene produced no file at all -- which happened on both basins
+        # it was tried on. The export now completes untextured and says what
+        # it lost. Pass texture=None to skip the imagery deliberately, or
+        # move the date window to find a cleaner pass.
+        try:
+            s2 = basin.sentinel2(start, end, cloud_cover=cloud_cover,
+                                 bands=["red", "green", "blue"],
+                                 composite="median", max_pixels=budget)
+            matched = s2.rio.reproject_match(dem)
+            step = max(1, dem.rio.shape[1] // int(texture_width))
+            stack = np.stack(
+                [np.asarray(matched[c].values, dtype="float32")[::step, ::step]
+                 for c in ("red", "green", "blue")], axis=-1)
+            valid = np.isfinite(stack).all(axis=-1)
+            tex = _texture(stack, valid, texture_width, high, gamma, lift)
+        except Exception as exc:                                # noqa: BLE001
+            import warnings as _warnings
+
+            texture_failed = f"{type(exc).__name__}: {exc}"
+            _warnings.warn(
+                "The Sentinel-2 texture could not be built, so this export is "
+                f"the bare terrain. {texture_failed}. The usual cause is one "
+                "unreadable scene in the window; try a different start and "
+                "end, or texture=None to stop asking for imagery.",
+                stacklevel=2)
     elif texture is not None:
         raise ValueError(
             f"texture must be 'sentinel2' or None, not {texture!r}")
@@ -553,9 +588,12 @@ def export_3d(
     lines = _rivers(basin.rivers(min_order=min_order), basin.bounds) if rivers else []
 
     meta.update({"bounds": list(basin.bounds), "area": round(basin.area_km2, 1)})
+    if texture_failed:
+        meta["texture_failed"] = texture_failed
     payload: dict[str, Any] = {"h": heights, "t": tex, "r": lines, "m": meta}
 
     lat, lon = basin.centroid
+    outlet_text = _outlet_text(basin.provenance.get("outlet"), lat, lon)
     default_facts = {
         "Basin area": f"{basin.area_km2:,.0f} km²",
         "Elevation": f"{meta['zmin']:,.0f} - {meta['zmax']:,.0f} m",
@@ -571,9 +609,7 @@ def export_3d(
             .replace("__TITLE__", title or f"Basin at {lat:.3f}, {lon:.3f}")
             .replace("__SUBTITLE__", subtitle or
                      f"{basin.area_km2:,.0f} km² draining to "
-                     f"{basin.provenance.get('outlet', ['?', '?'])[0]:.4g}, "
-                     f"{basin.provenance.get('outlet', ['?', '?'])[1]:.4g}. "
-                     "Drag to orbit, scroll to zoom.")
+                     f"{outlet_text}. Drag to orbit, scroll to zoom.")
             .replace("__FACTS__", _facts_html(facts if facts is not None else default_facts))
             .replace("__CREDIT__", credit)
             .replace("__EX__", f"{float(exaggeration):g}")

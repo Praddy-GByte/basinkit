@@ -55,6 +55,24 @@ class Basin:
         """
         from .delineate import delineate
 
+        # Coerced before it is compared, because a string reached the
+        # comparison and raised "'<=' not supported between str and int" from
+        # inside this check -- a message about Python's type system in place
+        # of the one written here about coordinates.
+        try:
+            lat = float(lat)
+            lon = float(lon)
+        except (TypeError, ValueError):
+            raise ValueError(
+                f"({lat!r}, {lon!r}) is not a coordinate pair. Pass numbers: "
+                "from_point(26.87, 87.15)."
+            ) from None
+        if not (lat == lat and lon == lon) or lat in (float("inf"), float("-inf")) \
+                or lon in (float("inf"), float("-inf")):
+            raise ValueError(
+                f"({lat}, {lon}) is not a coordinate pair: a latitude or "
+                "longitude cannot be NaN or infinite."
+            )
         if not -90 <= lat <= 90 or not -180 <= lon <= 180:
             raise ValueError(
                 f"({lat}, {lon}) is not a valid lat/lon. Note the order is "
@@ -180,7 +198,16 @@ class Basin:
         return available_water_capacity(self.geometry, depth=depth)
 
     def precipitation(self, start=2000, end=None, source: str = "chirps", **kwargs):
-        """Basin-mean rainfall time series. ``chirps``, ``persiann`` or ``terraclimate``."""
+        """Basin-mean rainfall time series. ``chirps``, ``persiann`` or ``terraclimate``.
+
+        Every source returns the same kind of object: a named
+        ``xarray.DataArray`` of precipitation indexed by time. It did not used
+        to -- ``terraclimate`` handed back a whole ``Dataset``, so code that
+        worked on one source raised an attribute error on another, and the
+        function's own name promised one quantity while returning thirteen.
+        For the rest of the TerraClimate variables call
+        :meth:`water_balance`, or ``sources.climate.terraclimate`` directly.
+        """
         from .sources.climate import chirps, persiann, terraclimate
 
         if source == "chirps":
@@ -188,7 +215,16 @@ class Basin:
         if source == "persiann":
             return persiann(self.geometry, str(start), end, **kwargs)
         if source == "terraclimate":
-            return terraclimate(self.geometry, ("ppt",), int(start), end, **kwargs)
+            ds = terraclimate(self.geometry, ("ppt",), int(start), end, **kwargs)
+            out = ds["ppt"]
+            out.name = "precipitation"
+            out.attrs.setdefault("units", "mm/month")
+            # The dataset-level provenance -- which years are missing, whether
+            # the clip held -- belongs to this series too, and is the only
+            # record that it is incomplete.
+            for key, value in ds.attrs.items():
+                out.attrs.setdefault(key, value)
+            return out
         raise ValueError(
             f"Unknown precipitation source {source!r}: use 'chirps', 'persiann' "
             "or 'terraclimate'."
@@ -218,15 +254,50 @@ class Basin:
         from .sources.attributes import describe, hydroatlas
 
         hybas_id = self.provenance.get("outlet_hybas_id")
+        looked_up = None
         if hybas_id is None:
-            raise ValueError(
-                "BasinATLAS is keyed by HydroBASINS id, which only the "
-                "'hydrobasins' backend records. Re-delineate with "
-                "backend='hydrobasins', or pass a geometry to "
-                "basinkit.sources.attributes.hydroatlas() directly."
-            )
+            # Refusing here was the wrong answer three times over. The
+            # HydroBASINS unit containing an outlet can be looked up for any
+            # basin, whichever backend drew the boundary; this call already
+            # costs a 2.7 GB download, so the regional file it needs is not
+            # the expensive part; and the QGIS algorithm for the same thing
+            # delineates with backend='hydrobasins' itself, so the plugin
+            # answered a question the library declined. The id is looked up
+            # and recorded as looked up, which is the part that matters: the
+            # row describes the unit at the outlet, not the polygon in hand.
+            from .delineate.hydrobasins import reported_upland_km2
+
+            outlet = self.provenance.get("outlet")
+            if outlet is not None:
+                lat, lon = float(outlet[0]), float(outlet[1])
+            else:
+                lat, lon = self.centroid
+            found = reported_upland_km2(lat, lon, allow_download=True,
+                                        progress=kwargs.get("progress", True))
+            if not found or not found.get("hybas_id"):
+                raise ValueError(
+                    "BasinATLAS is keyed by HydroBASINS id, and no "
+                    f"HydroBASINS unit was found at ({lat:.5f}, {lon:.5f}) to "
+                    "key this basin by. Pass a geometry to "
+                    "basinkit.sources.attributes.hydroatlas() directly."
+                )
+            hybas_id = found["hybas_id"]
+            looked_up = found
+
         gdf = hydroatlas(hybas_id=hybas_id, prefixes=prefixes, **kwargs)
-        return describe(gdf.iloc[0])
+        out = describe(gdf.iloc[0])
+        if looked_up is not None and isinstance(out, dict):
+            out["_basinkit_note"] = (
+                f"This basin came from the "
+                f"{self.provenance.get('backend', 'unknown')!r} backend, which "
+                "does not carry a HydroBASINS id, so unit "
+                f"{hybas_id} was looked up as the one containing the outlet. "
+                "Its upstream columns describe what HydroBASINS says drains to "
+                f"that unit's outlet -- {looked_up['up_area_km2']:,.0f} km2 -- "
+                f"against the {self.area_km2:,.1f} km2 of the polygon in hand. "
+                "Where those two differ, the attributes describe the former."
+            )
+        return out
 
     def rivers(self, min_order: int = 0, **kwargs):
         """HydroRIVERS reaches inside the basin, with discharge and stream order."""

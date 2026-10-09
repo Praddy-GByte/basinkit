@@ -17,6 +17,7 @@ they live behind explicit opt-in rather than in the default stack.
 
 from __future__ import annotations
 
+import warnings
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date
 
@@ -24,6 +25,10 @@ from ..cache import download, subdir
 from ..exceptions import DataSourceError, MissingDependency
 
 CHIRPS = "https://data.chc.ucsb.edu/products/CHIRPS/v3.0"
+
+#: First month CHIRPS publishes. Asking for 1975 is not an error worth
+#: refusing, but it is worth saying that the series starts later than asked.
+CHIRPS_FIRST_YEAR = 1981
 TERRACLIM_DODS = (
     "https://thredds.northwestknowledge.net/thredds/dodsC/TERRACLIMATE_ALL/data"
 )
@@ -134,6 +139,27 @@ def chirps(
     start_year = int(str(start)[:4])
     end_year = int(str(end)[:4]) if end else date.today().year
     today = date.today()
+
+    # Checked here, because the only thing that used to notice was the empty
+    # result at the bottom, whose message blames CHIRPS' 60N-60S coverage --
+    # sending the reader to look at their basin's latitude when the fault is
+    # in the two numbers they passed.
+    if end_year < start_year:
+        raise ValueError(
+            f"start={start} is after end={end}. The order is (start, end)."
+        )
+    if end_year < CHIRPS_FIRST_YEAR:
+        raise ValueError(
+            f"CHIRPS begins in {CHIRPS_FIRST_YEAR}, and the range asked for "
+            f"ends in {end_year}. For earlier years use TerraClimate (1958 "
+            "onwards)."
+        )
+    if start_year < CHIRPS_FIRST_YEAR:
+        warnings.warn(
+            f"CHIRPS begins in {CHIRPS_FIRST_YEAR}; the series returned "
+            f"starts there rather than at {start_year}.", stacklevel=2)
+        start_year = CHIRPS_FIRST_YEAR
+
     bounds = geometry.bounds
 
     months = [
@@ -153,12 +179,22 @@ def chirps(
             pass
 
     grids, times = [], []
+    failures: list[tuple[str, str]] = []
     for year, month in iterator:
         url = f"{CHIRPS}/monthly/global/cogs/chirps-v3.0.{year}.{month:02d}.cog"
         try:
             da = _read_window(url, bounds)
             clipped = clip_raster(da, geometry).squeeze()
-        except Exception:
+        except Exception as exc:                                # noqa: BLE001
+            # A month that does not come back used to be dropped in silence.
+            # The series then has a hole in it, and the two things most often
+            # computed from it -- a Mann-Kendall trend and an SPI -- both read
+            # a hole as a shorter record rather than as missing data. One run
+            # over 2015-2020 returned 59 months of 72 and said nothing; the
+            # next run returned all 72. Which months are absent, and why, is
+            # recorded and warned about.
+            failures.append((f"{year}-{month:02d}",
+                             f"{type(exc).__name__}: {exc}"[:120]))
             continue
         grids.append(zonal_mean(clipped) if aggregate else clipped)
         times.append(np.datetime64(f"{year}-{month:02d}-01"))
@@ -173,11 +209,27 @@ def chirps(
         grids, dim=xr.DataArray(times, dims="time", name="time")
     )
     out.name = "precipitation"
+    if failures:
+        absent = ", ".join(m for m, _ in failures[:8])
+        if len(failures) > 8:
+            absent += f", and {len(failures) - 8} more"
+        warnings.warn(
+            f"{len(failures)} of {len(months)} CHIRPS months did not come "
+            f"back and are missing from this series: {absent}. The series is "
+            f"{len(times)} months, not {len(months)}. Most of these are "
+            "transient -- the usual cause is the remote read timing out -- so "
+            "the same call often returns the full record on a second attempt. "
+            "A trend or an SPI computed on this will be computed on the "
+            "months that are here.",
+            stacklevel=2)
     out.attrs.update(
         {
             "units": "mm/month",
             "basinkit_product": "CHIRPS v3.0 monthly",
             "basinkit_n_months": len(times),
+            "basinkit_months_requested": len(months),
+            "basinkit_months_missing": [m for m, _ in failures],
+            "basinkit_complete": not failures,
             "license": "Public domain",
             "citation": "Funk, C. et al. (2015). Scientific Data 2, 150066.",
             "note": "v3.0 is gauge-undercatch corrected and wetter than v2.0.",
@@ -214,6 +266,12 @@ def terraclimate(
         )
 
     end = end or date.today().year - 1
+    start = int(start)
+    end = int(end)
+    if end < start:
+        raise ValueError(
+            f"start={start} is after end={end}. The order is (start, end)."
+        )
     w, s, e, n = geometry.bounds
     pad = 0.05
 
@@ -227,9 +285,11 @@ def terraclimate(
                 lon=slice(w - pad, e + pad), lat=slice(n + pad, s - pad)
             ).load()
             ds.close()
-        except Exception:
-            return var, None
-        return var, (sub if sub.size else None)
+        except Exception as exc:                                # noqa: BLE001
+            return var, year, None, f"{type(exc).__name__}: {exc}"[:120]
+        if not sub.size:
+            return var, year, None, "the basin window is empty in this file"
+        return var, year, sub, None
 
     # One NetCDF per variable per year means a 20-year, six-variable request is
     # 120 sequential OPeNDAP round trips -- minutes of latency and almost no
@@ -238,14 +298,34 @@ def terraclimate(
     # deliberately small: this is a university server, not a CDN.
     jobs = [(var, year) for var in variables for year in range(start, end + 1)]
     collected: dict[str, list] = {var: [] for var in variables}
+    failures: dict[tuple[str, int], str] = {}
     with ThreadPoolExecutor(max_workers=min(6, len(jobs))) as pool:
         futures = [pool.submit(_one, var, year) for var, year in jobs]
         for fut in as_completed(futures):
-            var, sub = fut.result()
+            var, year, sub, why = fut.result()
             if sub is not None:
                 collected[var].append(sub)
+            else:
+                failures[(var, year)] = why or "no reason given"
+
+    # The server this reads from is a university THREDDS instance and it
+    # refuses some of a burst of concurrent requests -- six workers is already
+    # restrained, and a refusal still arrives often enough that two runs of the
+    # same call returned different numbers of years. A refused year used to be
+    # dropped in silence, which is the worst of the three available outcomes.
+    # Retried one at a time, most of them succeed, and what remains is
+    # reported rather than hidden.
+    if failures:
+        for var, year in sorted(failures):
+            _var, _year, sub, why = _one(var, year)
+            if sub is not None:
+                collected[var].append(sub)
+                failures.pop((var, year), None)
+            else:
+                failures[(var, year)] = why or "no reason given"
 
     out = {}
+    unclipped: list[str] = []
     for var in variables:
         yearly = collected[var]
         if not yearly:
@@ -254,15 +334,48 @@ def terraclimate(
         merged = merged.rename({"lon": "x", "lat": "y"}).rio.write_crs("EPSG:4326")
         try:
             merged = clip_raster(merged, geometry)
-        except Exception:
-            pass
+        except Exception:                                       # noqa: BLE001
+            # Falling through to the unclipped grid means every number
+            # returned is a mean over the bounding box rather than over the
+            # basin, and on a dendritic catchment the box holds more of the
+            # neighbours than of the basin. The values are still returned,
+            # because a 4 km grid over a small basin genuinely has no cell
+            # centre inside the polygon and the box mean is then the only
+            # answer available -- but a basin mean and a box mean are not the
+            # same quantity, and which one this is has to be on the label.
+            unclipped.append(var)
         out[var] = zonal_mean(merged) if aggregate else merged
 
     if not out:
         raise DataSourceError(
-            "TerraClimate returned nothing. The OPeNDAP server occasionally "
-            "rejects concurrent requests; retry, or narrow the year range."
+            "TerraClimate returned nothing, including on a second attempt one "
+            "request at a time. "
+            + "; ".join(f"{v} {y}: {why}" for (v, y), why in
+                        sorted(failures.items())[:4])
+            + ". The OPeNDAP server occasionally refuses requests; retry, or "
+            "narrow the year range."
         )
+
+    if failures:
+        absent = ", ".join(f"{v} {y}" for v, y in sorted(failures)[:8])
+        if len(failures) > 8:
+            absent += f", and {len(failures) - 8} more"
+        warnings.warn(
+            f"{len(failures)} of {len(jobs)} TerraClimate variable-years did "
+            f"not come back, on two attempts, and are missing from this "
+            f"series: {absent}. Anything computed from it is computed on the "
+            "years that are here.",
+            stacklevel=2)
+
+    if unclipped:
+        warnings.warn(
+            "Clipping to the basin failed for "
+            f"{', '.join(unclipped)}, so those values are means over the "
+            "basin's bounding box rather than over the basin itself. "
+            "TerraClimate is a 4 km grid: a basin much smaller than one cell "
+            "has no cell centre inside it, which is the usual cause. Treat "
+            "them as a regional figure.",
+            stacklevel=2)
 
     ds = xr.Dataset(out)
     for var in ds.data_vars:
@@ -270,6 +383,10 @@ def terraclimate(
     ds.attrs.update(
         {
             "basinkit_product": "TerraClimate monthly",
+            "basinkit_years_requested": len(jobs),
+            "basinkit_years_missing": [f"{v} {y}" for v, y in sorted(failures)],
+            "basinkit_complete": not failures,
+            "basinkit_bounding_box_only": unclipped,
             "license": "CC0-1.0",
             "citation": "Abatzoglou, J.T. et al. (2018). Scientific Data 5, 170191.",
         }

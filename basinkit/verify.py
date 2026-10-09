@@ -186,13 +186,43 @@ def check_outlet(
                 "backend='dem'.",
                 basin_area_km2=basin_area_km2,
                 notes=["no mapped river near an outlet with a mid-sized basin"])
+        if basin_area_km2 > hi:
+            # Above the orphan range the measurement that set that range does
+            # not apply, because it was made on gauges -- which sit on rivers
+            # by definition, so a missing nearby reach there means a
+            # floodplain coordinate set back from the mapped centreline. A
+            # point someone chose on a map carries no such guarantee: a click
+            # in a city centre, on a lake surface or in a desert also finds no
+            # reach, and comes back holding whichever unit it landed in. The
+            # two cases cannot be told apart from here, so this reports the
+            # situation and leaves the answer alone rather than acting on it.
+            return OutletCheck(
+                True, "no-reach-large",
+                f"No mapped river within {search_km:g} km of the outlet, while "
+                f"the basin comes back as {basin_area_km2:,.0f} km2. On a "
+                "gauge that usually means a coordinate set back from the "
+                "mapped channel, and the answer is sound. On a point picked "
+                "off a map it can instead mean the point is not on a river at "
+                "all -- a street, a lake surface, dry ground -- in which case "
+                "what comes back is the catchment of whichever unit contains "
+                "it, which may be a river some distance away. Worth checking "
+                "that the outlet is where it was meant to be before using "
+                "this.",
+                basin_area_km2=basin_area_km2,
+                notes=["no mapped river near the outlet of a large basin"])
         return OutletCheck(
             True, "no-reach",
-            f"No mapped river within {search_km:g} km of the outlet. "
-            f"HydroRIVERS carries reaches down to about {NETWORK_FLOOR_KM2:g} "
-            "km2 of upstream area, so an outlet on a smaller headwater sits "
-            "below what this comparison can see. At that scale the DEM backend "
-            "is the instrument to use: it routes flow on a 30 m grid.",
+            f"No mapped river within {search_km:g} km of the outlet, and the "
+            f"basin comes back as {basin_area_km2:,.1f} km2. HydroRIVERS "
+            f"carries reaches down to about {NETWORK_FLOOR_KM2:g} km2 of "
+            "upstream area, so a genuine headwater at this scale sits below "
+            "what this comparison can see, and the DEM backend is the "
+            "instrument to use: it routes flow on a 30 m grid. The same two "
+            "facts also describe a point that is not on a river -- open "
+            "water, a lake surface, ice, dry ground -- where what comes back "
+            "is a local hollow in the elevation model rather than a "
+            "catchment. Nothing here can tell those two apart; only the "
+            "person who placed the point can.",
             basin_area_km2=basin_area_km2,
             notes=["below the river network's own resolution floor"])
 
@@ -298,3 +328,110 @@ def _km_from(gdf, lat: float, lon: float):
     local = gdf.to_crs(f"+proj=aeqd +lat_0={lat} +lon_0={lon} +units=m +datum=WGS84")
     from shapely.geometry import Point as _P
     return local.geometry.distance(_P(0, 0)) / 1000.0
+
+
+# How far a delineation may stand from HydroBASINS' own published upstream
+# area before it is reported. This is not a tuned threshold and is not meant to
+# be: UP_AREA belongs to a unit's outlet rather than to the clicked point, four
+# backends read four different grids, and two of them are a quarter of a
+# century apart, so disagreements of tens of percent are ordinary and say
+# nothing. A factor of ten is not a disagreement about resolution. Both
+# failures this was written for cleared it by a wide margin: a Danube outlet
+# that came back as 1.9 km2 against 800,000, and a Thames outlet that came back
+# as 73 against 9,948.
+MAGNITUDE_FACTOR = 10.0
+
+
+@dataclass
+class MagnitudeCheck:
+    """Whether a basin is the right order of magnitude for where it sits."""
+
+    ok: bool
+    reason: str
+    message: str = ""
+    basin_area_km2: float | None = None
+    reported_up_area_km2: float | None = None
+    unit_area_km2: float | None = None
+    hybas_id: int | None = None
+    factor: float | None = None
+
+    def __bool__(self) -> bool:
+        return self.ok
+
+
+def check_magnitude(
+    lat: float,
+    lon: float,
+    basin_area_km2: float,
+    *,
+    factor: float = MAGNITUDE_FACTOR,
+    allow_download: bool = False,
+) -> MagnitudeCheck:
+    """Weigh a basin against HydroBASINS' own published upstream area.
+
+    :func:`check_outlet` is the better instrument and needs HydroRIVERS, which
+    is a separate download; where it is absent nothing was checking the answer
+    at all. This one reads ``UP_AREA`` out of the HydroBASINS file instead --
+    already on disk for anyone who has used the default backend -- and asks
+    only whether the two numbers are the same size. It cannot judge a boundary
+    and does not try to.
+
+    It is deliberately one-sided about what it concludes: a basin outside the
+    band is *reported*, never replaced. Three backends, three grids and a
+    coarse reference disagree for legitimate reasons often enough that acting
+    on the disagreement would do more harm than naming it.
+    """
+    from .delineate.hydrobasins import reported_upland_km2
+
+    try:
+        ref = reported_upland_km2(lat, lon, allow_download=allow_download)
+    except Exception as exc:                                    # noqa: BLE001
+        return MagnitudeCheck(True, "check-failed", str(exc)[:200],
+                              basin_area_km2=basin_area_km2)
+    if ref is None:
+        return MagnitudeCheck(
+            True, "no-reference",
+            "HydroBASINS is not on disk for this region, so the area was not "
+            "weighed against its published upstream area.",
+            basin_area_km2=basin_area_km2)
+
+    up = float(ref["up_area_km2"])
+    common = dict(
+        basin_area_km2=basin_area_km2,
+        reported_up_area_km2=round(up, 2),
+        unit_area_km2=round(float(ref["sub_area_km2"]), 2),
+        hybas_id=ref["hybas_id"] or None,
+    )
+    if basin_area_km2 <= 0:
+        return MagnitudeCheck(False, "empty",
+                              "The delineated basin has no area.", **common)
+
+    ratio = basin_area_km2 / up
+    if ratio < 1.0 / factor:
+        return MagnitudeCheck(
+            False, "far-too-small",
+            f"The delineated basin is {basin_area_km2:,.1f} km2 while "
+            f"HydroBASINS puts {up:,.0f} km2 upstream of this point -- a "
+            f"factor of {1 / ratio:,.0f}. Two datasets do not differ by that "
+            "much over the same ground, so one of the two is describing "
+            "somewhere else. Delineate the same point with "
+            "backend='hydrobasins' and compare before using this.",
+            factor=round(1 / ratio, 1), **common)
+    if ratio > factor:
+        return MagnitudeCheck(
+            False, "far-too-large",
+            f"The delineated basin is {basin_area_km2:,.0f} km2 while "
+            f"HydroBASINS puts {up:,.0f} km2 upstream of this point -- a "
+            f"factor of {ratio:,.0f}. That is the shape of an outlet that "
+            "routed onto a larger river than the one at the point. Delineate "
+            "the same point with backend='hydrobasins' and compare before "
+            "using this.",
+            factor=round(ratio, 1), **common)
+
+    return MagnitudeCheck(
+        True, "same-order",
+        f"The basin is {ratio:.2f} times the {up:,.0f} km2 HydroBASINS "
+        "publishes upstream of this point. That reference belongs to the "
+        "containing unit's outlet rather than to the point itself, so read "
+        "this as an order-of-magnitude agreement and nothing finer.",
+        factor=round(ratio, 3), **common)

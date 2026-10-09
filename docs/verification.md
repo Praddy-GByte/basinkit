@@ -356,6 +356,34 @@ continental answers, including a Mekong gauge whose 373,000 km2 became 9.5
 because the only mapped reach within a kilometre drained 5.9 km2. That is why
 the radius is 2 km.
 
+### The second reference, and what it is not
+
+The outlet check above is the better instrument and it needs HydroRIVERS,
+which is a separate regional download of a few hundred megabytes. basinkit
+will not start one behind a request for a basin, so where the network is not
+already cached the check reports `not-cached` and nothing is weighed. That gap
+was where three findings lived: `api` returning 1.9 km2 of the Danube, `tdx`
+returning 73 km2 of the Thames, and both reported as ordinary answers.
+
+`check_magnitude` fills it with the only reference that costs nothing:
+HydroBASINS' own `UP_AREA`, the upstream area the dataset publishes for each
+unit's outlet. It is on disk already for anyone who has used the default
+backend. It is also coarse -- the figure belongs to the unit's outlet rather
+than to the clicked point, so for a point part-way up a unit it overstates by
+up to that unit's own area, about 130 km2 at level 12 -- and it is read from
+the same family of data as one of the four backends, so it is not independent
+of that one.
+
+Two things follow, and both are deliberate. The threshold is a factor of ten,
+which is not tuned and is not meant to be: four backends read four grids, two
+of them a quarter of a century apart, so disagreements of tens of percent are
+ordinary and say nothing, while a factor of ten is not a disagreement about
+resolution. And a basin outside the band is *reported*, never replaced -- there
+is no measured precision behind this check, only the reasoning above, and
+acting on a signal of unknown precision would be the same mistake it exists to
+catch. The two failures it was written for cleared the threshold by three and
+by two orders of magnitude respectively.
+
 ### Prior art
 
 The finding that automatic delineation fails on small catchments is not new and

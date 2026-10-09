@@ -661,13 +661,45 @@ def test_basinatlas_scaled_integers_are_decoded():
     assert out["aridity index (index) [ari_ix_uav]"] == 0.88
 
 
-def test_attributes_needs_a_hydrobasins_delineation():
-    """BasinATLAS is keyed by HydroBASINS id, so other backends cannot use it."""
+def test_attributes_says_so_when_there_is_no_unit_to_key_by():
+    """BasinATLAS is keyed by HydroBASINS id, and this polygon is in the sea.
+
+    The refusal used to be unconditional -- any backend other than
+    'hydrobasins' was turned away, while the QGIS algorithm for the same thing
+    delineated with that backend itself and answered. Now the unit containing
+    the outlet is looked up for any basin, and the only remaining refusal is
+    the real one: there is no unit there at all.
+    """
     from shapely.geometry import box
 
     basin = bk.Basin.from_geometry(box(0, 0, 1, 1))
-    with pytest.raises(ValueError, match="hydrobasins"):
-        basin.attributes()
+    with pytest.raises(ValueError, match="(?i)hydrobasins"):
+        basin.attributes(progress=False)
+
+
+def test_attributes_looks_up_the_unit_for_a_basin_from_another_backend(monkeypatch):
+    """A DEM basin carries no HydroBASINS id; the unit at its outlet has one."""
+    from shapely.geometry import box
+
+    monkeypatch.setattr(
+        "basinkit.delineate.hydrobasins.reported_upland_km2",
+        lambda lat, lon, **kw: {"up_area_km2": 1194.0, "sub_area_km2": 130.0,
+                                "hybas_id": 7120000010, "region": "na",
+                                "snapped": False})
+
+    class _Frame:
+        iloc = property(lambda self: [{"tmp_dc_uyr": 50}])
+
+    monkeypatch.setattr("basinkit.sources.attributes.hydroatlas",
+                        lambda **kw: _Frame())
+
+    basin = bk.Basin.from_geometry(
+        box(-80, 37, -79, 38),
+        {"backend": "dem", "outlet": (37.5, -79.5), "area_km2": 1194.8})
+    out = basin.attributes(progress=False)
+    assert "_basinkit_note" in out
+    assert "7120000010" in out["_basinkit_note"]
+    assert "dem" in out["_basinkit_note"]
 
 
 # =========================================================================

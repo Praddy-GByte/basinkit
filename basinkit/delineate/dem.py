@@ -13,9 +13,56 @@ window is doubled and the routing re-run.
 
 from __future__ import annotations
 
+import functools
+import warnings
+
 import numpy as np
 
 from ..exceptions import DelineationError, MissingDependency, OutletSnapError
+
+#: Peak resident memory per pixel of the routing window, in bytes. D8 routing
+#: holds far more than the elevation array: the receiver index, the ordered
+#: traversal, upstream area and the basin mask are all the size of the grid
+#: again. Measured here on two windows of the same terrain, reading the peak
+#: resident set of the whole process:
+#:
+#:     1 degree window   13.5 Mpx   1.12 GB
+#:     2 degree window   52.9 Mpx   3.32 GB
+#:
+#: which is 56 bytes per pixel at the margin, over a baseline of about 0.4 GB
+#: for the interpreter and its libraries. Rounded up, because being wrong in
+#: this direction costs a refusal and being wrong in the other costs the
+#: process.
+BYTES_PER_PIXEL = 60
+
+#: How much memory the routing step may be expected to need before this
+#: backend declines the job. The failure it replaces is the one worth knowing
+#: about: a 25,000 km2 catchment grows its window to four degrees, 207
+#: megapixels, an estimated twelve gigabytes, and the process is killed by the
+#: kernel with no traceback and nothing written. A refusal that names the
+#: figure and the alternative is a better answer than a dead terminal. Raise
+#: it on a machine with the memory to spare.
+DEFAULT_MAX_MEMORY_GB = 4.0
+
+
+def _estimated_gb(n_pixels: int) -> float:
+    return n_pixels * BYTES_PER_PIXEL / 1e9
+
+
+def _refuse(n_pixels: int, half: float, limit_gb: float) -> DelineationError:
+    """The message that replaces being killed by the kernel."""
+    return DelineationError(
+        f"Routing a {2 * half:.1f} degree window at 30 m means "
+        f"{n_pixels / 1e6:,.0f} megapixels, which needs about "
+        f"{_estimated_gb(n_pixels):.1f} GB of memory -- above the "
+        f"{limit_gb:g} GB this backend will attempt. D8 routing holds the "
+        "receiver index, the traversal order, upstream area and the basin "
+        "mask at the size of the grid, so the cost grows with the square of "
+        "the window.\n\n"
+        "Either delineate with backend='hydrobasins', which walks a graph "
+        "instead of a raster and handles any size, or raise the limit with "
+        "max_memory_gb= if this machine has the memory."
+    )
 
 
 def _require_pyflwdir():
@@ -68,6 +115,29 @@ def _snap_to_stream(flw, uparea, row, col, *, search_px: int = 12,
     return r0 + int(dr), c0 + int(dc), best
 
 
+def _quiet_matmul(fn):
+    """Silence affine's matmul deprecation for the duration of one call.
+
+    ``affine`` 3.0 deprecated ``*`` for matrix multiplication, and pyflwdir,
+    rasterio and rioxarray all still use it, so a single delineation emitted
+    twenty-six copies of "Use `@` matmul instead of `*` mul operator" --
+    twenty-six lines in the QGIS log for every basin. It names a file the user
+    did not write and cannot change, there is nothing to be done about it
+    until those libraries are updated, and a log nobody reads is worse than no
+    log. Filtered by its own message, inside this call only, so no other
+    warning is lost and the process-wide filters are left as the caller set
+    them.
+    """
+    @functools.wraps(fn)
+    def inner(*args, **kwargs):
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message=r".*matmul.*")
+            return fn(*args, **kwargs)
+
+    return inner
+
+
+@_quiet_matmul
 def delineate_dem(
     lat: float,
     lon: float,
@@ -77,6 +147,7 @@ def delineate_dem(
     snap_px: int = 12,
     min_uparea_km2: float = 1.0,
     max_window_deg: float = 4.0,
+    max_memory_gb: float = DEFAULT_MAX_MEMORY_GB,
     streams=None,
     burn_depth_m: float = 20.0,
     progress: bool = True,
@@ -104,6 +175,11 @@ def delineate_dem(
     max_window_deg
         Stop growing at this half-width and raise instead of silently
         downloading the continent.
+    max_memory_gb
+        Refuse, with the figure named, rather than attempt a routing window
+        whose estimated peak memory exceeds this. Above roughly 10,000 km2 the
+        window needed is large enough for that estimate to matter; below it,
+        this never comes up.
     """
     pyflwdir = _require_pyflwdir()
     from shapely.geometry import shape
@@ -113,6 +189,13 @@ def delineate_dem(
 
     half = window_deg
     while True:
+        # Checked before the download, not after: a window too large to route
+        # is also too large to be worth fetching, and the old order spent the
+        # transfer first and was killed second.
+        planned = int(round(2 * half * 3600)) ** 2
+        if _estimated_gb(planned) > max_memory_gb:
+            raise _refuse(planned, half, max_memory_gb)
+
         bounds = (lon - half, lat - half, lon + half, lat + half)
         elev = fetch_dem(bounds=bounds, product=product, clip=False, progress=progress)
         elev = elev.squeeze()
@@ -166,6 +249,15 @@ def delineate_dem(
         )
         if touches_edge and half < max_window_deg:
             half *= 2
+            nxt = int(round(2 * half * 3600)) ** 2
+            warnings.warn(
+                f"The basin reaches the edge of the window, so it is being "
+                f"doubled to {2 * half:.1f} degrees -- "
+                f"{nxt / 1e6:,.0f} megapixels, about "
+                f"{_estimated_gb(nxt):.1f} GB. A basin that needs this much "
+                "window is at the upper end of what the DEM backend is for; "
+                "backend='hydrobasins' costs neither.",
+                stacklevel=2)
             continue
         break
 
@@ -199,6 +291,8 @@ def delineate_dem(
         "snap_distance_px": snap_px_moved,
         "flow_accum_at_outlet_km2": round(float(snapped_area), 3),
         "window_deg": half * 2,
+        "window_megapixels": round(arr.size / 1e6, 1),
+        "estimated_peak_gb": round(_estimated_gb(arr.size), 2),
         "area_km2": round(basin_area_km2(geom), 3),
         "license": "Copernicus DEM free-and-open licence",
     }

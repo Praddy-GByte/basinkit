@@ -106,6 +106,98 @@ COLLECTIONS = {
 }
 
 
+#: Mission band identifiers mapped to the asset names each catalogue actually
+#: publishes, per collection.
+#:
+#: Both catalogues name their optical assets by common name -- ``red``,
+#: ``nir`` -- while every paper, product guide and user names them by band
+#: identifier. ``bands=["B04", "B08"]`` is the obvious thing to write and it
+#: came back as odc-stac's "No such band/alias", which names the symptom and
+#: not the translation. Worse, the HLS collections in this same module *do*
+#: use B-numbers, so one package accepted ``B04`` in one place and rejected it
+#: in another.
+#:
+#: The identifiers are not interchangeable between missions and this is why
+#: the map is per collection rather than global: Landsat's B5 is near
+#: infrared, Sentinel-2's B05 is the first red edge. Translating them through
+#: one shared table would quietly return the wrong wavelength.
+BAND_ALIASES = {
+    "sentinel2": {
+        "B01": "coastal", "B02": "blue", "B03": "green", "B04": "red",
+        "B05": "rededge1", "B06": "rededge2", "B07": "rededge3",
+        "B08": "nir", "B8A": "nir08", "B09": "nir09",
+        "B11": "swir16", "B12": "swir22",
+    },
+    "landsat": {
+        "B1": "coastal", "B2": "blue", "B3": "green", "B4": "red",
+        "B5": "nir08", "B6": "swir16", "B7": "swir22",
+        "B10": "lwir11",
+    },
+}
+BAND_ALIASES["sentinel2_c1"] = BAND_ALIASES["sentinel2"]
+
+
+def _available_assets(items) -> list[str]:
+    """Every asset name the items carry, in a stable order."""
+    seen: dict[str, None] = {}
+    for item in items:
+        for name in getattr(item, "assets", {}) or {}:
+            seen.setdefault(name, None)
+    return list(seen)
+
+
+def resolve_bands(bands, collection: str | None, items) -> list[str] | None:
+    """Translate band identifiers to asset names, or say what is available.
+
+    Case is ignored on the way in, because ``b04`` and ``B04`` are the same
+    band to everyone who is not a dictionary.
+    """
+    if not bands:
+        return bands
+
+    aliases = BAND_ALIASES.get(collection or "", {})
+    folded = {k.upper(): v for k, v in aliases.items()}
+    present = _available_assets(items)
+    known = {name.upper(): name for name in present}
+
+    out, unknown, translated = [], [], []
+    for band in bands:
+        key = str(band).upper()
+        if key in known:
+            out.append(known[key])
+            continue
+        mapped = folded.get(key)
+        if mapped is not None and mapped.upper() in known:
+            out.append(known[mapped.upper()])
+            translated.append(f"{band} -> {known[mapped.upper()]}")
+            continue
+        if mapped is not None:
+            out.append(mapped)
+            translated.append(f"{band} -> {mapped}")
+            continue
+        unknown.append(str(band))
+
+    if unknown:
+        hint = ""
+        if aliases:
+            hint = (" Band identifiers are accepted too, and translated: "
+                    + ", ".join(f"{k}={v}" for k, v in
+                                list(aliases.items())[:6]) + ", and so on.")
+        raise DataSourceError(
+            f"{', '.join(unknown)} is not a band in this collection. "
+            f"Available: {', '.join(present) or 'none on these items'}."
+            + hint
+        )
+    if translated:
+        warnings.warn(
+            "Band identifiers translated to this catalogue's asset names: "
+            + ", ".join(translated)
+            + ". The assets are named by common name here, so the returned "
+              "variables carry those names.",
+            stacklevel=3)
+    return out
+
+
 def _client(url: str):
     try:
         from pystac_client import Client
@@ -405,6 +497,7 @@ def stac_stack(
             "No STAC items to stack. Widen the date range or relax cloud_cover."
         )
 
+    bands = resolve_bands(bands, collection, items)
     items = _drop_requester_pays(items, bands)
 
     scaling = asset_scaling(items, bands)

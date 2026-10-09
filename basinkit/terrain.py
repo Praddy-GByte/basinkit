@@ -567,8 +567,14 @@ def drainage_density(dem, *, thresholds=None, chosen_km2: float | None = None):
         "chosen": marked,
         "curve": curve,
         "range_factor": round(float(factor), 2),
+        "source": "channels extracted from the DEM at the chosen threshold",
         "note": "Drainage density is a function of the channel-initiation "
                 "threshold, not a property of the basin. Quote the threshold "
                 "with the number, or the number cannot be compared with "
-                "anyone else's.",
+                "anyone else's. This is also not the same quantity as the "
+                "drainage density in morphometry(), which measures mapped "
+                "reaches from a river dataset; that network stops at about "
+                "10 km2 of upstream area while this one continues up the "
+                "hillslope, and on the same basin the two came out 2.4 times "
+                "apart.",
     }

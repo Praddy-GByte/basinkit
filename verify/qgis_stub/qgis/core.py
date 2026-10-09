@@ -30,6 +30,18 @@ class QgsWkbTypes:
 
 class QgsProcessing:
     TypeVectorPolygon = "TypeVectorPolygon"
+    TypeVectorLine = "TypeVectorLine"
+    TypeVectorPoint = "TypeVectorPoint"
+    TypeVectorAnyGeometry = "TypeVectorAnyGeometry"
+    # QGIS 3.36 moved these onto a nested SourceType enum and kept the flat
+    # names as aliases. The plugin uses the nested spelling, so the stub needs
+    # both or the check is testing a plugin that does not exist.
+    SourceType = _Enum(
+        TypeVectorPolygon="TypeVectorPolygon",
+        TypeVectorLine="TypeVectorLine",
+        TypeVectorPoint="TypeVectorPoint",
+        TypeVectorAnyGeometry="TypeVectorAnyGeometry",
+    )
 
 
 class QgsProcessingUtils:
@@ -59,6 +71,30 @@ class QgsFields(list):
         return True
 
 
+class QgsPointXY:
+    """A lon/lat pair.
+
+    Added because this stub was missing it, which is worse than it sounds: the
+    landscape algorithm imports it at module scope, so the import failed, so
+    the provider never registered, so run_qgis_wiring.py -- the check that
+    exists to prove every algorithm wires up -- had not run at all since that
+    algorithm was added. A broken check reports nothing and looks the same as
+    a passing one.
+    """
+
+    def __init__(self, x=0.0, y=0.0):
+        self._x, self._y = float(x), float(y)
+
+    def x(self):
+        return self._x
+
+    def y(self):
+        return self._y
+
+    def __repr__(self):
+        return f"QgsPointXY({self._x}, {self._y})"
+
+
 class QgsGeometry:
     def __init__(self, wkt=""):
         self._wkt = wkt
@@ -66,6 +102,10 @@ class QgsGeometry:
     @staticmethod
     def fromWkt(wkt):
         return QgsGeometry(wkt)
+
+    @staticmethod
+    def fromPointXY(point):
+        return QgsGeometry(f"POINT({point.x()} {point.y()})")
 
     def asWkt(self):
         return self._wkt
@@ -93,6 +133,15 @@ class QgsFeatureSink:
 
 
 class _Parameter:
+    # setHelp was missing, so an algorithm that documents its own parameters
+    # -- which the stream-carving parameter added in 0.9.0 does -- could not
+    # be constructed against this stub at all.
+    def setHelp(self, text):
+        self._help = text
+
+    def help(self):
+        return getattr(self, "_help", "")
+
     def __init__(self, name, description="", *args, **kwargs):
         self.name, self.description = name, description
         self.args, self.kwargs = args, kwargs

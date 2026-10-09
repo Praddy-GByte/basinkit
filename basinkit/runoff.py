@@ -88,10 +88,17 @@ def usda_texture(sand_pct: float, clay_pct: float) -> str:
         return "silt loam"
     if silt >= 50 and c < 12:
         return "silt" if silt >= 80 else "silt loam"
+    # The three sandy classes are separated by the USDA's own combinations,
+    # and the order matters: a sand satisfies loamy sand's bounds as well as
+    # its own, and a loamy sand satisfies sandy loam's. Tightest first.
+    silt_1_5 = silt + 1.5 * c
+    silt_2 = silt + 2.0 * c
+    if silt_1_5 < 15:
+        return "sand"
+    if silt_2 < 30:
+        return "loamy sand"
     if c < 20 and s >= 52:
-        return "sandy loam" if silt + 2 * c >= 30 else "loamy sand"
-    if c < 15 and s >= 85:
-        return "sand" if silt + 1.5 * c < 15 else "loamy sand"
+        return "sandy loam"
     return "loam"
 
 

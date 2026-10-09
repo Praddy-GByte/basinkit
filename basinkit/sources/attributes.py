@@ -62,12 +62,114 @@ def _resolve_file(name: str) -> tuple[str, int]:
     )
 
 
-def fetch_basinatlas(*, progress: bool = True) -> Path:
-    """Download and unpack BasinATLAS. About 2.7 GB, once, then cached."""
+#: Written beside the geodatabase once every member of the archive is out.
+#: A file geodatabase is a directory, so an interrupted extraction leaves one
+#: that exists, is named correctly, and is missing most of its contents -- and
+#: the old check was that a ``*.gdb`` directory existed. Afterwards every
+#: attributes() call failed with "Layer could not be opened" until somebody
+#: deleted the folder by hand, and nothing in the message said that was the
+#: remedy. The marker records what the directory listing cannot.
+_COMPLETE = ".basinkit-extracted"
+
+#: Free space the unpacked geodatabase needs. The archive itself is another
+#: 2.7 GB on top, when it is not already cached. Checked before starting,
+#: because running out part-way through is what produced the half-extracted
+#: directory in the first place.
+_NEEDED_BYTES = 7 * 1024 ** 3
+
+
+def _has_layers(gdb: Path) -> bool:
+    """Whether the geodatabase can be opened and holds its level-12 layer.
+
+    This is what an extraction has to be good for, so it is a better question
+    than whether the directory exists -- and it is the one that lets an
+    extraction made before the marker existed go on working instead of being
+    refused. Opening a file geodatabase to list its layers reads its catalogue
+    table, not its 6 GB of features.
+    """
+    try:
+        import pyogrio
+
+        names = {str(n) for n in pyogrio.list_layers(gdb)[:, 0]}
+    except Exception:                                       # noqa: BLE001
+        try:
+            import fiona
+
+            names = set(fiona.listlayers(str(gdb)))
+        except Exception:                                   # noqa: BLE001
+            return False
+    return any(n.startswith("BasinATLAS_v10_lev") for n in names)
+
+
+def _usable_gdb(target: Path) -> Path | None:
+    """An extraction that finished, or ``None``.
+
+    A marker is trusted outright. Without one -- an extraction from before the
+    marker existed, or one someone unpacked by hand -- the geodatabase is
+    opened and asked for its layers, and a marker written if it answers, so
+    the question is asked once rather than on every call.
+    """
+    for found in list(target.glob("*.gdb")) + list(target.rglob("*.gdb")):
+        if (found.parent / _COMPLETE).exists() or (found / _COMPLETE).exists():
+            return found
+        if _has_layers(found):
+            try:
+                (found.parent / _COMPLETE).write_text(
+                    "verified by reading its layers\n", encoding="utf-8")
+            except OSError:
+                pass
+            return found
+    return None
+
+
+def _partial_gdb(target: Path) -> Path | None:
+    for found in list(target.glob("*.gdb")) + list(target.rglob("*.gdb")):
+        return found
+    return None
+
+
+def fetch_basinatlas(*, progress: bool = True, force: bool = False) -> Path:
+    """Download and unpack BasinATLAS. About 2.7 GB, once, then cached.
+
+    Parameters
+    ----------
+    force
+        Extract again even if a finished extraction is already there. Use it
+        to replace one that was interrupted; the message raised in that case
+        says so.
+    """
+    import shutil
+
     target = subdir("hydroatlas") / "BasinATLAS_v10"
-    existing = list(target.glob("*.gdb")) or list(target.rglob("*.gdb"))
-    if existing:
-        return existing[0]
+    if not force:
+        done = _usable_gdb(target)
+        if done is not None:
+            return done
+        stale = _partial_gdb(target)
+        if stale is not None:
+            raise DataSourceError(
+                f"{stale} is there but the extraction that made it did not "
+                "finish, so most of its layers are absent and every read of "
+                "it fails with 'Layer could not be opened'. A file "
+                "geodatabase is a directory, so this cannot be told apart "
+                "from a complete one by looking.\n\n"
+                f"Delete {stale.parent} and call this again, or pass "
+                "force=True to extract over it. The archive itself is still "
+                "cached, so this costs the unpacking and not the download. "
+                "The layers were looked for and not found, so this is not "
+                "merely a missing marker."
+            )
+
+    free = shutil.disk_usage(subdir("hydroatlas")).free
+    if free < _NEEDED_BYTES:
+        raise DataSourceError(
+            f"BasinATLAS unpacks to about {_NEEDED_BYTES / 1024 ** 3:.0f} GB, "
+            "plus 2.7 GB for the archive if it is not already cached, and "
+            f"{free / 1024 ** 3:.1f} GB is free. Freeing the space first "
+            "avoids an extraction that stops half way and leaves a "
+            "geodatabase that looks complete and is not -- which is how this "
+            "check came to exist."
+        )
 
     url, size = _resolve_file("BasinATLAS_Data_v10.gdb.zip")
     zpath = download(
@@ -80,6 +182,10 @@ def fetch_basinatlas(*, progress: bool = True) -> Path:
     found = list(target.rglob("*.gdb"))
     if not found:
         raise DataSourceError(f"No file geodatabase inside {url}")
+    # Last, and only once extractall has returned, so the marker means what it
+    # says.
+    (found[0].parent / _COMPLETE).write_text(
+        f"{url}\n{size} bytes\n", encoding="utf-8")
     return found[0]
 
 

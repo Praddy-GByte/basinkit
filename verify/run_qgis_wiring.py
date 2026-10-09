@@ -40,8 +40,17 @@ check("provider registered", len(registered) == 1, f"{len(registered)}")
 provider = registered[0]
 provider.loadAlgorithms()
 check("provider id", provider.id() == "basinkit", provider.id())
-check("every algorithm registered", len(provider.algorithms) == 8,
-      ", ".join(a.name() for a in provider.algorithms))
+# Counted from the provider's own loadAlgorithms rather than written here. The
+# literal 8 that used to be in this line was three algorithms out of date, so
+# the check failed on a correct plugin -- and a check that fails for its own
+# reasons is one people learn to ignore.
+import inspect, re
+source = inspect.getsource(type(provider).loadAlgorithms)
+expected = sorted(set(re.findall(r"(\w+Algorithm)\(\)", source)))
+check("every algorithm the provider lists is registered",
+      len(provider.algorithms) == len(expected),
+      f"{len(provider.algorithms)} registered, {len(expected)} listed: "
+      + ", ".join(a.name() for a in provider.algorithms))
 
 for algorithm in provider.algorithms:
     label = algorithm.name()

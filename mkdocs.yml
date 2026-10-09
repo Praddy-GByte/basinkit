@@ -54,6 +54,8 @@ nav:
   - ArcGIS Pro: arcgis-pro.md
   - Delineation: delineation.md
   - Landscape form: landscape.md
+  - Catchment response: catchment-response.md
+  - Forcing a known channel: conditioning.md
   - Handing off to a model: model-coupling.md
   - Related work: related-work.md
   - Data catalogue: catalogue.md

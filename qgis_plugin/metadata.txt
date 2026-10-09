@@ -36,12 +36,71 @@ hasProcessingProvider=yes
 # their Python dependencies, so the plugin detects it at load
 # and hands the user a command that works. Declaring it here is what puts it in
 # the "External dependencies" field on plugins.qgis.org.
-external_deps=basinkit>=0.8.3
+external_deps=basinkit>=0.9.0
 server=False
 
 tags=hydrology,watershed,catchment,basin,delineation,dem,terrain,slope,hand,morphometry,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
 
-changelog=0.8.4
+changelog=0.9.0
+    - Delineate river basin takes an optional line layer of known channels and
+      forces the flow along them. Where a stream runs in a culvert under a city,
+      or a road embankment dams a valley in the elevation model, the surface
+      carries no channel and the water is sent the wrong way; a line drawn on
+      the canvas is enough to correct it. Lowering the cells by a fixed depth
+      does nothing -- the trench keeps the terrain's own rises -- so each line
+      is walked from its lower end and forced to descend the whole way. The
+      provenance records that the path was forced, how deep and over how many
+      cells, because a basin that was told where to go and one that was found
+      are not the same kind of answer.
+    - A basin that disagrees with the river at its outlet is now reported
+      instead of printed. The check measured the basin only against the largest
+      river within the search radius, which beside a confluence is a different
+      and far bigger river: a basin at half of what drains to its own stream
+      passed, and one at nine times it passed too. It now tests both directions
+      against the river at the outlet, and where two channels meet within a
+      metre of the point it says the outlet is ambiguous and names both
+      catchments rather than choosing one.
+    - The TDX-Hydro backend took the reach whose recorded point was nearest.
+      Beside a confluence that is a stub: at one outlet it returned 122 km2 of
+      a 228 km2 basin. It now takes the unit catchment that contains the
+      outlet, and that basin reads 241 km2, in line with the other backends.
+    - Basin morphometry and the terrain surfaces no longer fetch a second
+      elevation grid, so one report cannot print two different values for the
+      same basin's highest point.
+    - Every algorithm's help panel now prints the citation and the DOI.
+    - The plugin is GPL-3.0-or-later. The basinkit Python package it calls is
+      Apache-2.0. Neither licence grants the use of the name basinkit; a fork
+      must carry its own.
+    - The plugin now asks for the packages it actually needs. It told people
+      to run "pip install basinkit", which does not install pyflwdir -- and
+      the DEM backend routes with pyflwdir, which auto uses for every
+      catchment below 2,000 km2. Those basins came back as the coarser
+      HydroBASINS answer instead, 21.6 percent high on one 259 km2 catchment,
+      with nothing on the face of the result to say so. It now names
+      basinkit[delineate] and basinkit[viz], says what each is for, and quotes
+      the extras so the command survives a shell. On Debian and Ubuntu, where
+      QGIS runs on a system Python the distribution marks as externally
+      managed, the command now carries --break-system-packages, without which
+      it failed outright.
+    - Basin report no longer takes QGIS down with it. It read elevation at the
+      100 Mpx default, which on a large basin reached about 5.9 GB and was
+      killed by the operating system -- and in QGIS that kills QGIS. An A4
+      figure is about 2,000 pixels across, so it now reads 10 Mpx and the
+      cover states the resolution it used.
+    - Delineate river basin declines a window it cannot route, naming the
+      megapixels, the memory estimate and the backend to use instead, rather
+      than growing the window until the process is killed with nothing
+      written.
+    - The log is readable again: a delineation emitted twenty-six copies of
+      "Use @ matmul instead of * mul operator", a deprecation inside affine
+      that names a file nobody here can change.
+    - Asking for a backend by name is now checked the way auto checks itself.
+      Before, a backend chosen explicitly skipped every check, and a basin at
+      one percent of what drains to the point came back looking like any other
+      answer.
+    - Needs basinkit 0.9.0 or newer.
+    
+    0.8.4
     - Landscape form no longer fails on a basin that has knickpoints.
       It asked the output sink for its field list, which QgsFeatureSink
       does not have, so it only survived basins where there was nothing

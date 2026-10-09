@@ -2,6 +2,180 @@
 
 ## 0.9.0 -- 2026-10-07
 
+### A channel the elevation model cannot see
+
+A global elevation model knows the ground surface and nothing underneath it.
+Where a stream runs in a culvert beneath a city there is nothing on the
+surface to route along, so the water is sent over the buildings and the
+catchment returned is not the one that drains there. The same happens at a
+road embankment that dams a valley in the model, and at a canal that crosses a
+divide.
+
+`delineate_dem` takes `streams=` and carves them in before routing; the QGIS
+algorithm takes them as an optional line layer, so a line drawn on the canvas
+is enough. The obvious implementation, lowering every cell on the line by a
+fixed depth, does nothing at all: the trench keeps the terrain's own rises, so
+a line crossing a divide still climbs over it and the router treats the two
+halves as separate hollows and fills them. On a validated basin it moved the
+area by 0.00 km2 at every depth up to 150 m. Each line is therefore walked
+from its lower end and forced to descend the whole way, which is what obliges
+the flow to follow it. Carving the sixty-four mapped channels of the Cowpasture
+River moves its area by 0.18 km2 in 1,195; carving one line across its divide
+moves 708.
+
+The provenance records that the path was forced, how deep and over how many
+cells, because a basin that was told where to go and one that was found are
+not the same kind of answer.
+
+### How long a basin takes to respond, and how much of the rain runs off
+
+`concentration_time()` returns six empirical formulas rather than one, each
+with the catchments it was fitted to and the spread between them, because on a
+single basin they disagree by a factor of four and a tool that picks for you
+has hidden that. Kirpich and California Culvert Practice are flagged as the
+same equation in different clothes: they agree by construction here, not by
+corroboration.
+
+`curve_number()` composes the SCS curve number from the land cover and soil
+this package already fetches, with the antecedent moisture variants, the
+potential retention and the initial abstraction. The two judgements it rests on
+-- the hydrologic soil group from texture rather than a soil survey, and ESA
+WorldCover classes matched to the nearest TR-55 cover type -- are returned
+beside the number rather than buried under it, and `cn_table=` replaces the
+mapping with the condition actually on the ground.
+
+### The outlet reach TDX-Hydro was picking
+
+TDX-Hydro's index holds one recorded point per reach, and the backend took the
+reach whose point was nearest. Beside a confluence that is a stub: at one
+outlet it returned 122 km2 of a 228 km2 basin and reported it as the answer.
+A unit catchment is the ground draining to one reach, so the polygon that
+contains the outlet names the reach the outlet drains into, which is the
+question actually being asked. That basin now reads 241 km2, in line with the
+other three backends instead of half of them.
+
+### An answer that disagrees with the river it sits on
+
+`check_outlet` measured a basin only against the largest river within the
+search radius. Near a confluence that is a different and far bigger river, so a
+basin at half of what drains to the stream it sits on passed as consistent, and
+one at nine times it passed too. It now tests both directions against the
+river at the outlet, and where two channels meet within a metre of the point it
+says the outlet is ambiguous and names both catchments rather than choosing one.
+
+### Twenty-three findings from an independent test pass
+
+Someone ran about two hundred checks over the package, the CLI and the plugin
+inside a real QGIS on an 8 GB machine, and wrote down every wrong answer.
+Twenty-three held up against the code. They are grouped here by what they cost
+a user, because that is the order they were fixed in.
+
+**A wrong number with nothing said about it.** The plugin told people to run
+`pip install basinkit`, which does not install pyflwdir -- and `auto` routes on
+the DEM for every catchment below 2,000 km2, so those basins silently came back
+as the coarser HydroBASINS assembly instead: 314.8 km2 where the DEM resolves
+255.6, 21.6 percent high. The plugin now asks for `basinkit[delineate]` and
+`basinkit[viz]` by name and says what each is for, and quotes the extras so the
+command survives a shell. Asking for a backend by name skipped every check
+`auto` ran, so `api` returned 1.9 km2 of the Danube and 18.5 of the
+Brahmaputra, and `tdx` returned 73 km2 of the Thames, each as a plain answer;
+every named backend is now weighed the same way `auto` weighs its own, and
+where HydroRIVERS is not downloaded a second reference is used -- HydroBASINS'
+own published `UP_AREA`, which is coarse enough to be useless for a boundary
+and decisive for a factor of a hundred. A click with no mapped river within two
+kilometres and a large basin is now a distinct, stated outcome rather than a
+quiet note: at Connaught Place in Delhi, where there is no river, the old code
+returned 36,944 km2 of the Yamuna with a one-line aside.
+
+**A silent gap in a series.** A CHIRPS month that failed to download was
+dropped without a word -- one run of 2015-2020 returned 59 months of 72, the
+next returned all 72 -- and a Mann-Kendall trend or an SPI then read the hole
+as a shorter record. Missing months are now counted, listed in the attributes
+and warned about. TerraClimate did the same per year, and its OPeNDAP server
+refuses some of any burst of concurrent requests; failures are now retried once
+one at a time, and what still fails is named. A clipping failure there fell
+through to the unclipped grid, so every value returned was a bounding-box mean
+labelled as a basin mean; that now says which quantity it is. An interrupted
+BasinATLAS extraction left a `.gdb` directory that exists, is named correctly
+and is missing its layers, and was accepted as a cache forever after -- every
+`attributes()` call failing with "Layer could not be opened" until someone
+deleted the folder by hand. Completion is now recorded, an older extraction is
+verified by reading its layers rather than refused, and the 7 GB of free space
+needed is checked before the unpacking rather than discovered during it.
+
+**A dead process.** The eight-page report read elevation at the 100 Mpx
+default, which on the Koshi -- the basin in the README's own quick start --
+reached about 5.9 GB and was killed by the kernel, in Python and inside QGIS,
+where it takes QGIS down with it. An A4 figure is about 2,000 pixels across, so
+the report now reads 10 Mpx and the cover states the resolution that worked out
+to. The DEM backend grew its window until the routing exhausted memory with no
+message: 3.9 GB at the Thames, killed above 6 GB at the Potomac. Peak memory
+was measured here at 1.12 GB for a 13.5 Mpx window and 3.32 GB for 52.9 Mpx, so
+56 bytes per pixel at the margin; the backend now estimates before it
+downloads, warns on each doubling with the figure, and declines above
+`max_memory_gb` -- naming the window, the estimate and `backend='hydrobasins'`
+-- rather than being killed.
+
+**Smaller things that wasted a run.** `export_3d` raised "Unknown format code
+'g' for object of type 'str'" on any basin built from a file or a geometry,
+because it formatted a missing outlet as `'?'`; and one unreadable Sentinel-2
+scene anywhere in the window failed the whole export, which happened on both
+basins it was tried on -- the imagery is a skin on the terrain and its loss is
+now a warning, not a failure. `bands=["B04", "B08"]` was rejected: both
+catalogues name optical assets by common name, while every product guide names
+them by band identifier, and the HLS collections in this same module use the
+identifiers. Identifiers are now translated per mission, because Landsat's B5
+is near infrared and Sentinel-2's B05 is the first red edge, and an unknown
+band lists the ones that exist. `precipitation(2020, 2010)` raised "CHIRPS
+covers 60N-60S", sending the reader to look at their basin's latitude when the
+fault was the order of two arguments. `dem("fabdem")` said "Unknown DEM
+product" when it is a known one with a manual route and a ShareAlike licence
+trap, all of it already written in the catalogue. The CLI printed a Python
+traceback for a latitude of 95, and `--backend` had never been told about
+`tdx`; `archydro` defaulted to `auto`, which refines small catchments onto the
+DEM and then failed because a DEM basin has no sub-catchments to export, so it
+now asks for the backend it needs. `catalog --category nonsense` returned an
+empty list instead of the eight real categories. `attributes()` refused every
+basin that did not come from the HydroBASINS backend, while the QGIS algorithm
+for the same thing delineated with that backend itself and answered -- the unit
+containing the outlet is now looked up for any basin, and the row says so.
+`precipitation()` returned a `DataArray` for CHIRPS and a whole `Dataset` for
+TerraClimate, so code that worked on one source broke on the other. Drainage
+density came out 0.378 km/km2 from the mapped reaches in `morphometry()` and
+0.914 from the DEM in `drainage_density()` -- a factor of 2.4 under one name,
+with nothing in either output to say they measure different networks. A
+delineation emitted twenty-six copies of affine's `matmul` deprecation, which
+in the QGIS log is twenty-six lines per basin about a file the user cannot
+change. And `verify/run_qgis_wiring.py`, the check that exists to prove every
+algorithm wires up, had itself been broken since the landscape algorithm was
+added: its QGIS stub was missing `QgsPointXY`, so the import failed, so the
+check had not run at all -- and the count it asserted was three algorithms out
+of date.
+
+One finding is left open deliberately. The package and the plugin carry
+`pradeepika.kaushik@gmail.com` while the repository account is a different
+address; which one is meant is not something to guess at.
+
+### Fixed
+
+- Raster steps in the ArcGIS sweep took the 100 Mpx default instead of the
+  run's pixel budget. On a 27,841 km2 basin the surface-water step reached
+  6 GB and the process was killed twice.
+- `morphometry()` and `terrain_stats()` fetched a second elevation grid, so a
+  report could print two different values for the same basin's highest point.
+  They now take the elevation already in hand.
+- The satellite windows were fixed to November-March, the dry season north of
+  the equator and the wet season south of it. The hemisphere is read from the
+  basin.
+- An empty STAC search reported "no items" when eleven existed and the cloud
+  filter had removed them. It now says how many were found and how clean the
+  cleanest was.
+- `usda_texture` returned loamy sand for a sand: the sandy classes were tested
+  in the wrong order, and a sand satisfies loamy sand's bounds as well as its
+  own. Caught by the tests written for it.
+- `concentration_time` reported a lag that did not equal 0.6 times the median
+  it printed, and counted two identical formulas as distinct.
+
 ### Apache-2.0 for the package, GPL-3.0-or-later for the QGIS plugin
 
 MIT asks for one thing: that the copyright notice travels with every copy. It

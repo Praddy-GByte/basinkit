@@ -149,16 +149,24 @@ def concentration_time(morphometry: dict) -> dict:
             "which morphometry() builds from the river network."
         )
 
-    # Kirpich and California coincide exactly here (see METHODS), so counting
-    # both would make the estimates look more independent than they are.
-    distinct = {round(v, 6) for v in out.values()}
+    # Kirpich and California coincide here (see METHODS), so counting both
+    # would make the estimates look more independent than they are. They are
+    # not bit-identical: the channel gradient reaches this function already
+    # rounded by morphometry(), so the two forms of the same equation differ
+    # in the fifth significant figure. Counted at the precision the estimates
+    # are reported at -- two values that print the same are one value.
+    distinct = {round(v, 1) for v in out.values()}
     values = sorted(out.values())
     median = (values[len(values) // 2] if len(values) % 2
               else 0.5 * (values[len(values) // 2 - 1] + values[len(values) // 2]))
+    # Round once, then derive the lag from the rounded value. Taking the lag
+    # from the full-precision median and rounding separately leaves two
+    # printed numbers that do not agree with each other.
+    median = round(median, 1)
 
     return {
         "estimates": {k: round(v, 1) for k, v in sorted(out.items())},
-        "median_min": round(median, 1),
+        "median_min": median,
         "shortest_min": round(values[0], 1),
         "longest_min": round(values[-1], 1),
         "spread_factor": round(values[-1] / values[0], 2),
