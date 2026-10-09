@@ -171,6 +171,101 @@ def test_a_large_basin_with_no_river_nearby_is_distinguished(monkeypatch):
     assert "not on a river" in small.message
 
 
+def test_auto_says_out_loud_that_no_river_is_mapped_nearby(monkeypatch):
+    """The first version of this fix only reached the named backends.
+
+    `auto` is the default, so the one path that mattered was the one left
+    out: a click on Connaught Place came back as 36,944 km2 with the new
+    reason recorded in provenance and nothing said about it.
+    """
+    from basinkit import delineate as mod
+    from basinkit.verify import OutletCheck
+
+    monkeypatch.setattr(
+        "basinkit.delineate.delineate_hydrobasins",
+        lambda lat, lon, **kw: (box(0, 0, 1, 1),
+                                {"backend": "hydrobasins", "area_km2": 36_944.1,
+                                 "reported_up_area_km2": 36_900.0}))
+    monkeypatch.setattr(
+        "basinkit.verify.check_outlet",
+        lambda lat, lon, area, **kw: OutletCheck(
+            True, "no-reach-large", "no mapped river, and a large basin",
+            basin_area_km2=area))
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        _, prov = mod.delineate(28.6315, 77.2167)
+    assert prov["warning"] == "no mapped river, and a large basin"
+    assert any("no mapped river" in str(w.message) for w in caught)
+
+
+def test_a_dem_answer_from_auto_is_checked_too(monkeypatch):
+    """Lake Victoria's surface came back as 2.7 km2 with no check recorded.
+
+    Three of auto's four exits return a DEM delineation, and the refinement
+    branch recorded nothing about the answer it returned.
+    """
+    from basinkit import delineate as mod
+    from basinkit.verify import OutletCheck
+
+    monkeypatch.setattr(
+        "basinkit.delineate.delineate_hydrobasins",
+        lambda lat, lon, **kw: (box(0, 0, 1, 1),
+                                {"backend": "hydrobasins", "area_km2": 130.0}))
+    monkeypatch.setattr(
+        "basinkit.delineate.delineate_dem",
+        lambda lat, lon, **kw: (box(0, 0, 0.1, 0.1),
+                                {"backend": "dem", "area_km2": 2.7}))
+
+    calls = {"n": 0}
+
+    def counted(lat, lon, area, **kw):
+        calls["n"] += 1
+        return OutletCheck(True, "no-reach", "below the network's floor",
+                           basin_area_km2=area)
+
+    monkeypatch.setattr("basinkit.verify.check_outlet", counted)
+
+    _, prov = mod.delineate(-1.0, 33.0)
+    assert prov["backend"] == "dem"
+    assert prov["outlet_check"]["reason"] == "no-reach"
+    assert calls["n"] == 1
+    assert "floor" in prov["note"]
+
+
+def test_the_magnitude_check_is_kept_out_of_the_refinement_branch(monkeypatch):
+    """Below the threshold the reference is the whole containing unit.
+
+    A correct DEM refinement of a small headwater is legitimately a small
+    fraction of its level-12 unit, so weighing one against the other would
+    flag the answers this branch exists to produce.
+    """
+    from basinkit import delineate as mod
+    from basinkit.verify import OutletCheck
+
+    monkeypatch.setattr(
+        "basinkit.delineate.delineate_hydrobasins",
+        lambda lat, lon, **kw: (box(0, 0, 1, 1),
+                                {"backend": "hydrobasins", "area_km2": 130.0}))
+    monkeypatch.setattr(
+        "basinkit.delineate.delineate_dem",
+        lambda lat, lon, **kw: (box(0, 0, 0.1, 0.1),
+                                {"backend": "dem", "area_km2": 5.0}))
+    monkeypatch.setattr("basinkit.verify.check_outlet",
+                        lambda lat, lon, area, **kw: OutletCheck(
+                            True, "no-reach", "below the floor",
+                            basin_area_km2=area))
+
+    def refuse(*a, **k):
+        raise AssertionError("the magnitude check must not run here")
+
+    monkeypatch.setattr("basinkit.verify.check_magnitude", refuse)
+
+    _, prov = mod.delineate(26.87, 87.15)
+    assert prov["backend"] == "dem"
+    assert "magnitude_check" not in prov
+
+
 # ---------------------------------------------------------------------------
 # 4 and 11. A rainfall series with holes in it, and a date range blamed on CHIRPS
 # ---------------------------------------------------------------------------
@@ -320,6 +415,49 @@ def test_the_report_reads_a_grid_a_page_can_show(monkeypatch):
     with pytest.raises(RuntimeError):
         mod.report(FakeBasin(), "/dev/null", progress=False)
     assert asked["max_pixels"] == mod.REPORT_MAX_PIXELS
+
+
+def test_the_budget_reaches_the_grid_through_basin_report(monkeypatch):
+    """Basin.report fetched the grid itself, so report()'s budget never ran.
+
+    This is the test that was missing when the budget was first added: it
+    was pinned on report(), while every real caller -- the CLI, the QGIS
+    algorithm, the ArcGIS tool -- goes through Basin.report, which passed a
+    finished grid read at the package-wide 100 Mpx default. On the Koshi that
+    reached 6.1 GB and the kernel killed it; the cgroup's own message named
+    the figure.
+    """
+    from basinkit import report as mod
+    from basinkit.basin import Basin
+
+    asked = {}
+    basin = Basin.from_geometry(box(0, 0, 1, 1))
+
+    def fake_dem(self, **kwargs):
+        asked.update(kwargs)
+        raise RuntimeError("stop here; the budget is what is being tested")
+
+    monkeypatch.setattr(Basin, "dem", fake_dem)
+    with pytest.raises(RuntimeError):
+        basin.report("/dev/null", progress=False)
+    assert asked["max_pixels"] == mod.REPORT_MAX_PIXELS
+    assert asked["progress"] is False
+
+
+def test_a_caller_can_still_choose_the_budget(monkeypatch):
+    from basinkit.basin import Basin
+
+    asked = {}
+
+    def fake_dem(self, **kwargs):
+        asked.update(kwargs)
+        raise RuntimeError("stop")
+
+    monkeypatch.setattr(Basin, "dem", fake_dem)
+    with pytest.raises(RuntimeError):
+        Basin.from_geometry(box(0, 0, 1, 1)).report("/dev/null",
+                                                    max_pixels=1_234_567)
+    assert asked["max_pixels"] == 1_234_567
 
 
 # ---------------------------------------------------------------------------

@@ -484,20 +484,30 @@ def p(display, name, datatype="GPString", ptype="Required", direction="Input",
     return param
 
 
-def point_params(backend=True):
+def point_params(backend=True, default_backend="auto"):
+    """The outlet parameters every tool shares.
+
+    ``default_backend`` exists because two tools cannot use 'auto': the
+    sub-catchments and the Arc Hydro export both read the units the
+    HydroBASINS traversal walked, and 'auto' refines anything below
+    2,000 km2 onto the elevation model, which has no units. Those two
+    offered 'auto' as their default and so failed on small catchments after
+    the delineation had already been paid for.
+    """
     out = [p("Outlet latitude", "lat", "GPDouble"),
            p("Outlet longitude", "lon", "GPDouble")]
     if backend:
-        out.append(p("Delineation backend", "backend", default="auto",
+        out.append(p("Delineation backend", "backend", default=default_backend,
                      values=BACKENDS))
     out.append(p("Output folder", "out", "DEFolder", direction="Input"))
     return out
 
 
-def point_args(params, idx_backend=2, idx_out=3):
+def point_args(params, idx_backend=2, idx_out=3, default_backend="auto"):
     args = ["--lat", params[0].value, "--lon", params[1].value]
     if idx_backend is not None:
-        args += ["--backend", params[idx_backend].valueAsText or "auto"]
+        args += ["--backend",
+                 params[idx_backend].valueAsText or default_backend]
     args += ["--out", params[idx_out].valueAsText]
     return args
 
@@ -659,10 +669,12 @@ class SubBasins(BaseTool):
         self.category = "2 Basin Delineation"
 
     def getParameterInfo(self):
-        return point_params()
+        return point_params(default_backend="hydrobasins")
 
     def execute(self, parameters, messages):
-        outs, res = run(["subbasins"] + point_args(parameters), messages)
+        outs, res = run(
+            ["subbasins"]
+            + point_args(parameters, default_backend="hydrobasins"), messages)
         add_to_map(outs)
 
 
@@ -1026,14 +1038,14 @@ class ArcHydro(BaseTool):
         self.category = "8 Model Coupling"
 
     def getParameterInfo(self):
-        prm = point_params()
+        prm = point_params(default_backend="hydrobasins")
         prm.insert(3, p("Minimum stream order", "min_order", "GPLong",
                         ptype="Optional", default=0))
         return prm
 
     def execute(self, parameters, messages):
         args = ["archydro", "--lat", parameters[0].value, "--lon", parameters[1].value,
-                "--backend", parameters[2].valueAsText or "auto",
+                "--backend", parameters[2].valueAsText or "hydrobasins",
                 "--min-order", parameters[3].value or 0,
                 "--out", parameters[4].valueAsText]
         outs, res = run(args, messages)

@@ -13,7 +13,7 @@ import basinkit as bk
 from basins import REFERENCE
 
 results = []
-for name, lat, lon, published, tol, rain, region in REFERENCE:
+for name, lat, lon, published, tol, _rain, region in REFERENCE:
     row = {"name": name, "lat": lat, "lon": lon, "published_km2": published,
            "tol": tol, "expected_region": region}
     t = time.time()

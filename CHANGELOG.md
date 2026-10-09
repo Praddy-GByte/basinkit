@@ -106,9 +106,21 @@ needed is checked before the unpacking rather than discovered during it.
 **A dead process.** The eight-page report read elevation at the 100 Mpx
 default, which on the Koshi -- the basin in the README's own quick start --
 reached about 5.9 GB and was killed by the kernel, in Python and inside QGIS,
-where it takes QGIS down with it. An A4 figure is about 2,000 pixels across, so
-the report now reads 10 Mpx and the cover states the resolution that worked out
-to. The DEM backend grew its window until the routing exhausted memory with no
+where it takes QGIS down with it.
+
+This one took two attempts and the first was wrong, which is worth recording.
+A pixel budget was added to `report()`, and the Koshi was still killed: every
+real caller -- the CLI, the QGIS algorithm, the ArcGIS tool -- goes through
+`Basin.report`, which fetched the grid itself and handed `report()` a finished
+one, so the new budget was never reached. The test written for it passed
+because it tested the function and not the method. Under a memory cgroup the
+kernel named the figure: 6.1 GB. The grid is now budgeted where the callers
+actually arrive, at 4 Mpx -- the Koshi at about 186 m, and a 235 km2 catchment
+still at its native 31 m, because on the basins people run this on the budget
+never binds. Rasters are separately decimated to 1,600 pixels on the long side
+for drawing, since an A4 page at 300 dpi cannot show more, while the numbers
+stay on the full budgeted grid. Measured on the Koshi: 1.33 GB peak and
+eighteen seconds, against a process that previously did not finish. The DEM backend grew its window until the routing exhausted memory with no
 message: 3.9 GB at the Thames, killed above 6 GB at the Potomac. Peak memory
 was measured here at 1.12 GB for a 13.5 Mpx window and 3.32 GB for 52.9 Mpx, so
 56 bytes per pixel at the margin; the backend now estimates before it
@@ -155,6 +167,37 @@ of date.
 One finding is left open deliberately. The package and the plugin carry
 `pradeepika.kaushik@gmail.com` while the repository account is a different
 address; which one is meant is not something to guess at.
+
+### What the verification round after those fixes found
+
+The fixes above were then run rather than reasoned about: the whole suite
+offline and over the network, the repository's own harnesses, and a real basin
+through every path that had been touched. Four more things came out of it.
+
+The report fix was in the wrong function, as recorded above. A stale test was
+asserting a bug that had since been fixed -- it pinned TDX-Hydro returning 122
+of 228 km2 and the outlet check saying so, and TDX now returns 241 km2 and the
+check passes, so the assertion failed for the right reason; it has been
+rewritten to pin the agreement, and the under-capture branch it was the only
+cover for is now unit-tested offline against a stubbed river network, because
+that test is skipped on any machine without HydroRIVERS cached, which is most
+of them. Three of the new tests were patching names on submodules that `_auto`
+had already bound at import, so they were quietly doing real network
+delineations instead of exercising the branch they named; the suite went from
+29 seconds to 2 when that was corrected. And the no-mapped-river reason added
+above only reached the named backends, not `auto`, which is the default -- so
+the Delhi case it was written for still said nothing. All four are tested now.
+
+`verify/run_grade_validation.py` and `verify/run_tdx_wide.py` could not run at
+all: both held the line `OUT = OUT`, a path taken out of the file with nothing
+put back, so each raised `NameError` before its first statement. Both now
+write beside themselves by default and say, when their input data is absent,
+that it is not shipped and where it comes from. The ArcGIS sub-catchment and
+Arc Hydro tools defaulted to `backend='auto'`, which refines small catchments
+onto the elevation model and then has no sub-catchments to export -- the same
+fault fixed in the CLI, in the other two places it also lived. `export_3d` now
+accepts `progress=`, which every other method on `Basin` accepts and which
+raised a `TypeError` here.
 
 ### Fixed
 

@@ -128,7 +128,7 @@ def _table_fig(title, rows, colw, note=None, fs=8.2):
     y = 0.99 - 0.30 / h
     for i, r in enumerate(rows):
         x = 0.0
-        for cell, w in zip(r, colw):
+        for cell, w in zip(r, colw, strict=False):
             ax.text(x, y, str(cell), transform=ax.transAxes, fontsize=fs,
                     color=INK if i == 0 else INK2, va="top",
                     weight="bold" if i == 0 else "normal")
@@ -654,7 +654,7 @@ def s_soildepth(C):
     ax.set_yticks(range(len(depths))); ax.set_yticklabels(depths, fontsize=7.5, color=INK2)
     ax.invert_yaxis()
     ax.set_xlabel("median clay, %", color=INK2, fontsize=8)
-    return fig, dict(zip(depths, med))
+    return fig, dict(zip(depths, med, strict=True))
 
 
 @step(40, "Land, soil and water", "Any layer inside another layer's classes",
@@ -678,7 +678,8 @@ def s_precip(C):
     ann = pr.resample(time="YE").sum()
     yrs = [int(t.dt.year) for t in ann.time]
     vals = [float(v) for v in ann.values]
-    keep = [(y, v) for y, v in zip(yrs, vals) if C["clim_start"] <= y <= C["clim_end"]]
+    keep = [(y, v) for y, v in zip(yrs, vals, strict=True)
+            if C["clim_start"] <= y <= C["clim_end"]]
     yrs, vals = zip(*keep)
     fig, ax = _fig(4.8, 3.1); _chart(ax)
     ax.plot(yrs, vals, color=CAT[0], lw=2, marker="o", ms=4.5, zorder=3)
@@ -1138,8 +1139,6 @@ def run_everything(basin, lat, lon, out, *, max_pixels=4_000_000, sat_pixels=1_2
                    stream_km2=5.0, clim_start=2000, clim_end=2024, spi_start=1985,
                    skip=(), emit=print):
     """Run every registered step. Returns (records, context)."""
-    import basinkit as bk
-
     figs = os.path.join(out, "figures"); os.makedirs(figs, exist_ok=True)
     tabs = os.path.join(out, "tables"); os.makedirs(tabs, exist_ok=True)
 
@@ -1259,7 +1258,8 @@ def build_collage(records, path, title, subtitle, tiles, footer):
     figs = [r["figure"] for r in records if r["status"] == "ok" and r.get("figure")]
     if not figs:
         return None
-    S = (252, 252, 251); I = (11, 11, 11); I2 = (82, 81, 78); R = (207, 206, 201)
+    S = (252, 252, 251); INK_RGB = (11, 11, 11)
+    I2 = (82, 81, 78); R = (207, 206, 201)
 
     def font(sz, bold=False):
         for p in ("/usr/share/fonts/truetype/dejavu/DejaVuSans%s.ttf" % ("-Bold" if bold else ""),
@@ -1276,12 +1276,12 @@ def build_collage(records, path, title, subtitle, tiles, footer):
     cv = Image.new("RGB", (W, H), S); d = ImageDraw.Draw(cv)
 
     d.text((PAD, 30), subtitle.upper(), font=font(19, True), fill=I2)
-    d.text((PAD, 62), title, font=font(52, True), fill=I)
+    d.text((PAD, 62), title, font=font(52, True), fill=INK_RGB)
     d.text((PAD, 128), footer, font=font(19), fill=I2, spacing=7)
     x = PAD; ty = HEAD - 110
     for big, small in tiles:
         d.line([(x, ty), (x, ty + 74)], fill=R, width=2)
-        d.text((x + 14, ty + 2), str(big), font=font(31, True), fill=I)
+        d.text((x + 14, ty + 2), str(big), font=font(31, True), fill=INK_RGB)
         d.text((x + 14, ty + 46), small, font=font(16), fill=I2)
         x += (W - PAD * 2) // max(len(tiles), 1)
     d.line([(PAD, HEAD - 8), (W - PAD, HEAD - 8)], fill=R, width=2)

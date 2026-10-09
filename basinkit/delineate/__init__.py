@@ -92,6 +92,50 @@ def delineate(lat: float, lon: float, backend: str = "auto", **kwargs):
     return geom, prov
 
 
+def _check_dem_answer(lat: float, lon: float, prov: dict, *, verify=True) -> None:
+    """Attach the river-network check to a DEM answer ``auto`` is returning.
+
+    Three of ``auto``'s four exits hand back a DEM delineation, and two of
+    them did so with nothing recorded about it: a click on the surface of
+    Lake Victoria came back as 2.7 km2 with no ``outlet_check`` in the
+    provenance at all.
+
+    Only the river network is consulted here, never the magnitude check.
+    Below the refinement threshold the HydroBASINS reference *is* the whole
+    containing unit -- about 130 km2 at level 12 -- and a correct DEM
+    refinement of a small headwater is legitimately a small fraction of it.
+    Weighing one against the other would flag the very answers this branch
+    exists to produce.
+    """
+    import warnings as _warnings
+
+    if verify is False or "outlet_check" in prov:
+        return
+    area = float(prov.get("area_km2") or 0.0)
+    if area <= 0:
+        return
+
+    from ..verify import check_outlet
+
+    try:
+        check = check_outlet(lat, lon, area, allow_download=(verify == "download"))
+    except Exception as exc:                                    # noqa: BLE001
+        prov["outlet_check"] = {"ok": True, "reason": "check-failed",
+                                "detail": str(exc)[:200]}
+        return
+
+    prov["outlet_check"] = {
+        "ok": check.ok, "reason": check.reason, "ratio": check.ratio,
+        "nearest_ratio": check.nearest_ratio,
+        "largest_river_upland_km2": check.largest_upland_km2,
+    }
+    if check.reason in ("no-reach", "no-reach-large"):
+        prov.setdefault("note", check.message)
+    elif not check.ok:
+        prov["warning"] = check.message
+        _warnings.warn(check.message, stacklevel=3)
+
+
 def _weigh(lat: float, lon: float, prov: dict, *, verify=True) -> None:
     """Weigh a named backend's answer the way ``auto`` weighs its own.
 
@@ -241,7 +285,9 @@ def _auto(lat: float, lon: float, **kwargs):
     try:
         geom, prov = delineate_hydrobasins(lat, lon, **kwargs)
     except DelineationError:
-        return delineate_dem(lat, lon, **kwargs)
+        dem_geom, dem_prov = delineate_dem(lat, lon, **kwargs)
+        _check_dem_answer(lat, lon, dem_prov, verify=verify)
+        return dem_geom, dem_prov
 
     area = prov.get("area_km2", 1e9)
 
@@ -249,7 +295,9 @@ def _auto(lat: float, lon: float, **kwargs):
         # A single level-12 unit means the outlet is inside a headwater cell,
         # finer than the sub-basin grid resolves. Refine on the DEM.
         try:
-            return delineate_dem(lat, lon, **kwargs)
+            dem_geom, dem_prov = delineate_dem(lat, lon, **kwargs)
+            _check_dem_answer(lat, lon, dem_prov, verify=verify)
+            return dem_geom, dem_prov
         except MissingDependency as exc:
             # Below this threshold the refinement is the whole reason auto
             # exists, and the polygon handed back instead can be half as large
@@ -305,6 +353,15 @@ def _auto(lat: float, lon: float, **kwargs):
     if check.ok:
         if check.reason == "no-reach":
             prov["note"] = check.message
+        elif check.reason == "no-reach-large":
+            # Nothing is mapped within the search radius and the polygon is
+            # large, so the two cases cannot be separated here and the answer
+            # stands -- but it stands on a point that may not be on a river at
+            # all, and that belongs in the warning rather than in a note
+            # nobody reads. A click on Connaught Place in Delhi comes back as
+            # 36,944 km2 of the Yamuna this way.
+            prov["warning"] = check.message
+            _warnings.warn(check.message, stacklevel=2)
         return geom, prov
 
     # Only the ratio check offers a corroborating figure to test the DEM

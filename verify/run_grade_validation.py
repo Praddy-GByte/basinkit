@@ -13,7 +13,7 @@ chains, so their disagreement is not a shared artefact.
 Sample drawn by seed 20260918 from the blind validation set, before any result
 was seen.
 """
-import csv, json, os, sys, time, traceback, warnings
+import csv, os, time, warnings
 os.environ.setdefault("TQDM_DISABLE", "1")
 warnings.filterwarnings("ignore")
 
@@ -28,7 +28,25 @@ BLIND_SET = "bench/combined.csv"
 
 SEED = 20260918
 TARGET = 160
-OUT = OUT
+#: Where the per-gauge rows are appended. The script resumes from this
+#: file, so a run interrupted after three hundred gauges does not start
+#: again from the first. This line read "OUT = OUT", which raised
+#: NameError before anything else happened -- the path had been taken
+#: out of the file and nothing put back, so neither of these harnesses
+#: could run at all.
+OUT = os.environ.get(
+    "BASINKIT_VERIFY_OUT",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "grade_validation.csv"))
+
+if not os.path.exists(BLIND_SET):
+    raise SystemExit(
+        f"{BLIND_SET} is not here. The blind validation set is not shipped in "
+        "the repository -- it is 2,550 gauge rows with agency-published "
+        "catchment areas, and the licences differ per agency. docs/"
+        "verification.md says how it was assembled. Put it at that path, or "
+        "point this script at your own file with the same columns "
+        "(reported_area_km2, abs_error_pct, lat, lon)."
+    )
 
 rows = []
 for r in csv.DictReader(open(BLIND_SET)):

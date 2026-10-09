@@ -82,11 +82,15 @@ changelog=0.9.0
       QGIS runs on a system Python the distribution marks as externally
       managed, the command now carries --break-system-packages, without which
       it failed outright.
-    - Basin report no longer takes QGIS down with it. It read elevation at the
-      100 Mpx default, which on a large basin reached about 5.9 GB and was
-      killed by the operating system -- and in QGIS that kills QGIS. An A4
-      figure is about 2,000 pixels across, so it now reads 10 Mpx and the
-      cover states the resolution it used.
+    - Basin report no longer takes QGIS down with it. It read elevation at
+      the 100 Mpx default, which on a large basin reached about 5.9 GB and was
+      killed by the operating system -- and inside QGIS that kills QGIS. The
+      grid is now budgeted to 4 Mpx at the point every caller arrives, which
+      on a 54,000 km2 basin is about 186 m and on a 235 km2 one is still its
+      native 31 m, and the rasters drawn on the pages are decimated to 1,600
+      pixels because an A4 page at 300 dpi cannot show more. The cover states
+      the resolution used. Measured on the large basin: 1.33 GB and eighteen
+      seconds, against a process that did not finish.
     - Delineate river basin declines a window it cannot route, naming the
       megapixels, the memory estimate and the backend to use instead, rather
       than growing the window until the process is killed with nothing

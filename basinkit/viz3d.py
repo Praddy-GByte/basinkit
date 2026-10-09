@@ -518,6 +518,7 @@ def export_3d(
     high: float | None = None,
     gamma: float = 0.58,
     lift: float = 0.07,
+    progress: bool = False,
 ) -> Path:
     """Write ``basin`` to a self-contained interactive 3D page.
 
@@ -547,7 +548,11 @@ def export_3d(
     # The mesh and the texture are a few megapixels at most, so read no more
     # than that: a full-budget read of a continental basin exhausts memory.
     budget = max(4 * int(texture_width) ** 2, 4 * int(mesh_width) ** 2)
-    dem = basin.dem(max_pixels=budget, progress=False)
+    # progress= is accepted here because every other method on Basin accepts
+    # it, and a caller who passes it to this one got a TypeError naming a
+    # keyword they had every reason to expect. It is off by default, as it
+    # was, so nothing changes for anyone who did not pass it.
+    dem = basin.dem(max_pixels=budget, progress=progress)
     heights, meta = _heights(dem, mesh_width)
 
     tex = ""
@@ -585,7 +590,8 @@ def export_3d(
         raise ValueError(
             f"texture must be 'sentinel2' or None, not {texture!r}")
 
-    lines = _rivers(basin.rivers(min_order=min_order), basin.bounds) if rivers else []
+    lines = (_rivers(basin.rivers(min_order=min_order, progress=progress),
+                     basin.bounds) if rivers else [])
 
     meta.update({"bounds": list(basin.bounds), "area": round(basin.area_km2, 1)})
     if texture_failed:

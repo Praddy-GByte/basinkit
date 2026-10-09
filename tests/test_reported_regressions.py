@@ -117,21 +117,117 @@ def test_the_reported_basin_still_matches_its_published_area():
 
 
 @pytest.mark.network
-def test_a_truncated_delineation_is_flagged_not_returned_quietly():
-    """TDX-Hydro snaps to the nearest recorded point and can land on a stub.
+def test_tdx_takes_the_catchment_that_contains_the_outlet():
+    """This test used to assert the truncated answer, and has been rewritten.
 
-    At this outlet it returns about half the catchment. The number is still
-    wrong -- the fix for that needs reach geometry -- but it no longer passes
-    the outlet check in silence.
+    When it was written, TDX-Hydro took the reach whose recorded point was
+    nearest, which at this outlet is a stub: it returned 122 km2 of a 228 km2
+    basin, and the test pinned the fact that the outlet check at least said
+    so. The backend now takes the unit catchment that *contains* the outlet,
+    so the answer is about 241 km2 and the outlet check passes -- which made
+    the old assertion fail for the right reason. What is worth pinning now is
+    the agreement itself.
+
+    Note what this episode cost: that stale test was the only cover the
+    under-capture branch had, and it is skipped whenever HydroRIVERS is not
+    cached, which is most machines. The branch is now unit-tested offline
+    below.
     """
     import basinkit as bk
     from basinkit.verify import check_outlet
 
     basin = bk.Basin.from_point(-19.88038, -43.79371, backend="tdx")
+    assert 200.0 < basin.area_km2 < 280.0, basin.area_km2
+    assert basin.provenance["outlet_reach_chosen_by"] == "containing catchment"
+
     check = check_outlet(-19.88038, -43.79371, basin.area_km2,
                          allow_download=False)
-    if check.reason == "not-cached":
+    if check.reason in ("not-cached", "no-coverage"):
         pytest.skip("HydroRIVERS is not downloaded, so nothing was checked.")
+    assert check.ok, check.message
+    assert check.nearest_ratio is not None
+    assert 0.8 < check.nearest_ratio < 1.25, check.nearest_ratio
+
+
+# ------------------------- the outlet-check branches, without a 100 MB download
+def _stub_river_network(monkeypatch, reaches, region="sa"):
+    """Put a handful of reaches where check_outlet will read them.
+
+    ``reaches`` is ``(upland_km2, lon, lat)`` per reach. Everything else in
+    the function -- the distance projection, the nearest and largest picks,
+    the branch conditions -- runs for real against them.
+    """
+    import geopandas as gpd
+    from shapely.geometry import Point
+
+    monkeypatch.setattr("basinkit.delineate.hydrobasins.candidate_regions",
+                        lambda lat, lon: [region])
+    monkeypatch.setattr("basinkit.sources.vectors.RIVER_REGIONS", [region],
+                        raising=False)
+    monkeypatch.setattr("basinkit.sources.vectors._unpack",
+                        lambda *a, **k: "not read; read_file is stubbed")
+    frame = gpd.GeoDataFrame(
+        {"UPLAND_SKM": [float(r[0]) for r in reaches]},
+        geometry=[Point(r[1], r[2]) for r in reaches],
+        crs="EPSG:4326",
+    )
+    monkeypatch.setattr("geopandas.read_file", lambda *a, **k: frame)
+
+
+def test_a_basin_at_half_of_its_own_river_is_reported(monkeypatch):
+    """The failure the TDX stub produced: 122 km2 where 247 drains in."""
+    from basinkit.verify import check_outlet
+
+    lat, lon = -19.88038, -43.79371
+    _stub_river_network(monkeypatch, [(247.3, lon, lat)])
+
+    check = check_outlet(lat, lon, 122.4, allow_download=True)
     assert not check.ok
     assert check.reason == "under-captured"
     assert check.nearest_ratio < 0.5
+    assert check.suggested_area_km2 == 247.3
+    assert "missing" in check.message
+
+
+def test_an_outlet_between_two_channels_is_called_ambiguous(monkeypatch):
+    """A basin nine times the stream it sits on used to read as consistent.
+
+    The ratio is taken against the largest river in the search box, and at a
+    confluence that is the river the outlet is *not* on.
+    """
+    from basinkit.verify import check_outlet
+
+    lat, lon = -19.88038, -43.79371
+    _stub_river_network(monkeypatch, [
+        (247.3, lon, lat),                    # the stream at the point
+        (2_269.86, lon + 0.004, lat),         # the trunk, a few hundred metres off
+    ])
+
+    check = check_outlet(lat, lon, 2_269.0, allow_download=True)
+    assert not check.ok
+    assert check.reason == "confluence-ambiguous"
+    assert "247.3" in check.message and "2,269.9" in check.message
+
+
+def test_a_basin_that_matches_its_river_passes(monkeypatch):
+    from basinkit.verify import check_outlet
+
+    lat, lon = -19.88038, -43.79371
+    _stub_river_network(monkeypatch, [(241.4, lon, lat)])
+
+    check = check_outlet(lat, lon, 241.0, allow_download=True)
+    assert check.ok
+    assert check.reason == "consistent"
+
+
+def test_a_basin_many_times_its_river_is_still_reported(monkeypatch):
+    """Over-capture, the direction that was already caught. Kept honest."""
+    from basinkit.verify import check_outlet
+
+    lat, lon = -19.88038, -43.79371
+    _stub_river_network(monkeypatch, [(40.0, lon + 0.012, lat)])
+
+    check = check_outlet(lat, lon, 383.0, allow_download=True)
+    assert not check.ok
+    assert check.reason == "over-captured"
+    assert check.suggested_area_km2 == 40.0

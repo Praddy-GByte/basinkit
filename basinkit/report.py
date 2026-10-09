@@ -23,6 +23,7 @@ they are replaced by a page saying so rather than quietly omitted.
 from __future__ import annotations
 
 import datetime as _dt
+import warnings
 from typing import Any
 
 from .exceptions import MissingDependency
@@ -105,10 +106,36 @@ def _matplotlib():
         raise MissingDependency("matplotlib", "viz") from exc
 
 
+#: Longest side, in pixels, of a raster actually drawn into one of these
+#: figures. An A4 page at 300 dpi is about 2,480 pixels across and a map panel
+#: occupies rather less than the page, so anything beyond this is detail the
+#: PDF cannot show and the renderer has to carry anyway. It carried it badly:
+#: on the Koshi, with the grid already budgeted down to 7.4 megapixels, the
+#: cover page alone took the process past three gigabytes and the kernel
+#: killed it before page one was written. The numbers in the report are still
+#: computed on the full budgeted grid -- only the drawing is decimated.
+DRAW_MAX_PX = 1_600
+
+
+def _for_drawing(values):
+    """Decimate a raster to what a page can show, by striding.
+
+    Striding rather than averaging is deliberate: these panels are drawn with
+    ``interpolation="nearest"`` against a fixed extent, so a stride keeps
+    every value a real measured value instead of inventing blended ones, and
+    the panel is positioned by its extent rather than by its pixel count.
+    """
+    step = max(1, int(max(values.shape) // DRAW_MAX_PX))
+    return values if step == 1 else values[::step, ::step]
+
+
 def _array(layer):
     import numpy as np
 
-    values = np.asarray(getattr(layer, "values", layer), dtype="float64")
+    # float32, not float64. Every page converts the grid again, and a second
+    # copy at twice the width buys nothing: the source DEM is float32 and no
+    # figure here resolves a difference float32 cannot hold.
+    values = np.asarray(getattr(layer, "values", layer), dtype="float32")
     if values.ndim == 3 and values.shape[0] == 1:
         values = values[0]
     return values
@@ -123,6 +150,11 @@ def _draw_raster(ax, dem, values, *, cmap, title, units, geometry=None,
                  vmin=None, vmax=None, percentiles=(2, 98), discrete=None):
     """One map panel, scaled off the percentiles so outliers do not flatten it."""
     import numpy as np
+
+    # Decimated first, so the percentiles that set the colour scale are taken
+    # from the values that are drawn. Scaling on data the page does not show
+    # would put the legend slightly out of step with the picture.
+    values = _for_drawing(values)
 
     if vmin is None or vmax is None:
         finite = values[np.isfinite(values)]
@@ -748,16 +780,60 @@ def _elevation_source(elevation) -> str:
     return f"{name}, read at {float(res):.0f} m" if res not in (None, "") else name
 
 
-#: Pixel budget for the elevation grid the report is drawn from. An A4 figure
-#: is about 2,000 pixels across at 300 dpi, so ten megapixels is already more
-#: detail than any page here can show. The default elsewhere is 100 Mpx, and
-#: on a large basin that is what killed this function: the Koshi quick-start
-#: basin from the README reached about 5.9 GB and the process was killed, in
-#: Python and inside QGIS, where it takes QGIS down with it. Every figure and
-#: every terrain statistic in the report is computed from this grid, and the
-#: cover states the resolution it was read at, so the coarsening is on the
-#: page rather than hidden. Pass max_pixels= for a finer one.
-REPORT_MAX_PIXELS = 10_000_000
+#: Peak resident memory the report needs per pixel of the elevation grid, in
+#: bytes, over a fixed overhead of about 0.4 GB. Measured here on the Koshi,
+#: the quick-start basin from the README, by running the whole eight-page
+#: report at three budgets and reading the peak resident set of the process:
+#:
+#:     1.85 Mpx   0.92 GB
+#:     4.74 Mpx   1.69 GB
+#:     7.43 Mpx   2.39 GB
+#:
+#: which is 266 bytes per pixel at the margin and fits all three to within
+#: 0.03 GB. It is far more than the grid itself because the suitability
+#: assessment, the landform classification and the slope page each derive
+#: arrays of their own from it.
+BYTES_PER_PIXEL = 270
+FIXED_OVERHEAD_GB = 0.4
+
+#: Pixel budget for the elevation grid the report is built from.
+#:
+#: The default elsewhere in the package is 100 Mpx, and on a large basin that
+#: is what killed this function: the Koshi reached about 5.9 GB and was killed
+#: by the kernel, in Python and inside QGIS, where it takes QGIS down with it.
+#: Four megapixels puts the Koshi at about 155 m and the whole report at about
+#: 1.7 GB, which fits a small machine, and on the basins people actually run
+#: this on it does not bind at all -- a 235 km2 catchment comes back at its
+#: native 31 m.
+#:
+#: It is a fixed number rather than one fitted to the machine on purpose. A
+#: budget that moved with available memory would give the same basin a
+#: different grid on a different computer, and the suitability grade and the
+#: drainage density are both computed from this grid. Pass max_pixels= for a
+#: finer one; the cover states the resolution the budget worked out to, so
+#: whatever is chosen is on the page rather than hidden.
+REPORT_MAX_PIXELS = 4_000_000
+
+
+def estimated_peak_gb(n_pixels: int) -> float:
+    """What the report will need, in gigabytes, for a grid of this size."""
+    return FIXED_OVERHEAD_GB + n_pixels * BYTES_PER_PIXEL / 1e9
+
+
+def _available_gb() -> float | None:
+    """Memory the machine says it can still hand out, or ``None``.
+
+    Used only to warn. Nothing here changes behaviour on the strength of it,
+    because the figure is not reliable everywhere and a report that quietly
+    came out coarser on a busy machine would be worse than one that says it
+    is about to be expensive.
+    """
+    import os
+
+    try:
+        return (os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_AVPHYS_PAGES")) / 1e9
+    except (ValueError, OSError, AttributeError):
+        return None
 
 
 def report(basin, path, *, title: str | None = None, dem=None, rivers=None,
@@ -790,6 +866,26 @@ def report(basin, path, *, title: str | None = None, dem=None, rivers=None,
     from .terrain import drainage_density
 
     elevation = basin.dem(max_pixels=max_pixels) if dem is None else dem
+
+    # Said before the work, not discovered during it. The figure is an
+    # estimate from a measurement, so this warns and carries on rather than
+    # refusing: a report is cheap to retry at a smaller budget and the caller
+    # may know more about the machine than this does.
+    pixels = int(getattr(elevation, "size", 0) or 0)
+    if pixels:
+        want = estimated_peak_gb(pixels)
+        have = _available_gb()
+        if have is not None and want > have:
+            warnings.warn(
+                f"This report is built from a {pixels / 1e6:.1f} megapixel "
+                f"grid, which needs about {want:.1f} GB -- more than the "
+                f"{have:.1f} GB this machine reports as available. Every page "
+                "derives arrays of its own from the grid, so the cost is "
+                f"roughly {BYTES_PER_PIXEL} bytes per pixel and not the grid "
+                "alone. If the process is killed, pass a smaller max_pixels= "
+                f"(the default is {REPORT_MAX_PIXELS / 1e6:.0f} Mpx) or "
+                "report a sub-basin.",
+                stacklevel=2)
     lat, lon = basin.centroid
     title = title or f"Catchment at {lat:.4f}, {lon:.4f}"
 

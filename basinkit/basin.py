@@ -453,12 +453,26 @@ class Basin:
         hypsometry, slope and aspect, the shape of the ground, the channel
         network and Horton's laws, the morphometric table with symbols and
         references, what the answer rests on, and a methods page.
-        """
-        from .report import report
 
-        return report(self, path, title=title,
-                      dem=self.dem(**kwargs) if dem is None else dem,
-                      rivers=rivers)
+        ``max_pixels=`` sets the pixel budget for the elevation grid the
+        report is built from; the cover states the resolution it worked out
+        to. The default is :data:`basinkit.report.REPORT_MAX_PIXELS` and not
+        the package-wide one, because every page derives arrays of its own
+        from this grid.
+        """
+        from .report import REPORT_MAX_PIXELS, report
+
+        # The budget has to be applied here, because this method fetched the
+        # grid itself and handed report() a finished one -- so report()'s own
+        # max_pixels was never reached, and every caller that goes through
+        # this method, which is all of them including the QGIS and ArcGIS
+        # algorithms, still read at the package-wide 100 Mpx default. That is
+        # what reached 6.1 GB on the Koshi and was killed by the kernel. The
+        # earlier fix was real and was in the wrong function.
+        if dem is None:
+            kwargs.setdefault("max_pixels", REPORT_MAX_PIXELS)
+            dem = self.dem(**kwargs)
+        return report(self, path, title=title, dem=dem, rivers=rivers)
 
     def data_quality(self, **kwargs):
         """A quality indicator for every layer, each against something independent.

@@ -7,7 +7,7 @@ seen, then works through the regions holding the most of them until at least
 selection one: a region's catchment file is hundreds of megabytes and is read
 once.
 """
-import csv, os, sys, time, warnings
+import csv, os, time, warnings
 os.environ.setdefault("TQDM_DISABLE", "1")
 warnings.filterwarnings("ignore")
 
@@ -27,7 +27,25 @@ SEED = 20260918
 BAND = (100.0, 500.0)
 TARGET = 320
 PER_VPU = 45
-OUT = OUT
+#: Where the per-gauge rows are appended. The script resumes from this
+#: file, so a run interrupted after three hundred gauges does not start
+#: again from the first. This line read "OUT = OUT", which raised
+#: NameError before anything else happened -- the path had been taken
+#: out of the file and nothing put back, so neither of these harnesses
+#: could run at all.
+OUT = os.environ.get(
+    "BASINKIT_VERIFY_OUT",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "tdx_wide.csv"))
+
+if not os.path.exists(GSIM):
+    raise SystemExit(
+        f"{GSIM} is not here. GSIM's catchment characteristics table is not "
+        "shipped: it is redistributed under its own terms from "
+        "doi.org/10.1594/PANGAEA.887477. Download it and put it at that path, "
+        "or set the GSIM constant in this file to where you keep it. Use "
+        "area.meta, not the area column in GSIM_metadata.csv, which is in "
+        "square miles for 2,395 USGS stations."
+    )
 
 gauges = []
 with open(GSIM) as fh:

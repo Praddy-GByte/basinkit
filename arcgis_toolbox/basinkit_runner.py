@@ -506,17 +506,23 @@ def build_parser():
     p = argparse.ArgumentParser(prog="basinkit_runner")
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    def point(sp, need_out=True):
+    def point(sp, need_out=True, backend="auto"):
         sp.add_argument("--lat", type=float, required=True)
         sp.add_argument("--lon", type=float, required=True)
-        sp.add_argument("--backend", default="auto",
+        sp.add_argument("--backend", default=backend,
                         choices=["auto", "hydrobasins", "dem", "api", "tdx"])
         if need_out:
             sp.add_argument("--out", required=True)
         return sp
 
     point(sub.add_parser("delineate")).set_defaults(func=cmd_delineate)
-    point(sub.add_parser("subbasins")).set_defaults(func=cmd_subbasins)
+    # Sub-catchments and the Arc Hydro export both read the units the
+    # HydroBASINS traversal walked, and 'auto' refines anything below
+    # 2,000 km2 onto the DEM -- which has no units to hand back. These two
+    # defaulted to 'auto' and so failed on exactly the small catchments
+    # people reach for them with, after paying for the delineation.
+    point(sub.add_parser("subbasins"),
+          backend="hydrobasins").set_defaults(func=cmd_subbasins)
 
     sp = point(sub.add_parser("rivers"))
     sp.add_argument("--min-order", type=int, default=0)
@@ -581,7 +587,7 @@ def build_parser():
     sp.add_argument("--smooth-m", type=float, default=500.0)
     sp.set_defaults(func=cmd_landscape)
 
-    sp = point(sub.add_parser("archydro"))
+    sp = point(sub.add_parser("archydro"), backend="hydrobasins")
     sp.add_argument("--min-order", type=int, default=0)
     sp.set_defaults(func=cmd_archydro)
 

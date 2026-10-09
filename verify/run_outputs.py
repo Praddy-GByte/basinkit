@@ -74,7 +74,6 @@ def geodesic_area_km2(geom) -> float:
 def clipping_is_real(basin, arr) -> tuple[bool, str]:
     """Compare the raster's own nodata pattern against the polygon, rasterised
     here rather than by the package."""
-    import geopandas as gpd
     from rasterio.features import rasterize
 
     da = arr.squeeze()
