@@ -1,0 +1,1985 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Point to river basin to every open Earth observation layer">
+      
+      
+      
+        <link rel="canonical" href="https://praddy-gbyte.github.io/basinkit/landscape/">
+      
+      
+        <link rel="prev" href="../delineation/">
+      
+      
+        <link rel="next" href="../catchment-response/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/logo-32.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Landscape form - basinkit</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../assets/byline.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#landscape-form-chi-channel-steepness-and-knickpoints" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+            
+  <div class="bk-byline">
+    <span class="bk-byline__name">Created by Dr. Pradeepika (Praddy) Kaushik</span>
+    <span class="bk-byline__role">Geospatial and Data Visualization Expert &middot; GeoAI &middot; EO Expert</span>
+    <span class="bk-byline__links">
+      <a href="https://github.com/Praddy-GByte" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/dr-pradeepika-kaushik/" rel="noopener">LinkedIn</a>
+      <a href="https://doi.org/10.5281/zenodo.22181933" rel="noopener">Zenodo DOI</a>
+    </span>
+  </div>
+
+          </div>
+          
+        </aside>
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="basinkit" class="md-header__button md-logo" aria-label="basinkit" data-md-component="logo">
+      
+  <img src="../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            basinkit
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Landscape form
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Praddy-GByte/basinkit" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="basinkit" class="md-nav__button md-logo" aria-label="basinkit" data-md-component="logo">
+      
+  <img src="../assets/logo.svg" alt="logo">
+
+    </a>
+    basinkit
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Praddy-GByte/basinkit" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../why/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Why basinkit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../arcgis-pro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ArcGIS Pro
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../delineation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delineation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Landscape form
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Landscape form
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#every-number-arrives-with-what-it-is-worth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Every number arrives with what it is worth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cross-check-against-topotoolbox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-check against TopoToolbox
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cross-check against TopoToolbox">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#one-thing-has-to-be-settled-first-what-the-two-do-with-a-bad-cell" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One thing has to be settled first: what the two do with a bad cell
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#k_sn-agrees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        k_sn — agrees
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agrees-in-the-bulk-diverges-on-a-few-percent-of-cells" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        χ — agrees in the bulk, diverges on a few percent of cells
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#networks-are-not-identical-and-that-is-expected" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Networks are not identical, and that is expected
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#checked-against-published-ranges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checked against published ranges
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#knickpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knickpoints
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-reported-alongside-and-why" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is reported alongside, and why
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-small-basin-where-everything-is-already-published" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A small basin where everything is already published
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="A small basin where everything is already published">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-the-basin-area-against-the-usgs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. The basin area, against the USGS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-a-knickpoint-the-tool-was-not-told-about" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. A knickpoint the tool was not told about
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-the-channel-numbers-against-topotoolbox-on-the-identical-grid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. The channel numbers, against TopoToolbox on the identical grid
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#something-to-compare-your-number-against" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Something to compare your number against
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-does-not-tell-you" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this does not tell you
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limits
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#does-the-answer-survive-a-change-of-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Does the answer survive a change of resolution?
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../catchment-response/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catchment response
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../conditioning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Forcing a known channel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model-coupling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Handing off to a model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../related-work/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Related work
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../catalogue/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data catalogue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-quality/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data quality
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_14" >
+        
+          
+          <label class="md-nav__link" for="__nav_14" id="__nav_14_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notebooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_14">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Notebooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../notebooks/01_quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    basinkit quickstartFrom an outlet coordinate to a fully characterised river basin, with no accountanywhere in the chain.We'll use the Sapta Koshi at Chatara (26.87 N, 87.15 E) -- a Himalayan basinthat drains Everest and empties onto the Gangetic plain. It is a good test casebecause its area is independently published, so we can check the answer.
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#every-number-arrives-with-what-it-is-worth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Every number arrives with what it is worth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cross-check-against-topotoolbox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-check against TopoToolbox
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cross-check against TopoToolbox">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#one-thing-has-to-be-settled-first-what-the-two-do-with-a-bad-cell" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One thing has to be settled first: what the two do with a bad cell
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#k_sn-agrees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        k_sn — agrees
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agrees-in-the-bulk-diverges-on-a-few-percent-of-cells" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        χ — agrees in the bulk, diverges on a few percent of cells
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#networks-are-not-identical-and-that-is-expected" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Networks are not identical, and that is expected
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#checked-against-published-ranges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checked against published ranges
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#knickpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knickpoints
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-reported-alongside-and-why" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is reported alongside, and why
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-small-basin-where-everything-is-already-published" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A small basin where everything is already published
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="A small basin where everything is already published">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-the-basin-area-against-the-usgs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. The basin area, against the USGS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-a-knickpoint-the-tool-was-not-told-about" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. A knickpoint the tool was not told about
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-the-channel-numbers-against-topotoolbox-on-the-identical-grid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. The channel numbers, against TopoToolbox on the identical grid
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#something-to-compare-your-number-against" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Something to compare your number against
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-does-not-tell-you" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this does not tell you
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limits
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#does-the-answer-survive-a-change-of-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Does the answer survive a change of resolution?
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="landscape-form-chi-channel-steepness-and-knickpoints">Landscape form: chi, channel steepness and knickpoints<a class="headerlink" href="#landscape-form-chi-channel-steepness-and-knickpoints" title="Permanent link">&para;</a></h1>
+<p>Shape indices say what a basin looks like. They do not say whether it is still
+changing. This does.</p>
+<div class="highlight"><pre><span></span><code>basinkit<span class="w"> </span>landscape<span class="w"> </span>--lat<span class="w"> </span><span class="m">45</span>.11188<span class="w"> </span>--lon<span class="w"> </span>-110.79438<span class="w"> </span>--out<span class="w"> </span>yellowstone
+</code></pre></div>
+<p>In ArcGIS Pro: <strong>BasinKit -&gt; 5 Morphometry and Drainage Network -&gt; Landscape
+Form (Chi and Channel Steepness)</strong>. In Python:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">basinkit</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bk</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">basinkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">landscape</span>
+
+<span class="n">basin</span> <span class="o">=</span> <span class="n">bk</span><span class="o">.</span><span class="n">Basin</span><span class="o">.</span><span class="n">from_point</span><span class="p">(</span><span class="mf">45.11188</span><span class="p">,</span> <span class="o">-</span><span class="mf">110.79438</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">landscape</span><span class="o">.</span><span class="n">analyse</span><span class="p">(</span><span class="n">basin</span><span class="o">.</span><span class="n">dem</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">"summary"</span><span class="p">][</span><span class="s2">"ksn_median"</span><span class="p">])</span>
+</code></pre></div>
+<p>Outputs are <code>chi.tif</code>, <code>ksn.tif</code>, <code>trunk_profile.csv</code>, a knickpoint table with
+each step's height, and <code>landscape_form.png</code> — the trunk in χ–elevation space with
+every knickpoint marked, the long profile, and the slope–area relation with the
+fitted concavity drawn on it so the fit can be judged by eye.</p>
+<h3 id="every-number-arrives-with-what-it-is-worth">Every number arrives with what it is worth<a class="headerlink" href="#every-number-arrives-with-what-it-is-worth" title="Permanent link">&para;</a></h3>
+<p>The result carries a <code>confidence</code> block: one sentence per quantity, attached to
+that quantity, stating what that value is worth — the same role a stated tolerance
+plays beside an instrument reading.</p>
+<div class="highlight"><pre><span></span><code>"ksn":  "Measured on the 67% of channel cells that have a downstream gradient.
+         Cross-checked cell by cell against TopoToolbox: within 6% at every
+         quantile, and its median moves under 2% across a fourfold change in
+         cell size. Quotable as it stands."
+
+"fitted_concavity":
+        "Fitted with R2 = 0.68, which is weak. ... theta = 0.462 is a
+         measurement rather than a result; quote it with its R2 or not at all.
+         k_sn is unaffected — it does not use the fitted theta."
+</code></pre></div>
+<p>So a weak θ does not contaminate k_sn, and the output says which is which
+rather than leaving the reader to guess.</p>
+<p>Separately, a run may print a <strong>limit</strong>: the short list of conditions under which
+a value should not be used at all — a concavity fit below R² 0.5, a network more
+than half flat, or fewer than 500 channel cells. <strong>An ordinary run prints none</strong>,
+and a test enforces that. A caution raised on every run carries no information.</p>
+<h2 id="method">Method<a class="headerlink" href="#method" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>quantity</th>
+<th>definition</th>
+<th>reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>χ</td>
+<td>∫ from the outlet to x of (A₀/A)^θ dx</td>
+<td>Perron &amp; Royden 2013</td>
+</tr>
+<tr>
+<td>k_sn</td>
+<td>S · A^θref</td>
+<td>Wobus et al. 2006</td>
+</tr>
+<tr>
+<td>θ</td>
+<td>fitted from S = k_s A^−θ on log-area bins</td>
+<td>Flint 1974</td>
+</tr>
+</tbody>
+</table>
+<p>θref is fixed at 0.45 and A₀ at 1 km², so k_sn is comparable between basins and
+χ carries units of length. Both are recorded with every result, because changing
+either changes every number.</p>
+<p>Two channel slopes are computed, because they answer different questions:</p>
+<ul>
+<li><strong>k_sn uses the raw cell-to-cell drop</strong> along the flow path, negatives clamped
+  at zero. This is the estimate that matches the reference implementation and
+  published values.</li>
+<li><strong>the concavity fit uses elevation averaged over ~500 m</strong> along the flow
+  network. Cell-to-cell noise biases a fitted θ low; smoothing fixes that.</li>
+</ul>
+<p>Smoothing the elevation before computing k_sn would be wrong, and the
+cross-check below is what showed it: it damps genuine steep reaches and
+understates the k_sn 99th percentile by about a third.</p>
+<p>Flow routing is pyflwdir on the Copernicus DEM that basinkit already fetches.
+The channel network is every cell draining more than 1 km².</p>
+<h2 id="run">Run<a class="headerlink" href="#run" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Yellowstone above Corwin Springs</th>
+<th>Alaknanda at Devprayag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>setting</td>
+<td>Rocky Mountains, long stable</td>
+<td>Himalaya, actively uplifting</td>
+</tr>
+<tr>
+<td>cell size</td>
+<td>113.7 m</td>
+<td>122.0 m</td>
+</tr>
+<tr>
+<td>channel cells</td>
+<td>51,958</td>
+<td>47,671</td>
+</tr>
+<tr>
+<td>relief</td>
+<td>2,138 m</td>
+<td>6,585 m</td>
+</tr>
+<tr>
+<td>trunk length</td>
+<td>217.7 km</td>
+<td>250.9 km</td>
+</tr>
+<tr>
+<td>fitted θ (smoothed, R²)</td>
+<td>0.431 (0.82)</td>
+<td>0.377 (0.92)</td>
+</tr>
+<tr>
+<td>fitted θ (raw cells)</td>
+<td>0.264</td>
+<td>0.230</td>
+</tr>
+<tr>
+<td><strong>k_sn median</strong></td>
+<td><strong>59.8</strong></td>
+<td><strong>167.2</strong></td>
+</tr>
+<tr>
+<td>k_sn 90th percentile</td>
+<td>174.7</td>
+<td>446.8</td>
+</tr>
+<tr>
+<td>k_sn 99th percentile</td>
+<td>665.6</td>
+<td>1412.7</td>
+</tr>
+<tr>
+<td><strong>knickpoints on the trunk</strong></td>
+<td><strong>2</strong></td>
+<td><strong>10</strong></td>
+</tr>
+<tr>
+<td>zero-gradient channel cells</td>
+<td>21.6%</td>
+<td>7.0%</td>
+</tr>
+</tbody>
+</table>
+<p>k_sn counts only cells with a positive channel gradient.</p>
+<h2 id="cross-check-against-topotoolbox">Cross-check against TopoToolbox<a class="headerlink" href="#cross-check-against-topotoolbox" title="Permanent link">&para;</a></h2>
+<p>The check that settles whether the implementation is right. TopoToolbox 0.0.12
+(the Python port) and basinkit were run on the <strong>same</strong> DEM, reprojected to
+EPSG:32612 at 80 m, with the same 1 km² channel threshold and the same
+θref = 0.45. Comparison is made <strong>cell by cell on the cells both networks
+contain</strong>, not on two separate distributions, so a difference cannot be hidden
+behind a different network.</p>
+<h3 id="one-thing-has-to-be-settled-first-what-the-two-do-with-a-bad-cell">One thing has to be settled first: what the two do with a bad cell<a class="headerlink" href="#one-thing-has-to-be-settled-first-what-the-two-do-with-a-bad-cell" title="Permanent link">&para;</a></h3>
+<p>TopoToolbox's channel gradient is <strong>not clamped</strong>. Where a DEM rises downstream —
+a routing artifact, not a channel — it returns a negative gradient, and therefore
+a negative k_sn. basinkit clamps those to zero and reports the fraction instead.
+Neither choice is wrong, but they are different, so a median taken over <em>all</em>
+channel cells is comparing a distribution containing negatives against one
+containing zeros. On these two basins:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Yellowstone</th>
+<th>Fall Creek</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TopoToolbox cells with a negative gradient</td>
+<td>9.4%</td>
+<td>21.7%</td>
+</tr>
+<tr>
+<td>basinkit cells clamped to zero</td>
+<td>13.0%</td>
+<td>25.3%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Every k_sn comparison on this page is therefore made over the cells where both
+implementations return a positive value.</strong> That is the only population on which
+the two are measuring the same thing. The counts are given so the choice is
+visible.</p>
+<h3 id="k_sn-agrees">k_sn — agrees<a class="headerlink" href="#k_sn-agrees" title="Permanent link">&para;</a></h3>
+<p>Yellowstone above Corwin Springs, 27,418 cells positive in both:</p>
+<table>
+<thead>
+<tr>
+<th>statistic</th>
+<th>TopoToolbox</th>
+<th>basinkit</th>
+<th>apart</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>median</td>
+<td>59.2</td>
+<td>57.0</td>
+<td><strong>3.7%</strong></td>
+</tr>
+<tr>
+<td>75th percentile</td>
+<td>101.1</td>
+<td>98.1</td>
+<td>3.0%</td>
+</tr>
+<tr>
+<td>90th percentile</td>
+<td>165.5</td>
+<td>162.0</td>
+<td>2.1%</td>
+</tr>
+<tr>
+<td>99th percentile</td>
+<td>611.6</td>
+<td>611.6</td>
+<td><strong>0.0%</strong></td>
+</tr>
+<tr>
+<td>correlation, cell by cell</td>
+<td></td>
+<td></td>
+<td><strong>r = 0.973</strong></td>
+</tr>
+</tbody>
+</table>
+<p>TopoToolbox's <code>StreamObject.ksn</code> was called with <code>impose=False</code>, which differences
+raw cells as basinkit does. Against <code>impose=True</code> — TopoToolbox's own
+minima-imposed setting, which is the closer analogue of clamping — the medians are
+59.4 and 58.6, <strong>1.3% apart</strong>.</p>
+<p><strong>This comparison is what corrected the k_sn method.</strong> A first attempt ran
+basinkit with 500 m smoothing still applied and its 99th percentile came out 41%
+below TopoToolbox's. That was not a TopoToolbox difference — it was the smoothing,
+and smoothing was removed from k_sn because of it.</p>
+<h3 id="agrees-in-the-bulk-diverges-on-a-few-percent-of-cells">χ — agrees in the bulk, diverges on a few percent of cells<a class="headerlink" href="#agrees-in-the-bulk-diverges-on-a-few-percent-of-cells" title="Permanent link">&para;</a></h3>
+<p>χ is a path integral from the outlet, so any difference in flow routing
+propagates along the whole branch above it. That is what the comparison shows.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>median ratio basinkit / TopoToolbox</td>
+<td>1.0125</td>
+</tr>
+<tr>
+<td>regression slope against TopoToolbox</td>
+<td>0.986</td>
+</tr>
+<tr>
+<td>agreement in every decile of χ, including the top 1%</td>
+<td>within 0.7–1.9%</td>
+</tr>
+<tr>
+<td>shared cells within 5%</td>
+<td>82.7%</td>
+</tr>
+<tr>
+<td>shared cells within 10%</td>
+<td>89.4%</td>
+</tr>
+<tr>
+<td>shared cells more than 20% apart</td>
+<td>4.7%</td>
+</tr>
+</tbody>
+</table>
+<p>The single largest χ value differs by 19%, and that number is misleading on its
+own: the cell where basinkit's χ is highest carries a TopoToolbox χ of 6,169 m
+against basinkit's 17,578 m, and the cell where TopoToolbox's is highest runs
+the other way. Those are cells the two routings send down different paths, not a
+disagreement about the integral. Changing the quadrature rule from a rectangle
+to TopoToolbox's trapezoid moved the median ratio from 1.0125 to 1.0082 — the
+rule is not the cause, so it was left alone.</p>
+<h3 id="networks-are-not-identical-and-that-is-expected">Networks are not identical, and that is expected<a class="headerlink" href="#networks-are-not-identical-and-that-is-expected" title="Permanent link">&para;</a></h3>
+<p>TopoToolbox found 51,224 channel cells, basinkit 47,304, with 31,524 in common
+(61.5% and 66.6%). Two independent D8 implementations with different depression
+handling place channels one or two cells apart across flats, which collapses an
+index-matched overlap even where the network is geometrically the same. The
+quantiles above are computed on the shared cells for exactly this reason.</p>
+<h2 id="checked-against-published-ranges">Checked against published ranges<a class="headerlink" href="#checked-against-published-ranges" title="Permanent link">&para;</a></h2>
+<p>Normalised channel steepness is usually reported near 20–100 for stable ground
+and 100–400 for the Himalaya. Yellowstone returns a median of 59.8 and Alaknanda
+167.2. Both land inside the range published for their setting, and the uplifting
+basin is 2.8 times steeper.</p>
+<p>Fitted concavity comes out at 0.43 and 0.38, both inside the 0.3–0.6 normally
+reported for bedrock rivers.</p>
+<p>This is the discrimination the classical stage indices failed to make. The
+hypsometric integral put both basins in the same band.</p>
+<h2 id="knickpoints">Knickpoints<a class="headerlink" href="#knickpoints" title="Permanent link">&para;</a></h2>
+<p>2 on 218 km of stable trunk; 10 on 251 km of uplifting trunk. A graded profile
+against a transient one. Each is reported with its height and how far its local
+gradient stands above the profile's own median, so small steps can be dismissed.</p>
+<h2 id="what-is-reported-alongside-and-why">What is reported alongside, and why<a class="headerlink" href="#what-is-reported-alongside-and-why" title="Permanent link">&para;</a></h2>
+<p><strong>Zero-gradient channel cells: 21.6% in Yellowstone, 7.0% in Alaknanda.</strong> These
+are the lake and the flats. They are excluded from k_sn, because a flat return is
+not a bedrock channel — but the fraction is reported, because a basin where a
+fifth of the channel network is flat is one where k_sn describes less of the
+landscape than the number suggests. basinkit's own elevation grading already
+flags the same surface: "a level surface of 334 km² at 2357 m covers 4.95% of
+the basin".</p>
+<h2 id="a-small-basin-where-everything-is-already-published">A small basin where everything is already published<a class="headerlink" href="#a-small-basin-where-everything-is-already-published" title="Permanent link">&para;</a></h2>
+<p>The Yellowstone is 6,786 km². A reviewer is entitled to ask whether the same
+thing works on a small catchment, and whether it can be checked against
+something published rather than against itself.</p>
+<p><strong>Fall Creek near Ithaca, New York.</strong> 326 km². USGS gauge 04234000 at
+42.4533333, −76.47277778. It was chosen because three independent things about it
+are already on the record: its drainage area is published by the USGS, its lower
+gorge is a textbook hanging valley, and the waterfall at the end of that gorge has
+a published height.</p>
+<h3 id="1-the-basin-area-against-the-usgs">1. The basin area, against the USGS<a class="headerlink" href="#1-the-basin-area-against-the-usgs" title="Permanent link">&para;</a></h3>
+<p>USGS NWIS publishes the drainage area at this gauge as <strong>126 square miles =
+326.34 km²</strong>. Three of basinkit's delineation backends were run on the gauge
+coordinate:</p>
+<table>
+<thead>
+<tr>
+<th>backend</th>
+<th>source</th>
+<th>area</th>
+<th>against USGS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>api</code></td>
+<td>MERIT-Hydro (~90 m)</td>
+<td>324.56 km²</td>
+<td><strong>−0.54%</strong></td>
+</tr>
+<tr>
+<td><code>hydrobasins</code> (default)</td>
+<td>HydroBASINS v1c level 12</td>
+<td>343.94 km²</td>
+<td>+5.39%</td>
+</tr>
+<tr>
+<td><code>dem</code></td>
+<td>Copernicus 30 m, D8 routing</td>
+<td>352.08 km²</td>
+<td>+7.89%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The +5.39% is not an error, and this is worth being precise about.</strong> The
+HydroBASINS unit's outlet is not the gauge: the lowest cell of that basin sits at
+<strong>120.6 m</strong>, which is 1.95 km downstream of the gauge and 4.2 m above Cayuga
+Lake's published surface elevation of 116.4 m. The gauge cell itself is at
+<strong>239.0 m</strong>. Two different outlets measure two different basins, and the published
+126 mi² is measured at the gauge. On a basin this small, level-12 units cannot be
+cut at an arbitrary point, and <code>api</code> is the backend that can.</p>
+<p>So the apples-to-apples answer is <strong>−0.54% on a 326 km² basin</strong>, and the lesson
+for a small catchment is to choose the backend rather than take the default.</p>
+<h3 id="2-a-knickpoint-the-tool-was-not-told-about">2. A knickpoint the tool was not told about<a class="headerlink" href="#2-a-knickpoint-the-tool-was-not-told-about" title="Permanent link">&para;</a></h3>
+<p>Ithaca Falls is <strong>150 feet (46 m)</strong> high, and Wikipedia describes it as "the last
+of a series of waterfalls along the hanging valley formed where Fall Creek
+intersects the glacial trough of Cayuga Lake". A hanging valley is exactly the
+configuration that leaves a knickpoint: the trunk glacier overdeepened the Cayuga
+trough, the tributary was left perched, and the gorge has been cutting back from
+the lake ever since.</p>
+<p>That gorge is <strong>below</strong> the gauge. So the same analysis was run twice, on two
+basins that differ only in whether the gorge is inside them:</p>
+<table>
+<thead>
+<tr>
+<th>basin</th>
+<th>outlet</th>
+<th>gorge included?</th>
+<th>knickpoints found</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hydrobasins</code></td>
+<td>Cayuga Lake, 120.6 m</td>
+<td>yes</td>
+<td><strong>1</strong></td>
+</tr>
+<tr>
+<td><code>api</code></td>
+<td>the gauge, 240.2 m</td>
+<td>no</td>
+<td><strong>0</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The one it found sits at <strong>131.0 m elevation, 0.3 km above the outlet</strong> — inside
+the gorge — with a <strong>65.8 m step</strong> and a local gradient <strong>14.7σ</strong> above that
+profile's own median. Its 65.8 m spans Ithaca Falls' 46 m plus the cascades
+immediately above it, which is what a 30 m DEM differenced over a 500 m window
+should return; it is not a measurement of the waterfall's height.</p>
+<p><strong>The point is the pair, not either number.</strong> The tool found the documented
+feature where the documented feature is, and found nothing where there is
+nothing. Neither run was tuned, and neither was told that a waterfall existed.</p>
+<h3 id="3-the-channel-numbers-against-topotoolbox-on-the-identical-grid">3. The channel numbers, against TopoToolbox on the identical grid<a class="headerlink" href="#3-the-channel-numbers-against-topotoolbox-on-the-identical-grid" title="Permanent link">&para;</a></h3>
+<p>Same 30 m grid reprojected to EPSG:32618, same 1 km² threshold, same θ = 0.45,
+compared cell by cell on the 2,844 cells where both return a positive value:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>TopoToolbox</th>
+<th>basinkit</th>
+<th>apart</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>k_sn median</td>
+<td>21.6</td>
+<td>20.3</td>
+<td><strong>6.1%</strong></td>
+</tr>
+<tr>
+<td>k_sn 75th percentile</td>
+<td>42.0</td>
+<td>40.6</td>
+<td>3.4%</td>
+</tr>
+<tr>
+<td>k_sn 90th percentile</td>
+<td>87.3</td>
+<td>83.5</td>
+<td>4.3%</td>
+</tr>
+<tr>
+<td>k_sn 99th percentile</td>
+<td>372.3</td>
+<td>365.0</td>
+<td>2.0%</td>
+</tr>
+<tr>
+<td>correlation, cell by cell</td>
+<td></td>
+<td></td>
+<td><strong>r = 0.987</strong></td>
+</tr>
+<tr>
+<td>χ, regression slope</td>
+<td></td>
+<td></td>
+<td>1.070, <strong>r = 0.997</strong></td>
+</tr>
+<tr>
+<td>χ cells more than 20% apart</td>
+<td></td>
+<td></td>
+<td><strong>1.97%</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Against TopoToolbox's <code>impose=True</code> setting the medians are 19.1 and 19.6 —
+<strong>2.8% apart</strong>.</p>
+<p>The median's 6.1% is looser than the Yellowstone's 3.7%, and it is worth saying
+why rather than leaving it. <strong>Per cell, the median disagreement is 0.35 k_sn
+units.</strong> On a basin whose median k_sn is around 21, a third of one unit is a large
+percentage and a small quantity. The correlation of 0.987 — higher than the
+Yellowstone's 0.973 — is the evidence that the cells themselves agree.</p>
+<p>That is the honest shape of the result on low relief: the <strong>absolute</strong> agreement is
+tighter than on the Yellowstone, and the <strong>percentage</strong> agreement is looser,
+because the numbers being compared are small. A reviewer should hold percentage
+claims about k_sn to the relief of the basin they were measured on.</p>
+<h2 id="something-to-compare-your-number-against">Something to compare your number against<a class="headerlink" href="#something-to-compare-your-number-against" title="Permanent link">&para;</a></h2>
+<p>k_sn is a <strong>comparative</strong> index. There is no published cut-off at θref = 0.45
+that separates "active" from "stable" independently of lithology and rainfall, so
+this page does not print one. What it can give you is five basins measured by
+this exact code, with these exact settings, spanning depositional plain to active
+orogen:</p>
+<table>
+<thead>
+<tr>
+<th>basin</th>
+<th>setting</th>
+<th>k_sn median</th>
+<th>k_sn p90</th>
+<th>knickpoints</th>
+<th>flat channel cells</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gangetic plain near Patna</td>
+<td>alluvial, depositional</td>
+<td><strong>2.3</strong></td>
+<td>14.1</td>
+<td>0</td>
+<td>50.7%</td>
+</tr>
+<tr>
+<td>Godavari headwaters at Nashik</td>
+<td>Deccan plateau basalt</td>
+<td><strong>11.9</strong></td>
+<td>52.7</td>
+<td>0</td>
+<td>36.4%</td>
+</tr>
+<tr>
+<td>New River, Virginia</td>
+<td>Appalachians, long eroded</td>
+<td><strong>31.4</strong></td>
+<td>104.6</td>
+<td>0</td>
+<td>26.5%</td>
+</tr>
+<tr>
+<td>Yellowstone above Corwin Springs</td>
+<td>Rocky Mountains, stable</td>
+<td><strong>59.8</strong></td>
+<td>174.7</td>
+<td>2</td>
+<td>21.6%</td>
+</tr>
+<tr>
+<td>Alaknanda at Devprayag</td>
+<td>Himalaya, actively uplifting</td>
+<td><strong>167.2</strong></td>
+<td>446.8</td>
+<td>10</td>
+<td>7.0%</td>
+</tr>
+</tbody>
+</table>
+<p>The ordering is monotonic across all five, and it is the ordering you would
+predict from the tectonics. That is the evidence that the index is measuring what
+it claims to.</p>
+<p><strong>Read this as a ladder, not as thresholds.</strong> Lithology and rainfall move k_sn
+independently of uplift: a resistant quartzite reach in a quiet setting can
+out-steepen a shale reach in an active one. Two of these basins are small (239
+and 459 km²) because the outlet snapped to a tributary, while the Yellowstone is
+6,786 km². k_sn is normalised by drainage area, so size is not the confound —
+rock strength and precipitation are.</p>
+<h2 id="what-this-does-not-tell-you">What this does not tell you<a class="headerlink" href="#what-this-does-not-tell-you" title="Permanent link">&para;</a></h2>
+<p>Three things are deliberately absent, and each was tested before being left out.</p>
+<p><strong>A stage or an age.</strong> The classical erosional-stage indices were run first and
+cannot place a single basin: the hypsometric integral spread only 0.21–0.25
+across sub-catchments of one system, and the elongation and bifurcation ratios
+changed sign between settings. Nothing here prints "youthful" or "mature".</p>
+<p><strong>An uplift or erosion rate.</strong> χ, k_sn and knickpoint counts describe form and
+transience. Converting them to rates needs independent calibration — cosmogenic
+nuclides, dated terraces — which basinkit does not have and does not pretend to.</p>
+<p><strong>A steady-state score from the χ-plot's straightness.</strong> Perron &amp; Royden's result
+is that a river in equilibrium plots linear in χ–elevation, so the R² of a
+straight-line fit looks like an obvious transience metric. It was implemented and
+it failed: the stable Yellowstone returned R² = 0.77 while the uplifting
+Alaknanda returned 0.94 — backwards. The Yellowstone's lake and flats create a
+large concave departure, while the Alaknanda's 6,585 m of relief dominates the
+variance and keeps R² high in spite of a 1,795 m departure from the line. The
+metric is not shipped.</p>
+<h2 id="limits">Limits<a class="headerlink" href="#limits" title="Permanent link">&para;</a></h2>
+<p>Two basins, one cross-check implementation. k_sn is verified to within 6% at
+every quantile and within 4% on the larger basin; χ is verified in the bulk but 4.7% of cells sit more than 20%
+from the reference, and the cause is flow routing rather than the χ integral.</p>
+<p>Neither number is an uplift rate. χ, k_sn and knickpoint counts describe form and
+transience. Turning them into rates needs independent calibration.</p>
+<h2 id="does-the-answer-survive-a-change-of-resolution">Does the answer survive a change of resolution?<a class="headerlink" href="#does-the-answer-survive-a-change-of-resolution" title="Permanent link">&para;</a></h2>
+<p>The same basin, the same code, the same 1 km² threshold, at four cell sizes
+(area-averaged from the native grid, so the terrain is the same terrain):</p>
+<table>
+<thead>
+<tr>
+<th>cell size</th>
+<th>channel cells</th>
+<th>fitted θ</th>
+<th>k_sn median</th>
+<th>k_sn p90</th>
+<th>trunk length</th>
+<th>knickpoints</th>
+<th>flat channel cells</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>93 m</td>
+<td>51,958</td>
+<td>0.431</td>
+<td><strong>59.8</strong></td>
+<td>174.7</td>
+<td>217.7 km</td>
+<td>2</td>
+<td>21.6%</td>
+</tr>
+<tr>
+<td>186 m</td>
+<td>26,648</td>
+<td>0.417</td>
+<td><strong>60.3</strong></td>
+<td>176.6</td>
+<td>208.3 km</td>
+<td>2</td>
+<td>27.2%</td>
+</tr>
+<tr>
+<td>278 m</td>
+<td>17,590</td>
+<td>0.349</td>
+<td><strong>59.5</strong></td>
+<td>173.4</td>
+<td>202.6 km</td>
+<td>3</td>
+<td>28.6%</td>
+</tr>
+<tr>
+<td>371 m</td>
+<td>12,675</td>
+<td>0.360</td>
+<td><strong>59.2</strong></td>
+<td>173.3</td>
+<td>203.3 km</td>
+<td>1</td>
+<td>27.6%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>k_sn is the robust number.</strong> Its median moves 1.9% and its 90th percentile
+1.9% across a fourfold change in cell size, while the number of channel cells
+falls by three quarters. A separate run at a finer pixel budget returned 61.1,
+inside the same band. That is the quantity to compare between basins.</p>
+<p><strong>Two numbers are not robust, and are reported as such:</strong></p>
+<ul>
+<li><strong>The knickpoint count is unstable</strong>: 2, 2, 3, 1. It is a count of discrete
+  features found by a threshold on a profile, and a coarser profile both loses
+  small steps and merges neighbouring ones. The contrast between a graded and a
+  transient trunk (2 against 10) survives; the absolute count should not be
+  quoted without its cell size.</li>
+<li><strong>The fitted concavity degrades on a coarse grid</strong>: 0.431 at 93 m against
+  0.360 at 371 m. The concavity fit smooths elevation over 500 m, which is five
+  cells at 93 m and barely one at 371 m, so the noise the smoothing exists to
+  remove comes back. θ is worth quoting when the cell size is well under the
+  smoothing window, and not otherwise.</li>
+</ul>
+<p>Trunk length shortens by 7% as the grid coarsens, which is the usual effect of
+measuring a path on a coarser grid.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Pradeepika Kaushik &middot; cite via doi.org/10.5281/zenodo.22181933
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.sections", "content.code.copy", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
