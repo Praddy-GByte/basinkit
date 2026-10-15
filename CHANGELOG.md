@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.0 -- 2026-10-07
+## 0.9.0 -- 2026-10-15
 
 ### A channel the elevation model cannot see
 
