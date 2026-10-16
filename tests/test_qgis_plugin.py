@@ -247,3 +247,77 @@ def test_no_algorithm_asks_a_sink_for_its_fields():
             if re.search(r"\bsink\w*\.fields\(\)", line):
                 offenders.append(f"{path.name}:{n}: {line.strip()}")
     assert not offenders, offenders
+
+
+def test_the_report_algorithm_does_not_raise_the_packages_pixel_budget():
+    """The QGIS default must not exceed basinkit.report.REPORT_MAX_PIXELS.
+
+    The report is the one caller that cannot survive running out of memory,
+    because inside QGIS the kill takes QGIS with it. The package budgets the
+    grid to REPORT_MAX_PIXELS, but the algorithm passed max_pixels= explicitly,
+    so its own default decided -- and it stood at 40 Mpx, ten times the limit
+    the package had just set. Measured on the Juniata inside QGIS 3.34: 245 s
+    and 5.61 GB at 40, 26 s and 1.26 GB at 4, for the same eight pages. A
+    larger grid buys nothing, because every raster a page draws is decimated
+    to DRAW_MAX_PX first.
+    """
+    import pathlib
+    import re
+
+    from basinkit.report import REPORT_MAX_PIXELS
+
+    # read from the file rather than imported: importing the algorithm pulls
+    # in qgis.core, and this suite has to run where QGIS is not installed
+    source = (pathlib.Path(__file__).resolve().parents[1] / "qgis_plugin"
+              / "processing_provider" / "algorithms" / "report.py"
+              ).read_text(encoding="utf-8")
+    found = re.search(r"^REPORT_MEGAPIXELS\s*=\s*(\d+)", source, re.M)
+    assert found, "report.py no longer names its budget REPORT_MEGAPIXELS"
+    REPORT_MEGAPIXELS = int(found.group(1))
+
+    assert REPORT_MEGAPIXELS * 1_000_000 <= REPORT_MAX_PIXELS, (
+        f"the algorithm defaults to {REPORT_MEGAPIXELS} Mpx while the package "
+        f"budgets {REPORT_MAX_PIXELS // 1_000_000} Mpx"
+    )
+
+
+def test_every_raster_budget_default_is_within_what_it_costs():
+    """No algorithm may default to a grid it cannot hold in memory.
+
+    report.py costs about 270 bytes per pixel because every page derives
+    arrays of its own; the rest route or sample one grid at a time and cost
+    about 60. Four gigabytes is the ceiling basinkit's own DEM guard uses
+    (DEFAULT_MAX_MEMORY_GB), and QGIS is already holding a project on top of
+    it, so a default that reaches the ceiling on its own is not a default.
+    """
+    import pathlib
+    import re
+
+    from basinkit.delineate.dem import DEFAULT_MAX_MEMORY_GB
+
+    algorithms = (pathlib.Path(__file__).resolve().parents[1]
+                  / "qgis_plugin" / "processing_provider" / "algorithms")
+    over = []
+    for path in sorted(algorithms.glob("*.py")):
+        text = path.read_text(encoding="utf-8")
+        if "MAX_MEGAPIXELS" not in text:
+            continue
+        # from the parameter's own name forward to its defaultValue, which
+        # sits a few lines below it past other bracketed arguments
+        start = text.index("self.MAX_MEGAPIXELS,")
+        match = re.search(r"defaultValue=(\w+)", text[start:start + 400])
+        assert match, f"{path.name}: MAX_MEGAPIXELS has no defaultValue"
+        raw = match.group(1)
+        if raw.isdigit():
+            megapixels = int(raw)
+        else:
+            found = re.search(rf"^{re.escape(raw)}\s*=\s*(\d+)", text,
+                              re.M)
+            assert found, f"{path.name}: cannot read {raw}"
+            megapixels = int(found.group(1))
+        per_pixel = 270 if path.name == "report.py" else 60
+        gb = megapixels * 1_000_000 * per_pixel / 1024 ** 3
+        if gb > DEFAULT_MAX_MEMORY_GB:
+            over.append(f"{path.name}: {megapixels} Mpx is about "
+                        f"{gb:.1f} GB at {per_pixel} bytes a pixel")
+    assert not over, over

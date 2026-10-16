@@ -99,10 +99,15 @@ class FetchBasinLayersAlgorithm(BasinkitAlgorithm):
         end.setFlags(end.flags() | QgsProcessingParameterNumber.Flag.FlagAdvanced)
         self.addParameter(end)
 
+        # 100 stood here, which is about 5.6 GB at the 60 bytes a pixel the
+        # routing costs -- past basinkit's own DEFAULT_MAX_MEMORY_GB, so the
+        # DEM guard refused the window instead of returning a coarser grid,
+        # and a large basin came back with nothing rather than with less. 60
+        # is what the other three surface algorithms ask for.
         budget = QgsProcessingParameterNumber(
             self.MAX_MEGAPIXELS, "Raster budget (megapixels)",
             type=QgsProcessingParameterNumber.Type.Integer,
-            defaultValue=100, minValue=1, maxValue=4000,
+            defaultValue=60, minValue=1, maxValue=4000,
         )
         budget.setFlags(budget.flags() | QgsProcessingParameterNumber.Flag.FlagAdvanced)
         self.addParameter(budget)

@@ -14,6 +14,21 @@ from qgis.core import (
 from ...compat import SOURCE_POLYGON
 from .base import BasinkitAlgorithm
 
+#: The budget basinkit.report.REPORT_MAX_PIXELS sets, in megapixels.
+#:
+#: It is written out rather than imported because this module has to import
+#: cleanly when the basinkit package is absent -- that is the case the plugin
+#: exists to explain, and an import error here would stop it loading at all.
+#:
+#: 40 stood here before, which overrode the package budget rather than
+#: following it, so the one caller that cannot survive running out of memory
+#: ran at ten times the limit. Measured on the Juniata (8,805 km2) inside
+#: QGIS 3.34: at 40 the report took 245 s and 5.61 GB, at 4 it took 26 s and
+#: 1.26 GB, and both wrote the same eight pages within 6 KB of each other.
+#: Nothing was gained by the larger grid, because every raster a page draws is
+#: decimated to DRAW_MAX_PX anyway.
+REPORT_MEGAPIXELS = 4
+
 
 class BasinReportAlgorithm(BasinkitAlgorithm):
     """Basin polygon in, a publication-ready PDF out."""
@@ -80,7 +95,7 @@ class BasinReportAlgorithm(BasinkitAlgorithm):
         budget = QgsProcessingParameterNumber(
             self.MAX_MEGAPIXELS, "Raster budget (megapixels)",
             type=QgsProcessingParameterNumber.Type.Integer,
-            defaultValue=40, minValue=1, maxValue=4000,
+            defaultValue=REPORT_MEGAPIXELS, minValue=1, maxValue=4000,
         )
         budget.setFlags(budget.flags() | QgsProcessingParameterNumber.Flag.FlagAdvanced)
         self.addParameter(budget)
