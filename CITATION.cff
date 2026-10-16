@@ -23,7 +23,7 @@ type: software
 authors:
   - given-names: Pradeepika
     family-names: Kaushik
-    # orcid: "https://orcid.org/0000-0000-0000-0000"   # add yours
+    orcid: "https://orcid.org/0000-0002-0767-3983"
 version: 0.9.1
 # The version DOI, so a citation of this release resolves to this release.
 # The concept DOI below always resolves to whichever release is newest, and is

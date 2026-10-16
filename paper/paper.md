@@ -11,7 +11,7 @@ tags:
   - ArcGIS Pro
 authors:
   - name: Pradeepika Kaushik
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0002-0767-3983
     affiliation: 1
 affiliations:
   - name: AFFILIATION TO BE SUPPLIED
