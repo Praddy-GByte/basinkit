@@ -200,6 +200,20 @@ def chirps(
         times.append(np.datetime64(f"{year}-{month:02d}-01"))
 
     if not grids:
+        w, s_, e, n = bounds
+        inside = -60 <= s_ and n <= 60
+        if failures and inside:
+            # Blaming the latitude band when the basin sits inside it sends
+            # the reader to check their coordinates instead of retrying. Say
+            # what the reads actually returned.
+            first = "; ".join(f"{m}: {why}" for m, why in failures[:3])
+            raise DataSourceError(
+                f"All {len(months)} CHIRPS months failed to read for a basin at "
+                f"{s_:.1f} to {n:.1f} degrees latitude, which is inside the "
+                "60N-60S band CHIRPS covers -- so this is the reads failing, "
+                f"not the coverage. First failures: {first}. These are usually "
+                "transient; the same call often succeeds on a second attempt."
+            )
         raise DataSourceError(
             "No CHIRPS data retrieved. CHIRPS covers 60N-60S -- a basin outside "
             "that band has none. Try TerraClimate, which is global land."

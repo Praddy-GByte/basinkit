@@ -89,7 +89,17 @@ def _noise_floor_deg(error_m: float, cell_m: float) -> float:
     return math.degrees(math.atan(error_m / cell_m))
 
 
-def _grade(value: float, good: float, bad: float, *, higher_is_better: bool) -> str:
+def _grade(value: float, good: float, bad: float, *, higher_is_better: bool):
+    """The band ``value`` falls in, or ``None`` when there is no value.
+
+    ``None`` for a NaN, and not the worst band. A correlation that could not be
+    computed is not a poor correlation, and the difference matters: NaN fell
+    through every comparison here and came out as LIMITED, which then became
+    the whole basin's overall grade through :func:`_worst`. A number that could
+    not be worked out has to say so.
+    """
+    if value is None or value != value or value in (float("inf"), float("-inf")):
+        return None
     if higher_is_better:
         if value >= good:
             return "HIGH"
@@ -274,22 +284,59 @@ def precipitation_quality(basin, start: int = 2000, end: int | None = None, **kw
     chirps = basin.precipitation(start=start, end=end, source="chirps", **kwargs)
     terra = basin.precipitation(start=start, end=end, source="terraclimate", **kwargs)
     def _annual(obj, column=None):
+        # A Dataset is picked from by name; anything with to_series() becomes
+        # one directly. The old code converted to a DataFrame and fell back to
+        # column zero when the name it wanted was absent -- and on a
+        # DataArray that column is `spatial_ref`, a constant. Correlating
+        # against a constant is NaN, which was then graded LIMITED. Never
+        # guess a column: a series that cannot be identified is an error.
+        if hasattr(obj, "data_vars"):
+            name = column if column in obj.data_vars else next(iter(obj.data_vars))
+            obj = obj[name]
         s = obj.to_series() if hasattr(obj, "to_series") else obj
         if isinstance(s, pd.DataFrame):
-            s = s[column] if column and column in s else s.iloc[:, 0]
+            if column and column in s:
+                s = s[column]
+            else:
+                usable = [c for c in s.columns
+                          if c not in ("spatial_ref", "crs", "band")]
+                if not usable:
+                    raise ValueError(
+                        "the rainfall series carries no data column, only "
+                        f"{list(s.columns)}")
+                s = s[usable[0]]
         s = pd.Series(s)
         index = pd.to_datetime(pd.Index(s.index).get_level_values(-1))
         s = pd.Series(np.asarray(s, dtype="float64"), index=index)
         s = s[~s.index.duplicated()]
         return s.groupby(s.index.year).sum()
     a = _annual(chirps)
-    b = _annual(terra.to_dataframe() if hasattr(terra, "to_dataframe") else terra, column="ppt")
+    b = _annual(terra, column="ppt")
     years = sorted(set(a.index) & set(b.index))
     years = [y for y in years if y != max(years)] or years   # drop a partial final year
     a, b = a.loc[years], b.loc[years]
+    if len(years) < 3:
+        return {"layer": "precipitation", "grade": None, "value": None,
+                "years": len(years),
+                "not_graded_because":
+                    (f"only {len(years)} year(s) are covered by both products, and a "
+                     "correlation over that is not a measurement."),
+                "statement": "Too few overlapping years to compare the two products.",
+                "source": "CHIRPS v3.0 against TerraClimate"}
     r = float(np.corrcoef(a.values, b.values)[0, 1])
     bias = float(a.mean() / b.mean() - 1.0) * 100.0
     good, bad = THRESHOLDS["precipitation_r"]
+    if r != r:
+        return {"layer": "precipitation", "grade": None, "value": None,
+                "years": len(years),
+                "chirps_mm_per_year": round(float(a.mean()), 1),
+                "terraclimate_mm_per_year": round(float(b.mean()), 1),
+                "not_graded_because":
+                    ("the correlation came out undefined, which happens when one "
+                     "of the two series has no variance over these years. The "
+                     "two means are reported so the comparison is not lost."),
+                "statement": "The two products could not be correlated over these years.",
+                "source": "CHIRPS v3.0 against TerraClimate"}
     return {"layer": "precipitation", "indicator": "two independent products, annual totals",
             "grade": _grade(r, good, bad, higher_is_better=True),
             "value": round(r, 3), "bias_pct": round(bias, 1), "years": len(years),

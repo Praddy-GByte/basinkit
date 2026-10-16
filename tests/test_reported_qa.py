@@ -687,3 +687,98 @@ def test_the_wiring_stub_carries_what_the_plugin_imports():
         for name in list(sys.modules):
             if name == "qgis" or name.startswith("qgis."):
                 del sys.modules[name]
+
+
+# ---------------------------------------------------------------------------
+# Found by running the seventy-analysis sweep on a gauged basin
+# ---------------------------------------------------------------------------
+
+def test_a_value_that_is_not_a_number_is_not_a_grade():
+    """NaN fell through every comparison in _grade and came out LIMITED.
+
+    A correlation that could not be computed is not a poor correlation. The
+    difference reached the top: through _worst it became the whole basin's
+    overall grade, so one undefined number condemned every layer beside it.
+    """
+    from basinkit.quality import _grade
+
+    assert _grade(float("nan"), 0.9, 0.75, higher_is_better=True) is None
+    assert _grade(None, 0.9, 0.75, higher_is_better=True) is None
+    assert _grade(float("inf"), 0.9, 0.75, higher_is_better=True) is None
+    assert _grade(0.95, 0.9, 0.75, higher_is_better=True) == "HIGH"
+    assert _grade(0.80, 0.9, 0.75, higher_is_better=True) == "MODERATE"
+    assert _grade(0.50, 0.9, 0.75, higher_is_better=True) == "LIMITED"
+    # and the same for a lower-is-better indicator
+    assert _grade(float("nan"), 5.0, 10.0, higher_is_better=False) is None
+
+
+def test_nothing_graded_is_not_the_same_as_graded_well():
+    from basinkit.quality import _worst
+
+    assert _worst(["HIGH", "LIMITED"]) == "LIMITED"
+    assert _worst(["HIGH", "MODERATE"]) == "MODERATE"
+    assert _worst(["HIGH"]) == "HIGH"
+
+
+def test_the_rainfall_pair_reads_the_series_and_not_column_zero(monkeypatch):
+    """0.9.0 made precipitation() return a DataArray, and this went looking
+    for a column called 'ppt' that no longer existed.
+
+    It fell back to column zero of the DataFrame, which on a rioxarray
+    DataArray is `spatial_ref` — a constant. Correlating against a constant is
+    NaN, that NaN was graded LIMITED, and LIMITED became the whole basin's
+    overall verdict. On the basin this was found on the real agreement is
+    r = 0.95.
+    """
+    import numpy as np
+    import pandas as pd
+    import xarray as xr
+
+    from basinkit.basin import Basin
+    from basinkit.quality import precipitation_quality
+
+    months = pd.date_range("2000-01-01", periods=300, freq="MS")
+    rng = np.random.default_rng(0)
+    wet = rng.uniform(40, 140, size=300)
+
+    def series(values):
+        da = xr.DataArray(values, dims="time", coords={"time": months},
+                          name="precipitation")
+        # the coordinates rioxarray leaves behind, and what broke the lookup
+        return da.assign_coords(spatial_ref=0, crs=0)
+
+    monkeypatch.setattr(
+        Basin, "precipitation",
+        lambda self, start=2000, end=None, source="chirps", **kw:
+            series(wet if source == "chirps" else wet * 0.88))
+
+    out = precipitation_quality(Basin.from_geometry(box(0, 0, 1, 1)), 2000, 2024)
+    assert out["grade"] == "HIGH", out
+    assert out["value"] > 0.9
+    # the two means have to be the rainfall, not the constant coordinate
+    assert out["chirps_mm_per_year"] > 100
+    assert out["terraclimate_mm_per_year"] > 100
+
+
+def test_an_empty_chirps_result_does_not_blame_the_latitude(monkeypatch):
+    """The basin that hit this sits at 40 N, well inside the 60N-60S band."""
+
+    from basinkit.exceptions import DataSourceError
+    from basinkit.sources import climate as mod
+
+    def always_fails(url, bounds, pad=0.1):
+        raise RuntimeError("HTTP 503 from the host")
+
+    monkeypatch.setattr(mod, "_read_window", always_fails)
+    with pytest.raises(DataSourceError) as excinfo:
+        mod.chirps(box(-78.9, 39.8, -77.0, 40.8), 2020, 2020, progress=False)
+    message = str(excinfo.value)
+    assert "inside" in message
+    assert "503" in message
+    assert "transient" in message
+
+    # outside the band, the coverage explanation is the right one
+    monkeypatch.setattr(mod, "_read_window", always_fails)
+    with pytest.raises(DataSourceError) as excinfo:
+        mod.chirps(box(10, 70, 11, 71), 2020, 2020, progress=False)
+    assert "60N-60S" in str(excinfo.value)
