@@ -59,7 +59,17 @@ REASONS = {
 #: the resulting message ("no module named basinkit") sends people looking for
 #: an installation fault that is not there.
 MIN_PYTHON = (3, 10)
-MIN_QGIS = "3.28"
+#: The release to send someone to when their Python is too old.
+#:
+#: Not the same as qgisMinimumVersion, which stays at 3.28. The bundled
+#: Python is a property of the installer, not of the QGIS version: the
+#: Windows and macOS builds of 3.28 shipped Python 3.9, where pip finds no
+#: release of basinkit at all, while the Debian and Ubuntu packages of the
+#: same QGIS run on the distribution's own 3.11, where it installs fine. So
+#: 3.28 is still offered -- python_too_old() answers the real question at
+#: load time -- but a message that has fired has to name a version that
+#: actually fixes it, and it used to name the one the reader was already on.
+MIN_QGIS = "3.34"
 
 #: Extras worth having. The plugin degrades gracefully without them, and says
 #: which algorithm is affected at the point of use.
@@ -208,9 +218,10 @@ def python_too_old() -> str | None:
     return (f"This QGIS runs Python {running}, and basinkit needs "
             f"{MIN_PYTHON[0]}.{MIN_PYTHON[1]} or newer, as geopandas and "
             "rasterio do.\n\nUpdate QGIS to "
-            f"{MIN_QGIS} or newer (3.34 LTR and 3.40 both ship a new enough "
-            "Python), then install the package. Installing it into another "
-            "Python on this machine will not help: QGIS imports only its own.")
+            f"{MIN_QGIS} or newer; the 3.34 long-term release and 3.40 both "
+            "ship a new enough Python. Then install the package. Installing it "
+            "into another Python on this machine will not help: QGIS imports "
+            "only its own.")
 
 
 def status_message() -> str | None:

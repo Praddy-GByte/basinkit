@@ -3,7 +3,7 @@ name=basinkit
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Click a river anywhere on Earth and get an analysis-ready basin package: elevation, terrain surfaces, land cover, soil, rainfall, surface water, rivers, full Horton-Strahler morphometry, a grade for whether the elevation model can carry any of it, a quality indicator for every other layer, and an eight-page report.
-version=0.9.0
+version=0.9.1
 author=Pradeepika Kaushik
 email=pradeepika.kaushik@gmail.com
 
@@ -36,12 +36,41 @@ hasProcessingProvider=yes
 # their Python dependencies, so the plugin detects it at load
 # and hands the user a command that works. Declaring it here is what puts it in
 # the "External dependencies" field on plugins.qgis.org.
-external_deps=basinkit>=0.9.0
+external_deps=basinkit>=0.9.1
 server=False
 
 tags=hydrology,watershed,catchment,basin,delineation,dem,terrain,slope,hand,morphometry,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
 
-changelog=0.9.0
+changelog=0.9.1
+    - Basin report ran at ten times the budget 0.9.0 had just set for it. The
+      package caps the elevation grid at four megapixels because a larger one
+      was killed by the operating system, and inside QGIS that takes QGIS with
+      it -- but this algorithm passed a budget of its own, and that default
+      stood at forty. Measured on the Juniata (8,805 km2) in QGIS 3.34: 245
+      seconds and 5.61 GB at forty, 26 seconds and 1.26 GB at four, for the
+      same eight pages within six kilobytes of each other. The larger grid
+      bought nothing, because every raster a page draws is decimated to 1,600
+      pixels first.
+    - Fetch basin data layers asked for a hundred megapixels, about 5.6 GB,
+      past the ceiling the elevation guard enforces -- so a large basin was
+      refused outright instead of coming back at a coarser resolution. It now
+      asks for sixty, as the three other surface algorithms do.
+    - Data quality reported a layer it could not measure as a layer that
+      measured badly. A rainfall correlation that came back as not-a-number was
+      graded LIMITED, and through the worst-of rule that one layer set the whole
+      basin's grade: a basin whose rainfall pair agrees at r = 0.949 was
+      reported LIMITED overall instead of MODERATE. An unmeasurable layer now
+      stays ungraded and says why.
+    - The notice shown when QGIS runs a Python too old for the package said to
+      update to 3.28, which is the release the reader was already on. It now
+      names 3.34. The minimum stays 3.28, because the bundled Python belongs to
+      the installer rather than to the QGIS version: the Windows and macOS
+      builds of 3.28 shipped Python 3.9, where pip finds no release of basinkit
+      at all, while the Debian and Ubuntu packages of the same QGIS run on 3.11,
+      where it installs normally.
+    - Needs basinkit 0.9.1 or newer.
+    
+    0.9.0
     - Delineate river basin takes an optional line layer of known channels and
       forces the flow along them. Where a stream runs in a culvert under a city,
       or a road embankment dams a valley in the elevation model, the surface

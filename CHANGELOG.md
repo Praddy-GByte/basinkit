@@ -1,5 +1,69 @@
 # Changelog
 
+## 0.9.1 -- 2026-10-16
+
+Two faults in 0.9.0. Both were found by running the whole analysis set over
+one basin and then checking every printed figure against the run, rather than
+against the code that produced it.
+
+### A grade that could not be measured read as a bad grade
+
+0.9.0 changed `precipitation()` to return a named DataArray. The quality
+grader still asked for a column called `ppt`, did not find one, and fell back
+to the first column of the frame -- which was `spatial_ref`, a constant. The
+correlation of a constant is not a number, and the grader turned that into
+LIMITED. Through the worst-of rule a single ungraded layer then set the whole
+basin's grade: the Juniata reported LIMITED overall where its rainfall pair
+actually agrees at r = 0.949, which is HIGH, and the basin is MODERATE.
+
+A layer that could not be measured and a layer that measured badly are not the
+same finding, and reporting the first as the second is worse than reporting
+nothing. The grader now selects the series by name and never falls back to a
+position. A value that is not a number stays ungraded and says why, and a
+series shorter than three years is not scored at all rather than scored badly.
+
+An empty CHIRPS result also named latitude coverage as the cause, even for
+basins well inside the covered band. It now names the failures it saw.
+
+### The report ran at ten times its own budget inside QGIS
+
+0.9.0 budgeted the report's elevation grid to four megapixels, because a
+larger one had been killed by the operating system and inside QGIS that takes
+QGIS with it. The QGIS algorithm passed `max_pixels=` of its own, though, and
+its default stood at forty -- so the one caller that cannot survive running
+out of memory was the one caller that ignored the limit.
+
+Measured on the Juniata (8,805 square kilometres) inside QGIS 3.34: 245
+seconds and 5.61 GB at forty megapixels, 26 seconds and 1.26 GB at four, for
+the same eight pages, within six kilobytes of each other. The larger grid
+bought nothing, because every raster a page draws is decimated to 1,600 pixels
+first.
+
+Fetching the data layers defaulted to a hundred megapixels, about 5.6 GB, past
+the ceiling the elevation guard enforces -- so a large basin was refused
+outright rather than returned at a coarser resolution. It now asks for sixty,
+as the three other surface algorithms do.
+
+Two tests pin both defaults: one that the report cannot exceed the package's
+budget, one that no raster default costs more than the guard allows. They read
+the values out of the files, so they run where QGIS is not installed.
+
+### Smaller things
+
+The message shown when QGIS runs a Python too old for the package said to
+update to 3.28, which is the release those readers were already on. It now
+names 3.34. `qgisMinimumVersion` stays at 3.28, because the bundled Python
+belongs to the installer and not to the QGIS version: the Windows and macOS
+builds of 3.28 shipped Python 3.9, where pip finds no release of basinkit at
+all, while the Debian and Ubuntu packages of the same QGIS run on 3.11, where
+it installs normally.
+
+Checked while fixing the above, and reported because it is evidence rather
+than a change: all eleven algorithms load into QGIS 3.34.4 and every one of
+their Processing dialogs builds; a delineation driven from a point given in
+the canvas CRS, EPSG:3857, reprojects correctly and returns 8,804.7 square
+kilometres against the 8,686.8 published for USGS gauge 01567000.
+
 ## 0.9.0 -- 2026-10-15
 
 ### A channel the elevation model cannot see

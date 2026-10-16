@@ -2360,8 +2360,14 @@ def test_old_python_is_reported_instead_of_a_missing_module(monkeypatch):
     monkeypatch.setattr(deps.sys, "version_info", (3, 7, 3))
     message = deps.python_too_old()
     assert message is not None
-    assert "3.7.3" in message and "3.10" in message and "3.28" in message
+    assert "3.7.3" in message and "3.10" in message
+    assert deps.MIN_QGIS in message
     assert deps.status_message() == message    # reported before the module check
+
+    # The release named has to be one that fixes it. This said 3.28, which is
+    # where the Windows and macOS builds ship Python 3.9 -- so a reader on 3.28
+    # was told to update to 3.28. Anything below 3.34 is that bug again.
+    assert tuple(int(n) for n in deps.MIN_QGIS.split(".")) >= (3, 34)
 
 
 def _fake_basin(**layers):
