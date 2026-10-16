@@ -25,14 +25,18 @@ authors:
     family-names: Kaushik
     # orcid: "https://orcid.org/0000-0000-0000-0000"   # add yours
 version: 0.9.1
-# Until the 0.9.1 record exists on Zenodo this is the concept DOI, which
-# resolves to the newest release. Replace it with the 0.9.1 version DOI.
-doi: "10.5281/zenodo.22181933"
+# The version DOI, so a citation of this release resolves to this release.
+# The concept DOI below always resolves to whichever release is newest, and is
+# the one to quote when the version does not matter.
+doi: "10.5281/zenodo.23426122"
 identifiers:
+  - type: doi
+    value: "10.5281/zenodo.23426122"
+    description: "Version DOI -- this release, 0.9.1"
   - type: doi
     value: "10.5281/zenodo.22181933"
     description: "Concept DOI -- always resolves to the latest version"
-date-released: 2026-10-15
+date-released: 2026-10-16
 license: Apache-2.0
 repository-code: "https://github.com/Praddy-GByte/basinkit"
 url: "https://github.com/Praddy-GByte/basinkit"
