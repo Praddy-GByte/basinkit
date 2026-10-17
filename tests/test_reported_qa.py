@@ -867,3 +867,43 @@ def test_every_layer_method_records_what_it_fetched():
         if "_acquired(" not in src:
             missing.append(name)
     assert not missing, f"these layer methods do not record what they fetched: {missing}"
+
+
+def test_an_extra_cannot_overwrite_what_actually_arrived():
+    """The attrs say what came back; the arguments say what was asked for.
+
+    Passing the requested key as ``product=`` overwrote the product the source
+    had tagged, so a report printed "cop30" -- the string a caller typed -- in
+    place of the dataset that answered it.
+    """
+    basin = _bare_basin()
+    basin._acquired(_stub_layer(basinkit_product="Copernicus DEM GLO-30"),
+                    "dem", product="cop30", requested="cop30")
+    record, = basin.acquisitions()
+    assert record["product"] == "Copernicus DEM GLO-30"
+    assert record["requested"] == "cop30"
+
+
+def test_the_elevation_grid_names_itself_the_way_the_catalogue_does():
+    """A provenance line and a citation need the name, not the route key."""
+    from basinkit import catalog
+    from basinkit.sources.dem import _catalogued
+
+    assert _catalogued("cop30", "name", "") == catalog.get("cop30").name
+    assert _catalogued("cop30", "license", "") == catalog.get("cop30").license
+    assert _catalogued("not-a-dataset", "name", "fallback") == "fallback"
+
+
+def test_the_report_accepts_either_spelling_of_the_elevation_product():
+    """Grids tagged before this change carry the key; both must read."""
+    from basinkit.report import _elevation_source
+
+    class Grid:
+        pass
+
+    old, new = Grid(), Grid()
+    old.attrs = {"basinkit_product": "cop30", "basinkit_output_res_m": 90}
+    new.attrs = {"basinkit_product": "Copernicus DEM GLO-30",
+                 "basinkit_output_res_m": 90}
+    assert "Copernicus DEM GLO-30" in _elevation_source(old)
+    assert "Copernicus DEM GLO-30" in _elevation_source(new)

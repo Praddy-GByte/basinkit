@@ -1232,7 +1232,13 @@ def write_manifest(path, records, C, extra=None):
         "python": sys.version.split()[0],
         "platform": platform.platform(),
         "packages": mods,
+        # What could have been reached, and what actually was. The first is a
+        # catalogue; the second is the record a rerun is compared against,
+        # because it carries the retrieval date and the resolution each layer
+        # actually came back at.
         "datasets_available": datasets,
+        "layers_acquired": list(
+            (getattr(C.get("basin"), "provenance", {}) or {}).get("layers", [])),
         "steps": [{k: r[k] for k in ("id", "group", "title", "code", "status")
                    if k in r} for r in records],
         "counts": {"total": len(records),

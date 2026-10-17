@@ -692,6 +692,29 @@ def _methods_page(plt, pdf, basin, grade, density, page):
         if key in provenance:
             lines.append(f"  {key}: {provenance[key]}")
 
+    # A product name carries an edition; it does not carry a retrieval date,
+    # and a rerun months later needs the second to tell a change of its own
+    # from a provider reissuing a tile.
+    acquired = provenance.get("layers") or []
+    if acquired:
+        lines += ["", "DATA FETCHED FOR THIS REPORT", ""]
+        for record in acquired:
+            product = record.get("product") or record.get("call")
+            lines.append(f"  {record.get('call', '?')}: {product}")
+            detail = "    retrieved {}".format(record.get("retrieved_utc", "?"))
+            if record.get("license"):
+                detail += f"   licence {record['license']}"
+            if record.get("output_res_m"):
+                detail += f"   at {record['output_res_m']:g} m"
+            lines.append(detail)
+    else:
+        lines += ["", "DATA FETCHED FOR THIS REPORT", ""]
+        lines += _wrap(
+            "No layer was fetched through this basin object, so there is "
+            "nothing to date. A report built from a layer passed in by hand "
+            "carries that layer's provenance only where the caller recorded "
+            "it.", 110)
+
     lines += ["", "TERRAIN", ""]
     lines += _wrap(
         "Slope, aspect, curvature and hillshade are computed on the elevation "
@@ -775,7 +798,10 @@ _DEM_NAMES = {"cop30": "Copernicus DEM GLO-30", "cop90": "Copernicus DEM GLO-90"
 def _elevation_source(elevation) -> str:
     """Name the elevation product, with the cell it was read at."""
     attrs = getattr(elevation, "attrs", {}) or {}
-    name = _DEM_NAMES.get(str(attrs.get("basinkit_product", "")), "Copernicus DEM")
+    tagged = str(attrs.get("basinkit_product", ""))
+    # Older grids tagged the key, newer ones the catalogue name; accept both,
+    # because a report may be built from an array fetched by either.
+    name = _DEM_NAMES.get(tagged, tagged or "Copernicus DEM")
     res = attrs.get("basinkit_output_res_m")
     return f"{name}, read at {float(res):.0f} m" if res not in (None, "") else name
 

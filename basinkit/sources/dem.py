@@ -131,6 +131,17 @@ def dem_tiles(
     return paths, {"tiles_used": used, "tiles_missing": missing, "chain": chain}
 
 
+
+def _catalogued(key: str, field: str, fallback: str) -> str:
+    """One field of a catalogue entry, or ``fallback`` if it is not listed."""
+    try:
+        from .. import catalog
+
+        return getattr(catalog.get(key), field) or fallback
+    except Exception:                                    # noqa: BLE001
+        return fallback
+
+
 def dem(
     geometry=None,
     bounds: tuple[float, float, float, float] | None = None,
@@ -178,7 +189,13 @@ def dem(
         {
             "units": "m",
             "vertical_datum": "EGM2008 (Copernicus) / EGM96 (SRTM lineage)",
-            "basinkit_product": product,
+            # The catalogue is where a dataset's name and licence are kept, so
+            # take them from there rather than tagging the argument the caller
+            # typed. "cop30" identifies the route; "Copernicus DEM GLO-30" is
+            # what belongs in a provenance record or a citation.
+            "basinkit_product": _catalogued(product, "name", product),
+            "license": _catalogued(product, "license", ""),
+            "basinkit_product_key": product,
             "basinkit_tiles_used": str(meta["tiles_used"]),
             "basinkit_tiles_missing": ", ".join(meta["tiles_missing"]) or "none",
             "basinkit_native_res_m": meta.get("basinkit_native_res_m", ""),

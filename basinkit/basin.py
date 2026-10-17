@@ -181,7 +181,13 @@ class Basin:
         for key in self._ACQUISITION_KEYS:
             if key in attrs:
                 record[key.replace("basinkit_", "")] = attrs[key]
-        record.update({k: v for k, v in extra.items() if v is not None})
+        # The attrs say what arrived; the extras say what was asked for. Where
+        # both name the same thing the arrival wins, or a report prints the key
+        # a caller typed -- "cop30" -- in place of the product that answered
+        # it, "Copernicus DEM GLO-30".
+        for key, value in extra.items():
+            if value is not None:
+                record.setdefault(key, value)
         self.provenance.setdefault("layers", []).append(record)
         return out
 
@@ -206,7 +212,7 @@ class Basin:
         # rather than the cause. The source is lon/lat, so say so.
         if getattr(getattr(out, "rio", None), "crs", None) is None:
             out = out.rio.write_crs("EPSG:4326")
-        return self._acquired(out, "dem", product=product)
+        return self._acquired(out, "dem", requested=product)
 
     def landcover(self, year: int | None = None, source: str = "worldcover",
                   **kwargs):
