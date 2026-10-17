@@ -782,3 +782,88 @@ def test_an_empty_chirps_result_does_not_blame_the_latitude(monkeypatch):
     with pytest.raises(DataSourceError) as excinfo:
         mod.chirps(box(10, 70, 11, 71), 2020, 2020, progress=False)
     assert "60N-60S" in str(excinfo.value)
+
+
+def _stub_layer(**attrs):
+    """Something with ``.attrs``, which is all the recorder reads."""
+
+    class Layer:
+        pass
+
+    out = Layer()
+    out.attrs = dict(attrs)
+    return out
+
+
+def _bare_basin():
+    from shapely.geometry import box
+
+    from basinkit.basin import Basin
+
+    return Basin(box(85.0, 28.0, 85.5, 28.5), {"backend": "test"})
+
+
+def test_a_fetched_layer_records_what_it_was_and_when_it_arrived():
+    """Asked for by a user planning batch reruns months apart.
+
+    A product name carries an epoch -- "ESA WorldCover 2021" -- but not a
+    retrieval date, and they answer different questions. The epoch says which
+    edition was requested; the date says which bytes arrived. Without the
+    second, a rerun that differs cannot be told apart from a provider
+    reissuing a tile.
+    """
+    basin = _bare_basin()
+    basin._acquired(
+        _stub_layer(basinkit_product="ESA WorldCover 2021", license="CC BY 4.0",
+                    basinkit_output_res_m=194.8),
+        "landcover",
+    )
+    record, = basin.acquisitions()
+    assert record["call"] == "landcover"
+    assert record["product"] == "ESA WorldCover 2021"
+    assert record["license"] == "CC BY 4.0"
+    assert record["output_res_m"] == 194.8
+    assert record["retrieved_utc"].endswith("+00:00")
+    assert record["retrieved_utc"] != record["product"]
+
+
+def test_fetching_the_same_layer_twice_is_recorded_twice():
+    """A run that fetched a layer twice did fetch it twice.
+
+    Collapsing the two would hide a rerun inside a run, which is exactly the
+    thing the record exists to make visible.
+    """
+    basin = _bare_basin()
+    for _ in range(2):
+        basin._acquired(_stub_layer(basinkit_product="SoilGrids 250m v2.0"), "soil")
+    assert len(basin.acquisitions()) == 2
+
+
+def test_the_acquisition_list_cannot_be_edited_from_outside():
+    """``acquisitions()`` hands back a copy; the record is not a scratch pad."""
+    basin = _bare_basin()
+    basin._acquired(_stub_layer(basinkit_product="HydroRIVERS v1.0"), "rivers")
+    got = basin.acquisitions()
+    got.append({"call": "invented"})
+    assert len(basin.acquisitions()) == 1
+
+
+def test_every_layer_method_records_what_it_fetched():
+    """A new layer method that forgets to record is the failure mode here.
+
+    The recorder is only worth having if nothing routes around it, so this
+    reads basin.py and checks that each public layer method returns through
+    ``_acquired``.
+    """
+    import inspect
+
+    from basinkit import basin as basin_module
+
+    expected = ("dem", "landcover", "soil", "precipitation", "surface_water",
+                "rivers", "lakes")
+    missing = []
+    for name in expected:
+        src = inspect.getsource(getattr(basin_module.Basin, name))
+        if "_acquired(" not in src:
+            missing.append(name)
+    assert not missing, f"these layer methods do not record what they fetched: {missing}"

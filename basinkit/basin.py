@@ -151,6 +151,49 @@ class Basin:
             f"centroid=({lat:.3f}, {lon:.3f}) backend={backend!r}>"
         )
 
+    # -- what was fetched, and when ---------------------------------------
+    #: Keys worth keeping out of a layer's attrs. The sources already tag
+    #: every array they return; what was missing was a place to keep the tags
+    #: once the array had been handed on and forgotten.
+    _ACQUISITION_KEYS = ("basinkit_product", "license", "citation",
+                         "basinkit_native_res_m", "basinkit_output_res_m",
+                         "basinkit_resampling", "basinkit_coarsen_factor",
+                         "basinkit_tiles_merged", "basinkit_sources")
+
+    def _acquired(self, out, call: str, **extra):
+        """Record what a layer call fetched, then hand the layer back unchanged.
+
+        A product name carries an epoch -- "ESA WorldCover 2021" -- but not a
+        retrieval date, and the two answer different questions. The epoch says
+        which edition was asked for; the date says which bytes arrived, which
+        is what tells you whether a rerun months later differs because you
+        changed something or because the provider reissued a tile.
+
+        Appended rather than replaced: fetching the same layer twice in a run
+        is a fact about the run, not something to tidy away.
+        """
+        import datetime
+
+        attrs = getattr(out, "attrs", None) or {}
+        record = {"call": call,
+                  "retrieved_utc": datetime.datetime.now(
+                      datetime.timezone.utc).isoformat(timespec="seconds")}
+        for key in self._ACQUISITION_KEYS:
+            if key in attrs:
+                record[key.replace("basinkit_", "")] = attrs[key]
+        record.update({k: v for k, v in extra.items() if v is not None})
+        self.provenance.setdefault("layers", []).append(record)
+        return out
+
+    def acquisitions(self):
+        """Every layer fetched on this basin, in the order it was fetched.
+
+        This is the row set a batch run should keep beside each basin: rerun
+        the same outlet in six months and a diff over these records says
+        whether the inputs moved.
+        """
+        return list(self.provenance.get("layers", []))
+
     # -- layers ------------------------------------------------------------
     def dem(self, product: str = "cop30", **kwargs):
         """Elevation, clipped and masked to the basin."""
@@ -163,7 +206,7 @@ class Basin:
         # rather than the cause. The source is lon/lat, so say so.
         if getattr(getattr(out, "rio", None), "crs", None) is None:
             out = out.rio.write_crs("EPSG:4326")
-        return out
+        return self._acquired(out, "dem", product=product)
 
     def landcover(self, year: int | None = None, source: str = "worldcover",
                   **kwargs):
@@ -180,16 +223,20 @@ class Basin:
         from .sources.landcover import esri_lulc, worldcover
 
         if source == "worldcover":
-            return worldcover(self.geometry, year=year or 2021, **kwargs)
+            return self._acquired(
+                worldcover(self.geometry, year=year or 2021, **kwargs), "landcover")
         if source == "esri":
-            return esri_lulc(self.geometry, year=year, **kwargs)
+            return self._acquired(
+                esri_lulc(self.geometry, year=year, **kwargs), "landcover")
         raise ValueError(f"Unknown land cover source {source!r}: use 'worldcover' or 'esri'.")
 
     def soil(self, prop: str = "clay", depth: str = "0-5cm", **kwargs):
         """A SoilGrids property. See :data:`basinkit.sources.soil.PROPERTIES`."""
         from .sources.soil import soilgrids
 
-        return soilgrids(self.geometry, prop=prop, depth=depth, **kwargs)
+        return self._acquired(
+            soilgrids(self.geometry, prop=prop, depth=depth, **kwargs),
+            "soil", property=prop, depth=depth)
 
     def available_water_capacity(self, depth: str = "0-5cm"):
         """Plant-available water capacity (field capacity minus wilting point)."""
@@ -211,9 +258,13 @@ class Basin:
         from .sources.climate import chirps, persiann, terraclimate
 
         if source == "chirps":
-            return chirps(self.geometry, start, end, **kwargs)
+            return self._acquired(
+                chirps(self.geometry, start, end, **kwargs),
+                "precipitation", source="chirps", years=f"{start}-{end or 'latest'}")
         if source == "persiann":
-            return persiann(self.geometry, str(start), end, **kwargs)
+            return self._acquired(
+                persiann(self.geometry, str(start), end, **kwargs),
+                "precipitation", source="persiann", years=f"{start}-{end or 'latest'}")
         if source == "terraclimate":
             ds = terraclimate(self.geometry, ("ppt",), int(start), end, **kwargs)
             out = ds["ppt"]
@@ -224,7 +275,9 @@ class Basin:
             # record that it is incomplete.
             for key, value in ds.attrs.items():
                 out.attrs.setdefault(key, value)
-            return out
+            return self._acquired(out, "precipitation",
+                                  source="terraclimate",
+                                  years=f"{start}-{end or 'latest'}")
         raise ValueError(
             f"Unknown precipitation source {source!r}: use 'chirps', 'persiann' "
             "or 'terraclimate'."
@@ -240,7 +293,9 @@ class Basin:
         """JRC Global Surface Water: a pre-reduced 37-year Landsat water stack."""
         from .sources.water import global_surface_water
 
-        return global_surface_water(self.geometry, layer=layer, **kwargs)
+        return self._acquired(
+            global_surface_water(self.geometry, layer=layer, **kwargs),
+            "surface_water", layer=layer)
 
     def attributes(self, prefixes: tuple[str, ...] | None = None, **kwargs):
         """281 pre-computed BasinATLAS attributes for this basin.
@@ -303,13 +358,15 @@ class Basin:
         """HydroRIVERS reaches inside the basin, with discharge and stream order."""
         from .sources.vectors import hydrorivers
 
-        return hydrorivers(self.geometry, min_order=min_order, **kwargs)
+        return self._acquired(
+            hydrorivers(self.geometry, min_order=min_order, **kwargs), "rivers")
 
     def lakes(self, min_area_km2: float = 0.0, **kwargs):
         """HydroLAKES water bodies inside the basin."""
         from .sources.vectors import hydrolakes
 
-        return hydrolakes(self.geometry, min_area_km2=min_area_km2, **kwargs)
+        return self._acquired(
+            hydrolakes(self.geometry, min_area_km2=min_area_km2, **kwargs), "lakes")
 
     def sentinel2(self, start: str, end: str, *, cloud_cover: float = 20,
                   bands: list[str] | None = None, composite: str | None = "median",

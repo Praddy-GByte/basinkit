@@ -107,6 +107,7 @@ def hydrorivers(geometry, region: str | None = None, *, min_order: int = 0,
     if min_order and "ORD_STRA" in gdf.columns:
         gdf = gdf[gdf["ORD_STRA"] >= min_order]
     gdf.attrs["license"] = "CC BY 4.0"
+    gdf.attrs["basinkit_product"] = "HydroRIVERS v1.0"
     gdf.attrs["basinkit_regions"] = used or codes[:1]
     return gdf
 
@@ -128,5 +129,6 @@ def hydrolakes(geometry, *, min_area_km2: float = 0.0, progress: bool = True):
         gdf = gdf[gdf.intersects(geometry)].copy()
     if min_area_km2 and "Lake_area" in gdf.columns:
         gdf = gdf[gdf["Lake_area"] >= min_area_km2]
+    gdf.attrs["basinkit_product"] = "HydroLAKES v1.0"
     gdf.attrs["license"] = "CC BY 4.0"
     return gdf
