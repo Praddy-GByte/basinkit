@@ -3,7 +3,7 @@ name=basinkit
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Click a river anywhere on Earth and get an analysis-ready basin package: elevation, terrain surfaces, land cover, soil, rainfall, surface water, rivers, full Horton-Strahler morphometry, a grade for whether the elevation model can carry any of it, a quality indicator for every other layer, and an eight-page report.
-version=0.9.1
+version=0.9.2
 author=Pradeepika Kaushik
 email=pradeepika.kaushik@gmail.com
 
@@ -36,12 +36,25 @@ hasProcessingProvider=yes
 # their Python dependencies, so the plugin detects it at load
 # and hands the user a command that works. Declaring it here is what puts it in
 # the "External dependencies" field on plugins.qgis.org.
-external_deps=basinkit>=0.9.1
+external_deps=basinkit>=0.9.2
 server=False
 
 tags=hydrology,watershed,catchment,basin,delineation,dem,terrain,slope,hand,morphometry,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
 
-changelog=0.9.1
+changelog=0.9.2
+    - Every layer now records what it was and when it arrived: product,
+      licence, the resolution it came back at and a UTC retrieval date. A
+      product name carries an edition but not a date, and a repeat study needs
+      the date to tell its own change apart from the provider reissuing a
+      tile. Basin report prints the list on its provenance page, and the full
+      run writes it into the manifest beside the dataset catalogue.
+    - HydroRIVERS and HydroLAKES did not name themselves at all, only their
+      licence. The elevation source named its route key, "cop30", rather than
+      the dataset that answered it. Both now take their name and licence from
+      the catalogue.
+    - Needs basinkit 0.9.2 or newer.
+    
+    0.9.1
     - Basin report ran at ten times the budget 0.9.0 had just set for it. The
       package caps the elevation grid at four megapixels because a larger one
       was killed by the operating system, and inside QGIS that takes QGIS with

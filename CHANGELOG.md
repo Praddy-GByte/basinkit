@@ -1,5 +1,61 @@
 # Changelog
 
+## 0.9.2 -- 2026-10-17
+
+### What was fetched, and when it arrived
+
+Asked for by someone planning batch runs over many outlets, reread months
+later: can the report carry the dataset details through from the acquisition
+step?
+
+Almost. The sources already tagged every array they handed back -- ESA
+WorldCover 2021 arrives carrying its product, licence, native and output
+resolution, the resampling used and how many tiles were merged -- but nothing
+kept the tags once the array had been passed on, so the run itself had no
+record of what it had fetched.
+
+A product name carries an edition. It does not carry a retrieval date, and the
+two answer different questions: the edition says what was asked for, the date
+says which bytes arrived. Without the second, a rerun that differs cannot be
+told apart from the provider reissuing a tile -- which is the whole question a
+repeat study is asking.
+
+Every layer method now returns through an internal recorder that keeps those
+tags with a UTC timestamp and the arguments that chose the layer.
+`Basin.acquisitions()` hands the list back. Records are appended rather than
+replaced, because fetching a layer twice in one run is a fact about the run.
+The list is carried into the full-run manifest as `layers_acquired`, beside
+the existing `datasets_available` -- the first says what could be reached, the
+second what actually was -- and the report's provenance page prints it, or
+says plainly that no layer was fetched through this basin when none was.
+
+A test reads `basin.py` and fails if a layer method returns without recording,
+because a recorder is only worth having if nothing routes around it.
+
+### Three faults found while wiring it through
+
+HydroRIVERS and HydroLAKES did not name themselves at all. They tagged a
+licence and nothing else, so their records read `{"license": "CC BY 4.0"}`
+with no indication of which dataset that licence belonged to.
+
+The elevation source tagged its route key rather than the dataset, so a
+provenance line read `cop30` -- the string a caller types -- in place of
+`Copernicus DEM GLO-30`, and the report carried a second table of names to
+translate it back. The catalogue already holds the name and the licence, so
+the source takes them from there, and the report accepts either spelling
+because a grid fetched before this change still carries the key.
+
+An argument passed to the recorder overwrote the attribute the source had set.
+The attributes say what arrived and the arguments say what was asked for;
+where both name the same thing the arrival now wins, and the request is kept
+beside it rather than in place of it.
+
+### Also
+
+`CITATION.cff` carries the author's ORCID, which was a row of zeros -- worse
+than absent, because a reader cannot tell a placeholder from a wrong
+identifier.
+
 ## 0.9.1 -- 2026-10-16
 
 Two faults in 0.9.0. Both were found by running the whole analysis set over

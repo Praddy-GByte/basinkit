@@ -49,7 +49,7 @@ from .exceptions import (
 )
 from .river import Confluence, River
 
-__version__ = "0.9.1"
+__version__ = "0.9.2"
 
 # Authorship. These travel with every install, every wheel and every import, so
 # that the person a user credits is never a guess.
