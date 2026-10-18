@@ -1,5 +1,81 @@
 # Changelog
 
+## 0.9.3 -- unreleased
+
+### A provenance record that does not have to be believed
+
+The acquisition record added in 0.9.2 said which product a layer came from and
+when it was read. That is what a run says about itself, and a repeat study six
+months later can do nothing with it: if the answer has moved, nothing in the
+record separates a change of your own from the provider reissuing a tile under
+the same name and the same URL.
+
+Every file the cache serves or fetches is now hashed, and each layer record
+carries the digests of the files that call actually read. The digest is
+computed once and kept in a sidecar beside the file, because a 530 MB reach
+table is worth hashing once and not on every run. `HASH_DOWNLOADS` turns it
+off where reproducibility is not the point, and a source then reads as
+`unverifiable` -- never as `unchanged`.
+
+`cache.recheck()` compares a recorded run against what is in the cache now and
+answers `unchanged`, `changed`, `absent` or `unverifiable`. That is the
+difference between a provenance log and a provenance proof.
+
+### The answer now carries the measurement that applies to it
+
+A scientist asked how accurate the tool is. The honest answer was a table:
+2,740 delineations at 2,550 gauges in 99 countries, a median area error of
+0.3% above 100,000 km2, 1.3% from 10,000 to 100,000 and 1.7% from 2,000 to
+10,000. What that answer leaves out is the rest of the same table. Between 100
+and 500 km2 the median error measured 30%, and below 100 km2 it measured 181%.
+
+Both halves have been published since the validation was run. Only the first
+half ever reached the output. Someone clicking a 135 km2 headwater in QGIS got
+an area, a boundary and a consistency check, and nothing anywhere said that
+the figure behind the software was measured on basins two orders of magnitude
+away from theirs. The number was not wrong. It was being quoted about a case
+it had never been measured on, and the software was the one quoting it.
+
+`basinkit.envelope.validation_envelope()` and
+`Basin.validation_envelope()` answer the narrower question instead: of the
+basins that were measured, which ones does this one resemble, and what was the
+error there. It returns `inside`, `edge` or `outside`, the band's own median
+error and its within-5% and within-20% counts, and one entry per descriptor
+compared. Reading the area is all it costs, so it downloads nothing.
+
+Pass a `dem_suitability()` result and it compares the terrain descriptors too.
+Those are not new measurements: the five suitability tests are the same five
+numbers recorded alongside the area error for 133 of the validation gauges, so
+each one is compared against the range it actually covered there -- the middle
+90% separately from the full span, because a value at the 99th percentile was
+measured by almost nothing and should not read as covered. One of those
+comparisons is a finding in its own right: within every size band, the fifth
+of basins whose depression filling was heaviest carried two to three times the
+median area error of the rest, on three to ten basins per band, which is a
+direction and not a coefficient. Another is a definition: every basin in the
+study was fully covered, so a basin with a void in it is outside the set
+rather than merely unusual.
+
+Three conditions are named as uncharacterised rather than quietly omitted.
+Aridity, flow regulation and karst each change how well surface topography
+defines a catchment, and none of them was recorded in the validation, so no
+error figure here was measured on any of them. The output says which tool
+measures each one. Claiming a five-axis envelope when the record supports two
+would have been the easier thing to build and worth nothing.
+
+It surfaces where the answer does. **Delineate basin** prints the band that
+applies and writes `validated` and `band_err_pct` into the output layer's
+attribute table, so it survives the dialog closing. **Elevation data
+suitability** writes `validation_envelope.csv` beside `dem_suitability.csv`.
+The report's uncertainty section states the row rather than pointing at the
+table, and the full-run manifest carries the whole envelope. The ArcGIS run is
+still 70 analyses; the envelope rides along with the suitability step rather
+than becoming a 71st.
+
+Every figure in the module is recomputed from `verify/benchmarks` by
+`tests/test_envelope.py`, which fails if one of them drifts from the
+benchmark file it came from.
+
 ## 0.9.2 -- 2026-10-17
 
 ### What was fetched, and when it arrived

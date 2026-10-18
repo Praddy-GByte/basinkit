@@ -282,6 +282,25 @@ class DelineateBasinAlgorithm(BasinkitAlgorithm):
             f"Bounding-box efficiency: {basin.bbox_efficiency:.0%} "
             "(the share of the bounding box the basin actually occupies)"
         )
+        # The published accuracy is a median per size band and those medians
+        # span two orders of magnitude, so a user who is not told which row
+        # applies has been handed the headline figure by default. The warning
+        # above says this for one backend below one threshold. This says it
+        # for every basin, with the band's own numbers.
+        try:
+            from basinkit.envelope import validation_envelope
+
+            env = validation_envelope(basin)
+        except Exception as exc:                        # pragma: no cover
+            env = None
+            feedback.pushInfo(f"Validated range not computed: {exc}")
+        if env is not None:
+            line = (f"Validated range: {env['position']}. "
+                    f"{env['axes'][0]['statement']}")
+            if env["position"] == "inside":
+                feedback.pushInfo(line)
+            else:
+                feedback.pushWarning(line)
         # The consistency line compares the result against the river network,
         # which is an independent source. The outlet unit's own UP_AREA field
         # agrees with the assembled area to within one percent almost
@@ -345,6 +364,11 @@ class DelineateBasinAlgorithm(BasinkitAlgorithm):
         fields.append(make_field("n_units", FIELD_INT))
         fields.append(make_field("snapped_km", FIELD_DOUBLE))
         fields.append(make_field("snap_ratio", FIELD_DOUBLE))
+        # Carried in the attribute table and not only in the log, because the
+        # log is gone the moment the dialog closes and the layer is what gets
+        # saved, shared and reopened.
+        fields.append(make_field("validated", FIELD_STRING))
+        fields.append(make_field("band_err_pct", FIELD_DOUBLE))
         fields.append(make_field("citation", FIELD_STRING))
 
         sink, dest_id = self.parameterAsSink(
@@ -367,6 +391,8 @@ class DelineateBasinAlgorithm(BasinkitAlgorithm):
             int(provenance.get("n_units", 0) or 0),
             float(provenance.get("snap_distance_km", 0) or 0),
             float(provenance.get("snap_ratio", 0) or 0),
+            (env or {}).get("position", ""),
+            float((env or {}).get("size", {}).get("median_error_pct", 0) or 0),
             provenance.get("citation", ""),
         ])
         sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)

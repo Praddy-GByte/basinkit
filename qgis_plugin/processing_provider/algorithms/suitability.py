@@ -146,6 +146,44 @@ class DemSuitabilityAlgorithm(BasinkitAlgorithm):
         rows.append(f"cell_size_m,{result['cell_size_m']},,,,,")
         rows.append(f"basin_km2,{result['basin_km2']},,,,,")
 
+        # The grade above is about the terrain products. The envelope is about
+        # the boundary, and it is written here because this algorithm has
+        # already measured everything it needs: the five suitability tests are
+        # the five descriptors the terrain study recorded.
+        env = None
+        try:
+            from basinkit.envelope import validation_envelope
+
+            env = validation_envelope(basin, suitability=result)
+        except Exception as exc:                        # pragma: no cover
+            feedback.pushInfo(f"Validated range not computed: {exc}")
+        if env is not None:
+            feedback.pushInfo("")
+            feedback.pushInfo(f"POSITION IN THE VALIDATED SET: {env['position']}")
+            for axis in env["axes"]:
+                feedback.pushInfo(
+                    f"{axis['axis']:<11}{axis['position']:<11}"
+                    f"{axis['measured']:>12g}   validated "
+                    f"{axis['validated_range']}")
+            if env["position"] == "inside":
+                feedback.pushInfo(env["statement"])
+            else:
+                feedback.pushWarning(env["statement"])
+            env_rows = ["axis,position,measured,unit,validated_range,statement"]
+            for axis in env["axes"]:
+                statement = '"' + str(axis["statement"]).replace('"', "'") + '"'
+                env_rows.append(
+                    f"{axis['axis']},{axis['position']},{axis['measured']},"
+                    f"\"{axis['unit']}\",\"{axis['validated_range']}\",{statement}")
+            for entry in env["not_characterised"]:
+                env_rows.append(
+                    f"{entry['axis']},not-characterised,,,,"
+                    + '"' + str(entry["why"]).replace('"', "'") + '"')
+            env_path = os.path.join(folder, "validation_envelope.csv")
+            with open(env_path, "w", encoding="utf-8") as handle:
+                handle.write("\n".join(env_rows) + "\n")
+            feedback.pushInfo(f"Validated range written to {env_path}")
+
         csv_path = os.path.join(folder, "dem_suitability.csv")
         with open(csv_path, "w", encoding="utf-8") as handle:
             handle.write("\n".join(rows) + "\n")

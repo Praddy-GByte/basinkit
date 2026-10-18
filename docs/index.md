@@ -121,7 +121,18 @@ way rather than as one number:
 **And that table is about the population, not about your basin.** It says what
 error to expect across thousands of gauges at a given catchment size. It cannot
 say whether the one in front of you is a case it was kind to.
-`Basin.dem_suitability()` answers the second half by measuring the basin
+
+Two functions answer that, and they answer different halves of it.
+`Basin.validation_envelope()` says which row of the table above applies to this
+basin, and whether any of it does: `inside`, `edge` or `outside`, the median
+error measured at this size with its within-5% and within-20% counts, and the
+three conditions the validation never recorded -- aridity, flow regulation and
+karst -- so that no figure above is quoted about a case it was not measured on.
+It reads the area and nothing else, so it downloads nothing. Hand it a
+suitability result and it compares the terrain descriptors against the range
+they covered in the 133 gauges where both were recorded.
+
+`Basin.dem_suitability()` answers the other half by measuring the basin
 itself: how much of the surface depression filling had to invent, how many
 slopes fall below the angle at which a gradient is only the model's vertical
 error, relief against that error, the largest level surface as a share of the

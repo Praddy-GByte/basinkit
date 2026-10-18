@@ -757,13 +757,33 @@ def _methods_page(plt, pdf, basin, grade, density, page):
         except ImportError:
             lines.append(f"  {module} not installed")
 
+    # The accuracy figures differ by two orders of magnitude between the
+    # largest size band and the smallest, so a report that points at the
+    # published table without saying which row applies here has told the
+    # reader nothing. This states the row.
     lines += ["", "UNCERTAINTY", ""]
-    lines += _wrap(
-        "Catchment area accuracy depends almost entirely on catchment size and "
-        "is published by size band rather than as a single figure; see the "
-        "verification page in the basinkit documentation. The grade on the "
-        "cover of this report describes the terrain products here, which is a "
-        "separate question from the accuracy of the boundary.", 110)
+    try:
+        from .envelope import validation_envelope
+
+        env = validation_envelope(basin, suitability=grade)
+    except Exception as exc:                       # pragma: no cover - defensive
+        env = None
+        lines += _wrap(f"The validation envelope could not be computed: {exc}",
+                       110)
+    if env is not None:
+        lines.append(f"  Position in the validated set: {env['position']}")
+        lines += _wrap(env["statement"], 110)
+        lines += [""]
+        for axis in env["axes"]:
+            lines.append(f"  {axis['axis']}: {axis['position']} "
+                         f"({axis['measured']:g}, validated range "
+                         f"{axis['validated_range']})")
+        lines += [""]
+        lines += _wrap(
+            "The grade on the cover of this report describes the terrain "
+            "products here, which is a separate question from the accuracy of "
+            "the boundary. The full table by size band is in the verification "
+            "page of the basinkit documentation.", 110)
 
     _text_block(figure, 0.06, 0.905, lines, size=7.3, leading=0.0128)
     _close(plt, pdf, figure, page)

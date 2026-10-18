@@ -844,10 +844,22 @@ def s_suit(C):
                            mpatches.Patch(color="#e34948", label="below it — the model's own error")],
                   fontsize=7, frameon=False, loc="lower left", labelcolor=INK2)
     _bare(ax)
+    # The grade is about the terrain products. Where this basin sits in the
+    # set the boundary accuracy was measured on is a different question, and
+    # the five tests just computed are the five descriptors it needs, so it
+    # rides along here rather than costing a measurement of its own.
+    try:
+        C["envelope"] = C["basin"].validation_envelope(suitability=s)
+    except Exception:
+        C["envelope"] = None
+    env = C.get("envelope") or {}
     return fig, {"grade": s.get("grade"), "unmet": s.get("unmet"),
                  "support_fraction": s.get("support_fraction"),
                  "cell_size_m": s.get("cell_size_m"),
-                 "vertical_error_m": s.get("vertical_error_m")}
+                 "vertical_error_m": s.get("vertical_error_m"),
+                 "validated_position": env.get("position"),
+                 "validated_band_median_error_pct":
+                     (env.get("size") or {}).get("median_error_pct")}
 
 
 @step(52, "Does the data support the answer", "The five elevation tests, one by one",
@@ -1239,6 +1251,11 @@ def write_manifest(path, records, C, extra=None):
         "datasets_available": datasets,
         "layers_acquired": list(
             (getattr(C.get("basin"), "provenance", {}) or {}).get("layers", [])),
+        # Which row of the published accuracy table applies to this basin, and
+        # which conditions the validation never covered. Without it a manifest
+        # records what was computed and leaves the reader to assume the
+        # headline error applies.
+        "validation_envelope": C.get("envelope"),
         "steps": [{k: r[k] for k in ("id", "group", "title", "code", "status")
                    if k in r} for r in records],
         "counts": {"total": len(records),

@@ -586,6 +586,23 @@ class Basin:
         return suitability(self, dem=self.dem(**kwargs) if dem is None else dem,
                            support_map=support_map)
 
+    def validation_envelope(self, *, suitability=None):
+        """Which part of the validation set this basin belongs to.
+
+        The accuracy figures published with basinkit are medians over 2,740
+        delineations at 2,550 gauges, and they differ by two orders of
+        magnitude between the largest and the smallest band. This reports the
+        error that was measured at *this* basin's size, and names the
+        conditions the validation never covered, so that a figure which does
+        not apply here is not quoted as though it did.
+
+        Reads only the area, so it downloads nothing. Pass a
+        :meth:`dem_suitability` result to compare the terrain descriptors too.
+        """
+        from .envelope import validation_envelope
+
+        return validation_envelope(self, suitability=suitability)
+
     def streams(self, *, dem=None, min_area_km2: float = 1.0, **kwargs):
         """The channel network routed from this basin's own elevation."""
         from .terrain import streams

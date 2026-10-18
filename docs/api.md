@@ -6,6 +6,8 @@
 
 ::: basinkit.suitability
 
+::: basinkit.envelope
+
 ::: basinkit.quality
 
 ::: basinkit.report

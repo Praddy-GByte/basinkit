@@ -121,6 +121,17 @@ and nowhere else. The figures here use `area.meta`, which is km2 throughout.
 Weighted to the catalogue's own size mix: 61.9% within 20%, 16.7% out by more
 than 100%.
 
+Since 0.9.3 the software states this row itself rather than leaving it on this
+page. `Basin.validation_envelope()` reports which band a basin falls in, the
+error measured there, and whether the headline figures describe it at all: a
+135 km2 catchment is told that the median error measured at its size is 30%,
+which is what the table has always said and what the output never did. Given a
+`dem_suitability()` result it also compares the five terrain descriptors
+against the range they covered in the 133 gauges where both were recorded, and
+it names aridity, flow regulation and karst as conditions the validation did
+not characterise, so that no number here is quoted about a case it was not
+measured on.
+
 ### By continent
 
 Equal effort per continent and size band, because the catalogue is 72% European
