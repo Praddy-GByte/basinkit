@@ -68,6 +68,121 @@ def _key(url: str) -> str:
     return hashlib.sha256(url.encode()).hexdigest()[:16]
 
 
+
+#: Whether to hash what arrives. A digest is what turns "this run used
+#: WorldCover 2021" from something to believe into something a later run can
+#: check, so it is on by default; set it False to skip the cost where
+#: reproducibility is not the point.
+HASH_DOWNLOADS = True
+
+#: Every cached file this process has read or fetched, oldest first. Append
+#: only: a run that read the same tile twice read it twice.
+_LEDGER: list[dict] = []
+
+
+def _sha256(path: Path) -> str | None:
+    """The file's digest, computed once and kept in a sidecar beside it.
+
+    A 530 MB reach table costs seconds to hash, which is worth paying once and
+    not on every run, so the digest is written next to the file and read back
+    while the sidecar is no older than the file it describes. The sidecar is
+    advisory: anything that does not look like a digest is recomputed, and a
+    cache that cannot be written to is still usable.
+    """
+    if not HASH_DOWNLOADS:
+        return None
+    try:
+        side = path.with_suffix(path.suffix + ".sha256")
+        if side.exists() and side.stat().st_mtime >= path.stat().st_mtime:
+            kept = side.read_text(encoding="utf-8").strip()
+            if len(kept) == 64:
+                return kept
+        digest = hashlib.sha256()
+        with open(path, "rb") as fh:
+            for chunk in iter(lambda: fh.read(1 << 20), b""):
+                digest.update(chunk)
+        out = digest.hexdigest()
+        try:
+            side.write_text(out, encoding="utf-8")
+        except OSError:
+            pass
+        return out
+    except OSError:
+        return None
+
+
+def _record(url: str, path: Path, *, from_cache: bool) -> None:
+    """Note that this file was used, and what was in it."""
+    try:
+        size = path.stat().st_size
+    except OSError:
+        size = None
+    _LEDGER.append({"url": url, "path": str(path), "bytes": size,
+                    "sha256": _sha256(path), "from_cache": from_cache})
+
+
+def ledger() -> list[dict]:
+    """Every cached file read or fetched so far, oldest first."""
+    return list(_LEDGER)
+
+
+def clear_ledger() -> None:
+    """Forget what has been read. The cached files themselves are untouched."""
+    _LEDGER.clear()
+
+
+def recheck(sources: list[dict]) -> list[dict]:
+    """Compare a run's recorded sources against what is in the cache now.
+
+    This is the point of recording a digest rather than a date. A date says
+    when a file was read; a digest says what was in it, so a study repeated six
+    months later can be told whether its own change moved the answer or the
+    provider reissued a tile underneath it.
+
+    Each entry comes back with ``status``:
+
+    ``unchanged``   the bytes in the cache still hash to what was recorded
+    ``changed``     the file is there and hashes to something else
+    ``absent``      the file is no longer in the cache
+    ``unverifiable``  nothing was recorded to compare against
+    """
+    out = []
+    for source in sources or []:
+        was = source.get("sha256")
+        entry = {"url": source.get("url"), "recorded_sha256": was}
+        path = _find_cached(source.get("url"))
+        if was is None:
+            entry["status"] = "unverifiable"
+        elif path is None:
+            entry["status"] = "absent"
+        else:
+            now = _sha256(path)
+            entry["current_sha256"] = now
+            entry["status"] = "unchanged" if now == was else "changed"
+        out.append(entry)
+    return out
+
+
+def _find_cached(url: str | None) -> Path | None:
+    """The cached file for ``url``, wherever in the cache it was put.
+
+    A record carries no local path on purpose: a path names one machine, and
+    these records are meant to travel with a study. The cache file name begins
+    with a digest of the URL, so the URL is enough to find it again on any
+    machine that has it.
+    """
+    if not url:
+        return None
+    key = _key(url)
+    try:
+        for found in cache_dir().rglob(f"{key}_*"):
+            if found.is_file() and found.suffix != ".sha256":
+                return found
+    except OSError:
+        pass
+    return None
+
+
 def download(
     url: str,
     dest: Path | None = None,
@@ -92,6 +207,7 @@ def download(
     dest.parent.mkdir(parents=True, exist_ok=True)
 
     if dest.exists() and not force and dest.stat().st_size > expected_min_bytes:
+        _record(url, dest, from_cache=True)
         return dest
 
     tmp = dest.with_suffix(dest.suffix + ".part")
@@ -134,6 +250,7 @@ def download(
         raise DataSourceError(f"Download failed for {url}: {exc}") from exc
 
     tmp.replace(dest)
+    _record(url, dest, from_cache=False)
     return dest
 
 

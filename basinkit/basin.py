@@ -38,6 +38,8 @@ class Basin:
     def __init__(self, geometry, provenance: dict | None = None) -> None:
         self.geometry = geometry
         self.provenance = provenance or {}
+        #: How far into the cache ledger this basin has already attributed.
+        self._cache_mark = 0
         self._cache: dict[str, Any] = {}
 
     # -- constructors ------------------------------------------------------
@@ -188,6 +190,27 @@ class Basin:
         for key, value in extra.items():
             if value is not None:
                 record.setdefault(key, value)
+
+        # Which files this call actually read, and what was in them. The
+        # product name and the date are what the run says about itself; the
+        # digest is what a later run can check. Without it "the inputs had not
+        # moved" is an assertion, and the record exists so that it need not be.
+        from . import cache
+
+        seen = cache.ledger()
+        if len(seen) > self._cache_mark:
+            # One call that opened the same file twice read the same bytes
+            # twice, which says nothing a reader needs, so each file appears
+            # once per layer. Across layers they repeat, because a second
+            # layer reading the same tile is a fact about the run.
+            fresh, sources = seen[self._cache_mark:], []
+            for s in fresh:
+                entry = {k: s[k] for k in ("url", "bytes", "sha256", "from_cache")}
+                if entry not in sources:
+                    sources.append(entry)
+            record["sources"] = sources
+            self._cache_mark = len(seen)
+
         self.provenance.setdefault("layers", []).append(record)
         return out
 

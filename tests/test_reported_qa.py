@@ -907,3 +907,135 @@ def test_the_report_accepts_either_spelling_of_the_elevation_product():
                  "basinkit_output_res_m": 90}
     assert "Copernicus DEM GLO-30" in _elevation_source(old)
     assert "Copernicus DEM GLO-30" in _elevation_source(new)
+
+
+def _seed_cache(tmp_path, monkeypatch, url, payload: bytes):
+    """Put a file in a throwaway cache exactly where download() would."""
+    from basinkit import cache
+
+    monkeypatch.setattr(cache, "cache_dir", lambda: tmp_path)
+    target = tmp_path / "downloads" / f"{cache._key(url)}_tile.tif"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(payload)
+    return target
+
+
+def test_a_file_read_from_the_cache_is_recorded_with_its_digest():
+    """The ledger is what lets a later run check rather than believe."""
+    import hashlib
+    import tempfile
+    from pathlib import Path
+
+    from basinkit import cache
+
+    cache.clear_ledger()
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "tile.tif"
+        path.write_bytes(b"elevation")
+        cache._record("https://example.org/tile.tif", path, from_cache=True)
+
+    entry, = cache.ledger()
+    assert entry["sha256"] == hashlib.sha256(b"elevation").hexdigest()
+    assert entry["bytes"] == len(b"elevation")
+    assert entry["from_cache"] is True
+    cache.clear_ledger()
+
+
+def test_the_digest_is_kept_beside_the_file_and_not_recomputed():
+    """A 530 MB reach table is worth hashing once, not once per run."""
+    import tempfile
+    from pathlib import Path
+
+    from basinkit import cache
+
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "big.parquet"
+        path.write_bytes(b"reaches")
+        first = cache._sha256(path)
+        side = path.with_suffix(path.suffix + ".sha256")
+        assert side.exists()
+        assert side.read_text(encoding="utf-8").strip() == first
+
+        # a sidecar that disagrees is still used while it is not older than
+        # the file, so prove the read path is the one being taken
+        side.write_text("f" * 64, encoding="utf-8")
+        assert cache._sha256(path) == "f" * 64
+
+
+def test_hashing_can_be_turned_off_and_then_nothing_claims_to_be_verified():
+    """An unhashed source must read as unverifiable, never as unchanged."""
+    import tempfile
+    from pathlib import Path
+
+    from basinkit import cache
+
+    cache.clear_ledger()
+    monkeyed = cache.HASH_DOWNLOADS
+    try:
+        cache.HASH_DOWNLOADS = False
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "tile.tif"
+            path.write_bytes(b"x")
+            cache._record("https://example.org/x", path, from_cache=False)
+        entry, = cache.ledger()
+        assert entry["sha256"] is None
+        status, = cache.recheck([entry])
+        assert status["status"] == "unverifiable"
+    finally:
+        cache.HASH_DOWNLOADS = monkeyed
+        cache.clear_ledger()
+
+
+def test_recheck_tells_unchanged_from_changed_from_absent(tmp_path, monkeypatch):
+    """The three answers a repeat study needs, and they must not blur."""
+    from basinkit import cache
+
+    url = "https://example.org/worldcover/tile.tif"
+    path = _seed_cache(tmp_path, monkeypatch, url, b"first edition")
+    recorded = {"url": url, "bytes": path.stat().st_size,
+                "sha256": cache._sha256(path), "from_cache": False}
+
+    assert cache.recheck([recorded])[0]["status"] == "unchanged"
+
+    # the provider reissues the tile
+    path.write_bytes(b"second edition, same name")
+    path.with_suffix(path.suffix + ".sha256").unlink(missing_ok=True)
+    verdict = cache.recheck([recorded])[0]
+    assert verdict["status"] == "changed"
+    assert verdict["current_sha256"] != recorded["sha256"]
+
+    # or it is simply gone from this machine
+    path.unlink()
+    assert cache.recheck([recorded])[0]["status"] == "absent"
+
+
+def test_a_layer_record_carries_no_local_path():
+    """These records travel with a study; a path names one machine.
+
+    It is also the reason recheck() finds the file from the URL instead.
+    """
+    basin = _bare_basin()
+    basin._acquired(_stub_layer(basinkit_product="ESA WorldCover 2021"), "landcover")
+    record, = basin.acquisitions()
+    for source in record.get("sources", []):
+        assert "path" not in source
+
+
+def test_one_call_reading_a_file_twice_lists_it_once():
+    """Within a layer the same bytes twice say nothing a reader needs."""
+    import tempfile
+    from pathlib import Path
+
+    from basinkit import cache
+
+    cache.clear_ledger()
+    basin = _bare_basin()
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "tile.tif"
+        path.write_bytes(b"same bytes")
+        for _ in range(2):
+            cache._record("https://example.org/same.tif", path, from_cache=True)
+    basin._acquired(_stub_layer(basinkit_product="HydroRIVERS v1.0"), "rivers")
+    record, = basin.acquisitions()
+    assert len(record["sources"]) == 1
+    cache.clear_ledger()
