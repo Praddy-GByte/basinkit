@@ -25,13 +25,15 @@ authors:
     family-names: Kaushik
     orcid: "https://orcid.org/0000-0002-0767-3983"
 version: 0.9.3
-# Zenodo mints a version DOI at the moment a release is published, so the one
-# belonging to this release does not exist while this release is being built.
-# This file therefore ships with the concept DOI, which is true at every
-# moment -- it resolves to the newest version, which is this one -- and the
-# version DOI is added in the commit that follows publication.
-doi: "10.5281/zenodo.22181933"
+# The version DOI, so a citation of this release resolves to this release and
+# not to whichever one happens to be newest when the citation is followed.
+# It is added here after publication, because Zenodo mints it at the moment
+# the release is published and it does not exist while the release is built.
+doi: "10.5281/zenodo.23485810"
 identifiers:
+  - type: doi
+    value: "10.5281/zenodo.23485810"
+    description: "Version DOI -- this release, 0.9.3"
   - type: doi
     value: "10.5281/zenodo.22181933"
     description: "Concept DOI -- always resolves to the latest version"
