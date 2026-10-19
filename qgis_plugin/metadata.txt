@@ -3,7 +3,7 @@ name=basinkit
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Click a river anywhere on Earth and get an analysis-ready basin package: elevation, terrain surfaces, land cover, soil, rainfall, surface water, rivers, full Horton-Strahler morphometry, a grade for whether the elevation model can carry any of it, a quality indicator for every other layer, and an eight-page report.
-version=0.9.2
+version=0.9.3
 author=Pradeepika Kaushik
 email=pradeepika.kaushik@gmail.com
 
@@ -36,12 +36,30 @@ hasProcessingProvider=yes
 # their Python dependencies, so the plugin detects it at load
 # and hands the user a command that works. Declaring it here is what puts it in
 # the "External dependencies" field on plugins.qgis.org.
-external_deps=basinkit>=0.9.2
+external_deps=basinkit>=0.9.3
 server=False
 
 tags=hydrology,watershed,catchment,basin,delineation,dem,terrain,slope,hand,morphometry,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
 
-changelog=0.9.2
+changelog=0.9.3
+    - Every answer now carries the accuracy that was measured at its own
+      catchment size. The published figures run from 0.3 percent median area
+      error above 100,000 square kilometres to 181 percent below 100, and
+      until now only the first half reached the output. Delineate basin states
+      the band that applies and writes it into the layer's attribute table as
+      "validated" and "band_err_pct", so it survives the dialog closing.
+      Elevation data suitability writes the full comparison to
+      validation_envelope.csv. Basin report states the row rather than
+      pointing at the documentation.
+    - Aridity, flow regulation and karst are named as conditions the
+      validation never characterised, rather than left out, so no figure is
+      quoted about a case it was not measured on.
+    - Every file the cache serves or fetches is now hashed, and each layer
+      record carries the digests of the files that call read, so a repeat run
+      can tell a change of its own apart from a provider reissuing a tile.
+    - Needs basinkit 0.9.3 or newer.
+    
+    0.9.2
     - Every layer now records what it was and when it arrived: product,
       licence, the resolution it came back at and a UTC retrieval date. A
       product name carries an edition but not a date, and a repeat study needs

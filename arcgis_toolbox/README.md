@@ -199,7 +199,7 @@ not grant the name: a fork must carry its own.
 If you use it in published work, please cite:
 
 > Kaushik, P. (2026). *basinkit: basin-scale acquisition of open Earth
-> observation data* (Version 0.9.2) [Computer software]. Zenodo.
+> observation data* (Version 0.9.3) [Computer software]. Zenodo.
 > https://doi.org/10.5281/zenodo.22181933
 
 The underlying datasets carry their own licences — `Basin.license_report()`
