@@ -186,7 +186,8 @@ RTC, Landsat Collection 2, HLS.
 ## Licence
 
 GPL-3.0-or-later for the plugin, because the QGIS plugin repository requires
-a licence compatible with the GPL version 2 or later. Apache-2.0 for the
-basinkit Python package the plugin calls. Neither licence grants the use of
-the name: a fork must carry its own. Releases up to 0.8.4 were MIT and remain
-MIT. The data carries its own terms.
+a licence compatible with the GPL version 2 or later. AGPL-3.0-or-later for the
+basinkit Python package the plugin calls, from 0.9.4 onwards. Neither licence
+grants the use of the name: a fork must carry its own. Releases up to 0.8.4
+were MIT and remain MIT, and 0.9.0 to 0.9.3 were Apache-2.0 and remain so. The
+data carries its own terms.

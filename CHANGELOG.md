@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.9.4 -- unreleased
+
+### AGPL-3.0-or-later for the package
+
+Apache-2.0 let anyone take basinkit, close it, and sell it -- as a product or,
+more realistically for a delineation engine, as a web service -- without giving
+anything back and without anyone being able to check what the service was
+actually doing. For software whose entire claim is that you can open it and
+verify the number, that last part is the contradiction.
+
+From this release the Python package is AGPL-3.0-or-later. Use it, change it,
+publish with it: unchanged. Distribute a modified version, or let other people
+use one over a network, and they get your source on the same terms.
+
+Three things deliberately did not change. The QGIS plugin stays
+GPL-3.0-or-later, which is what the QGIS plugin repository requires and what it
+already was. The ArcGIS Pro toolbox stays Apache-2.0: it is a separate program
+that runs the package in an interpreter of its own and reads back the files it
+writes. And every release already published keeps the licence it was published
+under -- MIT up to 0.8.4, Apache-2.0 for 0.9.0 to 0.9.3. A licence cannot be
+withdrawn from a version that is already out, and this is not an attempt to.
+
+The NOTICE file is no longer required by the licence, since AGPL-3.0 has no
+equivalent of Apache-2.0 section 4(b). It still ships inside the wheel, because
+it carries the citation and the name clause, and a copy that arrives without
+them is a copy that cannot be cited or correctly named. The name clause now
+rests on section 7(e), which is where the AGPL lets a licensor decline to grant
+rights in a trade name.
+
 ## 0.9.3 -- 2026-10-19
 
 ### A provenance record that does not have to be believed

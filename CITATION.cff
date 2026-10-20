@@ -38,7 +38,7 @@ identifiers:
     value: "10.5281/zenodo.22181933"
     description: "Concept DOI -- always resolves to the latest version"
 date-released: 2026-10-19
-license: Apache-2.0
+license: AGPL-3.0-or-later
 repository-code: "https://github.com/Praddy-GByte/basinkit"
 url: "https://github.com/Praddy-GByte/basinkit"
 keywords:

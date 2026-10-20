@@ -56,7 +56,7 @@ __version__ = "0.9.3"
 # that the person a user credits is never a guess.
 __author__ = "Pradeepika Kaushik"
 __email__ = "pradeepika.kaushik@gmail.com"
-__license__ = "Apache-2.0"
+__license__ = "AGPL-3.0-or-later"
 __copyright__ = "Copyright (c) 2026 Pradeepika Kaushik"
 # Concept DOI: always resolves to the newest release. The version DOI for this
 # release is in CITATION.cff.

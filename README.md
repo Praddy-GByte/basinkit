@@ -8,7 +8,7 @@
 [![PyPI](https://img.shields.io/pypi/v/basinkit?logo=pypi&logoColor=white)](https://pypi.org/project/basinkit/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22181933.svg)](https://doi.org/10.5281/zenodo.22181933)
 [![Tests](https://github.com/Praddy-GByte/basinkit/actions/workflows/ci.yml/badge.svg)](https://github.com/Praddy-GByte/basinkit/actions)
-[![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
+[![License](https://img.shields.io/badge/code-AGPL--3.0--or--later-blue)](LICENSE)
 
 **Click a river anywhere on Earth. Get an analysis-ready basin package: the
 basin polygon, elevation, land cover, soil, rainfall, surface water and rivers
@@ -457,19 +457,25 @@ for one specific version, and the author ORCID, are in `CITATION.cff`.
 
 ## Licence
 
-**Apache-2.0** for the Python package and the ArcGIS Pro toolbox.
+**AGPL-3.0-or-later** for the Python package, from 0.9.4.
 **GPL-3.0-or-later** for the QGIS plugin, because the QGIS plugin repository
-requires a licence compatible with the GPL version 2 or later. Releases up to
-and including 0.8.4 were published under MIT and remain under it; Apache-2.0
-applies from 0.9.0.
+requires a licence compatible with the GPL version 2 or later.
+**Apache-2.0** for the ArcGIS Pro toolbox, which is a separate program that
+runs the package in an interpreter of its own.
 
-You may use it, modify it and redistribute it, commercially included. Three
-things are conditions of the licence rather than courtesies: the copyright
-notice and the `NOTICE` file travel with every copy (section 4), files you
-change have to be marked as changed (section 4a), and the licence does not
-grant the name (section 6).
+Releases up to and including 0.8.4 were published under MIT and remain under
+it; 0.9.0 to 0.9.3 were Apache-2.0 and remain under it. A licence cannot be
+withdrawn from a version already published, and this one is not being
+withdrawn from those.
 
-The data carries its own terms, which are not Apache-2.0 and in several cases
+You may use it, modify it and redistribute it, commercially included. What the
+AGPL adds over the licence it replaces is reciprocity: if you distribute a
+modified version, or let others use one over a network, the people you give it
+to get the source of your version on the same terms. Running it yourself,
+studying it, changing it for your own work and publishing with it are
+unaffected. The licence does not grant the name (section 7e).
+
+The data carries its own terms, which are not the AGPL and in several cases
 are stricter; see `LICENSE` and `basinkit catalog`.
 
 ### The name

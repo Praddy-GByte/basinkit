@@ -8,7 +8,7 @@ version = "0.9.3"
 description = "Click a river anywhere on Earth; get its basin, its data layers and its morphometry, analysis-ready, with no account."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "Apache-2.0" }
+license = { text = "AGPL-3.0-or-later" }
 authors = [{ name = "Pradeepika Kaushik", email = "pradeepika.kaushik@gmail.com" }]
 maintainers = [{ name = "Pradeepika Kaushik", email = "pradeepika.kaushik@gmail.com" }]
 keywords = [
@@ -18,7 +18,7 @@ keywords = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: Apache Software License",
+  "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -60,8 +60,10 @@ basinkit = "basinkit.cli:main"
 [tool.hatch.build.targets.wheel]
 packages = ["basinkit"]
 
-# Apache-2.0 section 4(b) requires the NOTICE file to travel with every
-# redistribution, so it has to be inside the wheel, not only in the repo.
+# AGPL-3.0 does not require a NOTICE file the way Apache-2.0 section 4(b) did.
+# It is still shipped inside the wheel rather than only in the repo, because it
+# carries the citation and the name clause, and a copy that arrives without
+# them is a copy that cannot be cited or correctly named.
 [tool.hatch.build.targets.wheel.force-include]
 "NOTICE" = "basinkit/NOTICE"
 "LICENSE" = "basinkit/LICENSE"

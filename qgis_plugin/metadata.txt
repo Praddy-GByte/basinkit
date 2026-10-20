@@ -11,7 +11,7 @@ about=Click a point on any river in the world and get the basin draining into it
     Other plugins delineate from a clicked point, and Sen Hydro does it well through the same public mghydro service this plugin can use. Three things here are different. The data: elevation, land cover, soil, rainfall, surface water, rivers and lakes come back as layers clipped to the polygon, not as a report. The morphometry: the full Horton-Strahler-Schumm set from one algorithm, with Strahler streams counted as streams rather than as the reaches a river dataset splits them into. And the offline path: the default backend walks the HydroBASINS level-12 graph from a cached local copy, so after the first download it needs no network at all. Every algorithm is a Processing algorithm, so batch mode, the Model Builder and qgis_process all work.
     SETUP: the Python package needs Python 3.10, as geopandas 1.0 and rasterio both do, and what matters is the Python your QGIS was built against rather than the QGIS version itself. QGIS 3.34 LTR and 3.40 both ship a new enough one on every platform. The Windows and macOS builds of 3.28 shipped Python 3.9, where pip finds no release of basinkit at all, while the Debian and Ubuntu packages of the same 3.28 run on the distribution's own 3.11, where it installs normally -- so 3.28 is still offered, and the plugin answers the real question at load time by reading the running Python and saying what it found. If it reports one older than 3.10, update QGIS to 3.34 or newer. This plugin runs on the Python package "basinkit", which is installed once with pip into the Python that QGIS itself uses. The plugin detects whether it is present and prints the exact command for your installation, so setup is a single copy and paste. The surest route on every platform is from the QGIS Python Console, which installs into the interpreter QGIS imports from; note that "!pip install" works only in Jupyter, not in the QGIS console. See the plugin homepage for details.
     LICENCE: the plugin is GPL-3.0-or-later. The basinkit Python package it
-    calls is Apache-2.0. Neither licence grants the use of the name
+    calls is AGPL-3.0-or-later. Neither licence grants the use of the name
     basinkit; a fork must carry its own.
 
     CITATION: if basinkit contributes to published work, please cite
@@ -129,7 +129,7 @@ changelog=0.9.3
       same basin's highest point.
     - Every algorithm's help panel now prints the citation and the DOI.
     - The plugin is GPL-3.0-or-later. The basinkit Python package it calls is
-      Apache-2.0. Neither licence grants the use of the name basinkit; a fork
+      AGPL-3.0-or-later. Neither licence grants the use of the name basinkit; a fork
       must carry its own.
     - The plugin now asks for the packages it actually needs. It told people
       to run "pip install basinkit", which does not install pyflwdir -- and

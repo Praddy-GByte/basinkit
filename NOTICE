@@ -17,14 +17,17 @@ BibTeX entry for the version installed.
 
 NAME
 
-"basinkit" and "BasinKit" are names of this project. As section 6 of the
-Apache License 2.0 states, the licence does not grant permission to use the
-licensor's names or marks. A fork, a redistribution or a derived product is
-free to exist and must carry a name of its own, and must not present itself as
-basinkit or imply endorsement by the author.
+"basinkit" and "BasinKit" are names of this project. Section 7(e) of the GNU
+Affero General Public License version 3 permits a licensor to decline to grant
+rights under trademark law for use of a trade name, and that right is declined
+here: the licence covers the code and not the name. A fork, a redistribution or
+a derived product is free to exist and must carry a name of its own, and must
+not present itself as basinkit or imply endorsement by the author.
 
 QGIS PLUGIN
 
 The QGIS plugin in qgis_plugin/ is licensed GPL-3.0-or-later, because the QGIS
 plugin repository requires a licence compatible with the GPL version 2 or
-later. See qgis_plugin/LICENSE.
+later. See qgis_plugin/LICENSE. The ArcGIS Pro toolbox in arcgis_toolbox/
+remains Apache-2.0: it is a separate program that runs this package in an
+interpreter of its own and reads back the files it writes.

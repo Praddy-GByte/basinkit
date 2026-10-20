@@ -193,7 +193,10 @@ Everything lands in the output folder you choose, in formats Pro reads natively:
 
 ## Licence and citation
 
-Apache-2.0. Releases up to 0.8.4 were MIT and remain MIT. The licence does
+Apache-2.0 for this toolbox, which is a separate program that runs the
+basinkit package in an interpreter of its own; the package itself is
+AGPL-3.0-or-later from 0.9.4. Releases up to 0.8.4 were MIT and remain MIT,
+and 0.9.0 to 0.9.3 were Apache-2.0 throughout. The licence does
 not grant the name: a fork must carry its own.
 
 If you use it in published work, please cite:
