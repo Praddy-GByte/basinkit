@@ -8,6 +8,8 @@
 
 ::: basinkit.envelope
 
+::: basinkit.snow
+
 ::: basinkit.quality
 
 ::: basinkit.report

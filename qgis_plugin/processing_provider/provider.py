@@ -14,6 +14,7 @@ from .algorithms.fetch_layers import FetchBasinLayersAlgorithm
 from .algorithms.landscape import LandscapeFormAlgorithm
 from .algorithms.morphometry import BasinMorphometryAlgorithm
 from .algorithms.report import BasinReportAlgorithm
+from .algorithms.snow import SnowIceAlgorithm
 from .algorithms.statistics import BasinStatisticsAlgorithm
 from .algorithms.subbasins import SubBasinsAlgorithm
 from .algorithms.suitability import DemSuitabilityAlgorithm
@@ -31,6 +32,7 @@ class BasinkitProvider(QgsProcessingProvider):
             TerrainSurfacesAlgorithm(),
             DemSuitabilityAlgorithm(),
             DataQualityAlgorithm(),
+            SnowIceAlgorithm(),
             BasinStatisticsAlgorithm(),
             BasinMorphometryAlgorithm(),
             LandscapeFormAlgorithm(),

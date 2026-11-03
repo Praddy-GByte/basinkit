@@ -2,6 +2,51 @@
 
 ## 0.9.4 -- unreleased
 
+### Permanent snow and ice, and where it sits
+
+For a Himalayan, Andean or Alpine catchment this is usually the first question
+asked and the last one answered. Both layers it needs were already being
+fetched: ESA WorldCover carries a snow-and-ice class, and the elevation model
+is in hand for the terrain products. Nothing put the two together.
+
+`Basin.snow_ice()` reports the share of the basin under permanent snow and
+ice, measured by area rather than by counting cells -- a cell is 12.3 km2 at
+the equator and 2.2 km2 at 80 degrees north, and glaciers live at the second
+latitude -- together with the elevation band the ice occupies and how much of
+the basin lies in it. No new dataset, no account, nothing downloaded that a
+run was not already downloading.
+
+The first version read the bottom of the ice zone as the minimum elevation of
+the mapped ice, and the Trishuli said that was wrong: the lowest cell sits at
+1,458 m, which is not a Himalayan terminus, off 33 cells in 140,415. It also
+made the share of the basin above that elevation 100 per cent, a number that
+says nothing about anything. The floor is now the first percentile, which on
+the same basin reads 4,414 m and puts 67 per cent of the catchment above it.
+The lowest mapped cell is still reported and is named as probable
+misclassification when it sits far below the floor, rather than quietly
+dropped. A statistic one bad cell can destroy is not a statistic, and a
+caveat in the documentation is not a substitute for not reporting it.
+
+Said on every path, because it is the misreading waiting to happen: **an ice
+fraction is not a meltwater fraction.** A basin 7 per cent covered by ice does
+not deliver 7 per cent of its flow from melt. That depends on mass balance and
+on how much of the ice is in the ablation zone in a given year, none of which
+is measured here. Outside the 60S to 82.75N that ESA WorldCover covers, the
+answer says the map has no opinion rather than reporting zero per cent --
+which is what no data would otherwise be mistaken for, in precisely the basins
+that have the ice.
+
+Given a BasinATLAS row the answer gains glacier, snow-cover and permafrost
+extent over the whole upstream area. Those columns are found by prefix rather
+than by name, and they are reported beside the land-cover measurement rather
+than averaged into it: permanent ice in one mapped year is not mean annual
+snow cover. Nothing requires the row, because BasinATLAS is a 2.7 GB download
+and the land-cover map was being fetched anyway.
+
+In QGIS it is the **Snow and ice** algorithm, which also writes the ice mask
+as a raster -- a number is what a report needs, a layer is what anyone looking
+at a glacier actually wants.
+
 ### AGPL-3.0-or-later for the package
 
 Apache-2.0 let anyone take basinkit, close it, and sell it -- as a product or,

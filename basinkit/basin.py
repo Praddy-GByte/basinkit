@@ -603,6 +603,22 @@ class Basin:
 
         return validation_envelope(self, suitability=suitability)
 
+    def snow_ice(self, *, dem=None, landcover=None, attributes=None,
+                 year: int = 2021, **kwargs):
+        """Permanent snow and ice in this basin, and the elevations it occupies.
+
+        Measured from the land-cover map already being fetched, by area rather
+        than by counting cells, with the elevation band the ice occupies read
+        off the elevation model. Pass a BasinATLAS row to add glacier, snow
+        and permafrost extent aggregated over the whole upstream area.
+
+        It reports how much ice there is, not how much water comes from it.
+        """
+        from .snow import snow_ice
+
+        return snow_ice(self, dem=dem, landcover=landcover,
+                        attributes=attributes, year=year, **kwargs)
+
     def streams(self, *, dem=None, min_area_km2: float = 1.0, **kwargs):
         """The channel network routed from this basin's own elevation."""
         from .terrain import streams

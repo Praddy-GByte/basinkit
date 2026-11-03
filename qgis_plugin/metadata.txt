@@ -41,7 +41,21 @@ server=False
 
 tags=hydrology,watershed,catchment,basin,delineation,dem,terrain,slope,hand,morphometry,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
 
-changelog=0.9.3
+changelog=0.9.4
+    - New algorithm, Snow and ice: how much of the basin is under permanent
+      snow and ice, and the elevation band that ice occupies. Both layers it
+      needs were already being fetched, so nothing new is downloaded and no
+      account is required. The share is measured by area rather than by
+      counting cells, which at glacier latitudes is a different number, and
+      the bottom of the ice zone is the first percentile of the ice
+      elevations rather than the lowest cell -- on the Trishuli the lowest
+      mapped cell reads 1,458 m, which is not a Himalayan terminus. It also
+      writes the ice mask as a raster.
+    - An ice fraction is not a meltwater fraction, and every output says so.
+    - Outside the 60S to 82.75N that ESA WorldCover covers, the answer says
+      the map has no opinion rather than reporting zero per cent.
+    
+    0.9.3
     - Every answer now carries the accuracy that was measured at its own
       catchment size. The published figures run from 0.3 percent median area
       error above 100,000 square kilometres to 181 percent below 100, and
