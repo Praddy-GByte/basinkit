@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.4 -- unreleased
+## 0.9.4 -- 2026-11-03
 
 ### Permanent snow and ice, and where it sits
 
