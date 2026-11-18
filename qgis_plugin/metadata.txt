@@ -3,7 +3,7 @@ name=basinkit
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Click a river anywhere on Earth and get an analysis-ready basin package: elevation, terrain surfaces, land cover, soil, rainfall, surface water, rivers, full Horton-Strahler morphometry, a grade for whether the elevation model can carry any of it, a quality indicator for every other layer, and an eight-page report.
-version=0.9.5
+version=0.9.6
 author=Pradeepika Kaushik
 email=pradeepika.kaushik@gmail.com
 
@@ -36,12 +36,17 @@ hasProcessingProvider=yes
 # their Python dependencies, so the plugin detects it at load
 # and hands the user a command that works. Declaring it here is what puts it in
 # the "External dependencies" field on plugins.qgis.org.
-external_deps=basinkit>=0.9.5
+external_deps=basinkit>=0.9.6
 server=False
 
 tags=hydrology,watershed,catchment,basin,delineation,dem,terrain,slope,hand,morphometry,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
 
-changelog=0.9.5
+changelog=0.9.6
+    Same contents as 0.9.5. The 0.9.5 that reached PyPI was built
+    before the reservoir work was committed and does not contain it,
+    and PyPI will not take a version twice, so this release carries it
+    instead. The plugin now asks for basinkit>=0.9.6 for that reason.
+    0.9.5
     Reservoirs and regulation. A new algorithm reports the reservoirs upstream
     of the basin, what they hold, and the degree of regulation -- storage as a
     share of one year's flow. Where a basin is held back it also says that

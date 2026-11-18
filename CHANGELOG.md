@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.9.6 -- 2026-11-18
+
+### The same release, published properly
+
+0.9.5 reached PyPI from a build made before the reservoir work was committed:
+the uploaded archive carries no `regulation.py` and reports `__version__` as
+0.9.4. PyPI does not allow a version to be uploaded twice, so the fix is this
+release rather than a corrected 0.9.5. Everything described under 0.9.5 below
+is in this one. 0.9.5 on PyPI is yanked; the git tag and its notes stand.
+
+The QGIS plugin now asks for `basinkit>=0.9.6`, because the 0.9.5 on PyPI is
+the build without the feature the plugin's new algorithm calls.
+
 ## 0.9.5 -- 2026-11-18
 
 ### Reservoirs, and an error bar withdrawn

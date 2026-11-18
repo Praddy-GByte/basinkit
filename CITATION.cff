@@ -24,7 +24,7 @@ authors:
   - given-names: Pradeepika
     family-names: Kaushik
     orcid: "https://orcid.org/0000-0002-0767-3983"
-version: 0.9.5
+version: 0.9.6
 # Zenodo mints a version DOI at the moment a release is published, so the one
 # belonging to this release does not exist while this release is being built.
 # This file therefore ships with the concept DOI, which is true at every
