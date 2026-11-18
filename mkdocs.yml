@@ -13,19 +13,28 @@ theme:
   features:
     - navigation.instant
     - navigation.sections
+    - navigation.top
+    - navigation.tracking
     - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
     - search.suggest
+    - search.highlight
+    - toc.follow
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: teal
+      primary: custom
+      accent: custom
       toggle: { icon: material/weather-night, name: Dark mode }
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: teal
+      primary: custom
+      accent: custom
       toggle: { icon: material/weather-sunny, name: Light mode }
 
 extra_css:
+  - assets/basinkit.css
   - assets/byline.css
 
 plugins:
@@ -42,8 +51,17 @@ plugins:
 
 markdown_extensions:
   - admonition
+  - attr_list
+  - md_in_html
   - pymdownx.details
   - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed: { alternate_style: true }
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
   - tables
   - toc: { permalink: true }
 

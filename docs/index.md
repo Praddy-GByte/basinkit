@@ -1,6 +1,23 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/logo-wordmark-dark.svg">
-  <img src="assets/logo-wordmark-light.svg" alt="basinkit" width="420">
+  <img src="assets/logo-wordmark-light.svg" alt="basinkit — one point, one basin, 40 analyses" width="450">
+</picture>
+
+[![PyPI](https://img.shields.io/pypi/v/basinkit?label=pypi&color=f97316&logo=pypi&logoColor=white)](https://pypi.org/project/basinkit/)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.22181933-1f7fd0)](https://doi.org/10.5281/zenodo.22181933)
+[![Tests](https://img.shields.io/github/actions/workflow/status/Praddy-GByte/basinkit/ci.yml?branch=main&label=tests&logo=github&logoColor=white&color=2f9e5e)](https://github.com/Praddy-GByte/basinkit/actions)
+
+[![code](https://img.shields.io/badge/code-AGPL--3.0--or--later-13203a)](https://github.com/Praddy-GByte/basinkit/blob/main/LICENSE)
+[![python](https://img.shields.io/badge/python-3.10%20%E2%80%93%203.13-15406e?logo=python&logoColor=white)](https://pypi.org/project/basinkit/)
+[![release](https://img.shields.io/github/v/release/Praddy-GByte/basinkit?label=release&color=2f9e5e&include_prereleases)](https://github.com/Praddy-GByte/basinkit/releases)
+
+[![QGIS](https://img.shields.io/badge/QGIS-plugin-2f9e5e?logo=qgis&logoColor=white)](https://github.com/Praddy-GByte/basinkit/blob/main/qgis_plugin/README.md)
+[![ArcGIS Pro](https://img.shields.io/badge/ArcGIS%20Pro-toolbox-1f7fd0)](https://github.com/Praddy-GByte/basinkit/blob/main/arcgis_toolbox/README.md)
+[![docs](https://img.shields.io/badge/docs-website-8a2f6b)](https://praddy-gbyte.github.io/basinkit/)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg">
+  <img src="assets/hero-light.svg" alt="The Trishuli basin as BasinKit delineates it: watershed boundary, 29 sub-catchments, and streams classed by the area draining through them" width="760">
 </picture>
 
 **There is no basin-native data acquisition layer for South Asia.** HyRiver is

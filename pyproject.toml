@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "basinkit"
-version = "0.9.4"
+version = "0.9.5"
 description = "Click a river anywhere on Earth; get its basin, its data layers and its morphometry, analysis-ready, with no account."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -46,7 +46,12 @@ climate = ["netCDF4>=1.6", "cftime>=1.6"]
 viz = ["leafmap>=0.30", "folium>=0.14", "matplotlib>=3.7", "pillow>=9.0"]
 tdx = ["pyarrow>=14"]
 all = ["basinkit[stac,delineate,climate,viz,tdx]"]
-dev = ["pytest>=7", "pytest-cov", "ruff", "mypy", "mkdocs-material", "mkdocs-jupyter", "mkdocstrings[python]"]
+# pymdown-extensions 12 made `md` a required argument of Highlight, and
+# mkdocstrings still builds its highlighter without it, so the docs build
+# dies on the first page that uses an API block. Hold the extensions at 11
+# until mkdocstrings passes the argument; nothing here needs 12.
+dev = ["pytest>=7", "pytest-cov", "ruff", "mypy", "mkdocs-material",
+       "mkdocs-jupyter", "mkdocstrings[python]", "pymdown-extensions<12"]
 
 [project.urls]
 Homepage = "https://praddy-gbyte.github.io/basinkit"

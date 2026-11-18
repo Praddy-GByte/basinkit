@@ -1,14 +1,26 @@
-# basinkit
-
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/logo-wordmark-dark.svg">
-  <img src="assets/logo-wordmark-light.svg" alt="basinkit" width="440">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Praddy-GByte/basinkit/main/assets/logo-wordmark-dark.png">
+  <img src="https://raw.githubusercontent.com/Praddy-GByte/basinkit/main/assets/logo-wordmark-light.png" alt="BasinKit - one point, one basin, 40 analyses" width="470">
 </picture>
 
-[![PyPI](https://img.shields.io/pypi/v/basinkit?logo=pypi&logoColor=white)](https://pypi.org/project/basinkit/)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22181933.svg)](https://doi.org/10.5281/zenodo.22181933)
-[![Tests](https://github.com/Praddy-GByte/basinkit/actions/workflows/ci.yml/badge.svg)](https://github.com/Praddy-GByte/basinkit/actions)
-[![License](https://img.shields.io/badge/code-AGPL--3.0--or--later-blue)](LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/basinkit?label=pypi&color=f97316&logo=pypi&logoColor=white)](https://pypi.org/project/basinkit/)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.22181933-1f7fd0)](https://doi.org/10.5281/zenodo.22181933)
+[![Tests](https://img.shields.io/github/actions/workflow/status/Praddy-GByte/basinkit/ci.yml?branch=main&label=tests&logo=github&logoColor=white&color=2f9e5e)](https://github.com/Praddy-GByte/basinkit/actions)
+
+[![code](https://img.shields.io/badge/code-AGPL--3.0--or--later-13203a)](LICENSE)
+[![python](https://img.shields.io/badge/python-3.10%20%E2%80%93%203.13-15406e?logo=python&logoColor=white)](https://pypi.org/project/basinkit/)
+[![release](https://img.shields.io/github/v/release/Praddy-GByte/basinkit?label=release&color=2f9e5e&include_prereleases)](https://github.com/Praddy-GByte/basinkit/releases)
+
+[![QGIS](https://img.shields.io/badge/QGIS-plugin-2f9e5e?logo=qgis&logoColor=white)](qgis_plugin/README.md)
+[![ArcGIS Pro](https://img.shields.io/badge/ArcGIS%20Pro-toolbox-1f7fd0)](arcgis_toolbox/README.md)
+[![docs](https://img.shields.io/badge/docs-website-8a2f6b)](https://praddy-gbyte.github.io/basinkit/)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Praddy-GByte/basinkit/main/assets/hero-dark.png">
+  <img src="https://raw.githubusercontent.com/Praddy-GByte/basinkit/main/assets/hero-light.png" alt="The Trishuli basin as BasinKit delineates it: watershed boundary, 29 sub-catchments, and streams classed by the area draining through them" width="760">
+</picture>
+
+# basinkit: a basin-native data acquisition layer for Python, QGIS and ArcGIS Pro
 
 **Click a river anywhere on Earth. Get an analysis-ready basin package: the
 basin polygon, elevation, land cover, soil, rainfall, surface water and rivers
