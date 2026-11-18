@@ -3,7 +3,7 @@ name=basinkit
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Click a river anywhere on Earth and get an analysis-ready basin package: elevation, terrain surfaces, land cover, soil, rainfall, surface water, rivers, full Horton-Strahler morphometry, a grade for whether the elevation model can carry any of it, a quality indicator for every other layer, and an eight-page report.
-version=0.9.4
+version=0.9.5
 author=Pradeepika Kaushik
 email=pradeepika.kaushik@gmail.com
 
@@ -36,12 +36,21 @@ hasProcessingProvider=yes
 # their Python dependencies, so the plugin detects it at load
 # and hands the user a command that works. Declaring it here is what puts it in
 # the "External dependencies" field on plugins.qgis.org.
-external_deps=basinkit>=0.9.4
+external_deps=basinkit>=0.9.5
 server=False
 
 tags=hydrology,watershed,catchment,basin,delineation,dem,terrain,slope,hand,morphometry,remote sensing,satellite,srtm,copernicus,sentinel,landsat,rainfall,soil,stac,processing
 
-changelog=0.9.4
+changelog=0.9.5
+    Reservoirs and regulation. A new algorithm reports the reservoirs upstream
+    of the basin, what they hold, and the degree of regulation -- storage as a
+    share of one year's flow. Where a basin is held back it also says that
+    basinkit's own published error figures were measured on gauges whose
+    regulation was never recorded, and that none of them is known to apply
+    there. Nothing new is downloaded: HydroLAKES and HydroRIVERS are already
+    fetched for the lakes and river layers. It reports how much water can be
+    held, not how much there is.
+    0.9.4
     - New algorithm, Snow and ice: how much of the basin is under permanent
       snow and ice, and the elevation band that ice occupies. Both layers it
       needs were already being fetched, so nothing new is downloaded and no

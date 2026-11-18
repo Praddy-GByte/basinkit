@@ -619,6 +619,29 @@ class Basin:
         return snow_ice(self, dem=dem, landcover=landcover,
                         attributes=attributes, year=year, **kwargs)
 
+    def regulation(self, *, lakes=None, rivers=None,
+                   min_storage_mcm: float = 0.0, **kwargs):
+        """Reservoirs upstream, what they hold, and what that means here.
+
+        A delineation is a statement about terrain: it says where water would
+        go if nothing had been built. This measures how far that is from true
+        in this basin, from the reservoir inventory already fetched for
+        ``lakes()`` and the modelled flow already fetched for ``rivers()``.
+
+        It then says something about basinkit rather than about the river.
+        The blind validation behind the published error figures recorded no
+        degree of regulation for any of its gauges, so where a basin is held
+        back the honest answer is not a wider error bar but none, and the
+        output says so.
+
+        It reports how much water can be held, not how much there is, and
+        nothing here observes an operating rule or a release.
+        """
+        from .regulation import regulation
+
+        return regulation(self, lakes=lakes, rivers=rivers,
+                          min_storage_mcm=min_storage_mcm, **kwargs)
+
     def streams(self, *, dem=None, min_area_km2: float = 1.0, **kwargs):
         """The channel network routed from this basin's own elevation."""
         from .terrain import streams

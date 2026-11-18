@@ -159,8 +159,10 @@ NOT_CHARACTERISED: tuple[dict[str, str], ...] = (
             "divide the terrain draws. The gauge records carried no degree of "
             "regulation, so a regulated basin's error was never separated "
             "from an unregulated one's.",
-     "measure": "basinkit.sources.attributes.hydroatlas, degree of regulation "
-                "'dor_pc_pva', and lakes() for upstream reservoirs"},
+     "measure": "basin.regulation(), which reads the degree of regulation "
+                "from the reservoir inventory already on disk and states, for "
+                "this basin, whether the figures above were measured on one "
+                "like it. HydroATLAS 'dor_pc_pva' is the second opinion"},
     {"axis": "karst",
      "why": "Where drainage is subsurface the catchment can differ from the "
             "surface basin by more than any delineation error. No "

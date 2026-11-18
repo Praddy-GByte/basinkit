@@ -1,5 +1,46 @@
 # Changelog
 
+## 0.9.5 -- 2026-11-18
+
+### Reservoirs, and an error bar withdrawn
+
+A delineation is a statement about terrain: it says where water would go if
+nothing had been built. `envelope.NOT_CHARACTERISED` has named regulation
+since the validation was published, because the blind run at 2,550 gauges
+recorded no degree of regulation for any of them, so no error figure here is
+known to have been measured below a dam.
+
+`Basin.regulation()` measures it. HydroLAKES was already being fetched for
+`lakes()` and carries, per water body, whether it is a reservoir, how much it
+holds, and the area draining to it; HydroRIVERS was already being fetched for
+`rivers()` and carries the modelled long-term flow. The arithmetic between
+them was the part that was missing. No new dataset, no account, nothing
+downloaded that a run was not already downloading.
+
+It returns the reservoirs, their storage, and the degree of regulation --
+storage as a share of one year's flow -- in bands that are read rather than
+ranked, from "effectively unregulated" to "over-year storage". The Colorado
+above Lees Ferry comes back at 212 per cent of a year held behind 61
+reservoirs, with 99.6 per cent of the basin draining through one of them. The
+Trishuli, run through the same call, comes back at zero: three natural lakes
+and no reservoir.
+
+Two numbers are reported where one would mislead. The largest single
+reservoir's upstream area is unambiguous. The sum of every reservoir's
+upstream area is not an area at all -- reservoirs in series each count the
+whole catchment above them, and on the Colorado that sum exceeds the basin --
+so it is reported as an upper bound and labelled as one.
+
+Above ten per cent, the output says that basinkit's own published error
+figures were measured on gauges whose regulation was never recorded, and that
+none of them is known to apply. The honest answer there is not a wider error
+bar; it is none. `envelope.NOT_CHARACTERISED` now points at this call instead
+of only naming the gap.
+
+It reports how much water can be held, not how much there is. Operating
+rules, release schedules and current storage are decisions and measurements,
+and nothing here observes either.
+
 ## 0.9.4 -- 2026-11-03
 
 ### Permanent snow and ice, and where it sits
