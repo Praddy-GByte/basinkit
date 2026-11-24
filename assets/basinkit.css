@@ -1,0 +1,136 @@
+/* One palette for the whole site.
+ *
+ * The colours are the ones the mark is drawn in: the dark the tile is set
+ * in, the orange of the outlet, and the blue the channel network is drawn
+ * with. Everything else is a tint of those three. Each foreground below
+ * clears 4.5:1 against the background it is used on.
+ */
+
+:root {
+  --bk-ink:        #13203a;   /* tile, headings, body text on paper */
+  --bk-ink-soft:   #1d2d4d;
+  --bk-ink-lift:   #2b4068;
+  --bk-orange:     #f97316;   /* the outlet, and the only accent */
+  --bk-orange-ink: #c2410c;   /* the accent where it has to carry text */
+  --bk-river:      #15406e;   /* links on paper */
+  --bk-river-lift: #8fc7ff;   /* links on ink */
+  --bk-grey:       #5a6b80;
+  --bk-grey-lift:  #93a4ba;
+  --bk-paper:      #ffffff;
+  --bk-paper-sink: #f6f8fa;   /* code and table backgrounds, light */
+  --bk-night:      #0f1724;
+  --bk-night-sink: #111b2b;   /* code and table backgrounds, dark */
+  --bk-rule:       #e3e8ee;
+  --bk-rule-dark:  #243249;
+}
+
+/* The header and the controls that take the primary colour. */
+[data-md-color-primary="custom"] {
+  --md-primary-fg-color:        var(--bk-ink);
+  --md-primary-fg-color--light: var(--bk-ink-lift);
+  --md-primary-fg-color--dark:  #0c1628;
+  --md-primary-bg-color:        #ffffff;
+  --md-primary-bg-color--light: rgba(255, 255, 255, 0.72);
+}
+
+[data-md-color-accent="custom"] {
+  --md-accent-fg-color:             var(--bk-orange-ink);
+  --md-accent-fg-color--transparent: rgba(249, 115, 22, 0.12);
+  --md-accent-bg-color:             #ffffff;
+  --md-accent-bg-color--light:      rgba(255, 255, 255, 0.72);
+}
+
+/* ---------------------------------------------------------------- light */
+
+[data-md-color-scheme="default"] {
+  --md-default-bg-color: var(--bk-paper);
+  --md-default-fg-color: var(--bk-ink);
+  --md-default-fg-color--light:  var(--bk-grey);
+  --md-default-fg-color--lighter: #8c9aab;
+  --md-typeset-color: #1b2735;
+  --md-typeset-a-color: var(--bk-river);
+  --md-typeset-mark-color: rgba(249, 115, 22, 0.22);
+  --md-code-bg-color: var(--bk-paper-sink);
+  --md-code-fg-color: #1b2735;
+
+  --md-code-hl-comment-color:     #5c6e85;
+  --md-code-hl-keyword-color:     #8a2f6b;
+  --md-code-hl-string-color:      #1f7a4d;
+  --md-code-hl-number-color:      var(--bk-orange-ink);
+  --md-code-hl-special-color:     var(--bk-orange-ink);
+  --md-code-hl-function-color:    var(--bk-river);
+  --md-code-hl-constant-color:    #8a2f6b;
+  --md-code-hl-name-color:        #1b2735;
+  --md-code-hl-operator-color:    #4a5b70;
+  --md-code-hl-punctuation-color: #4a5b70;
+  --md-code-hl-variable-color:    #1b2735;
+}
+
+/* ----------------------------------------------------------------- dark */
+
+[data-md-color-scheme="slate"] {
+  --md-hue: 215;
+  --md-accent-fg-color: var(--bk-orange);   /* bright enough against night */                       /* a blue-grey night, not a violet one */
+  --md-default-bg-color: var(--bk-night);
+  --md-default-fg-color: #e7edf5;
+  --md-default-fg-color--light:  var(--bk-grey-lift);
+  --md-default-fg-color--lighter: #7d8ea1;
+  --md-typeset-color: #dce5f0;
+  --md-typeset-a-color: var(--bk-river-lift);
+  --md-typeset-mark-color: rgba(249, 115, 22, 0.30);
+  --md-code-bg-color: var(--bk-night-sink);
+  --md-code-fg-color: #dbe4ef;
+
+  --md-code-hl-comment-color:     #8295ab;
+  --md-code-hl-keyword-color:     #e9a0cd;
+  --md-code-hl-string-color:      #86dcaa;
+  --md-code-hl-number-color:      #ffb27a;
+  --md-code-hl-special-color:     #ffb27a;
+  --md-code-hl-function-color:    var(--bk-river-lift);
+  --md-code-hl-constant-color:    #e9a0cd;
+  --md-code-hl-name-color:        #dbe4ef;
+  --md-code-hl-operator-color:    #a7b7c9;
+  --md-code-hl-punctuation-color: #a7b7c9;
+  --md-code-hl-variable-color:    #dbe4ef;
+}
+
+/* --------------------------------------------------------------- detail */
+
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3 { font-weight: 700; letter-spacing: -0.012em; }
+
+.md-typeset h1 { color: var(--md-default-fg-color); }
+
+.md-typeset h2 {
+  margin-top: 2.2em;
+  padding-top: 0.55em;
+  border-top: 1px solid var(--bk-rule);
+}
+
+[data-md-color-scheme="slate"] .md-typeset h2 { border-top-color: var(--bk-rule-dark); }
+
+/* Several pages already separate their sections with a rule. Drawing the
+ * heading's own rule as well leaves two lines with a gap between them. */
+.md-typeset hr + h2 {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 1.4em;
+}
+
+.md-typeset pre > code { border-radius: 6px; }
+
+.md-typeset code { border-radius: 4px; }
+
+.md-typeset table:not([class]) th {
+  background: var(--md-code-bg-color);
+  font-weight: 650;
+}
+
+.md-typeset blockquote {
+  border-left: 3px solid var(--bk-orange);
+  color: var(--md-default-fg-color--light);
+}
+
+/* The header logo keeps its own colours, so it must not be dimmed. */
+.md-header__button.md-logo img { height: 1.6rem; width: auto; opacity: 1; }
